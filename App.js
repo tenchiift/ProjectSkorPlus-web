@@ -1,20 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFonts, Sen_400Regular, Sen_700Bold } from '@expo-google-fonts/sen';
+import { REM_600SemiBold, REM_700Bold } from '@expo-google-fonts/rem';
+import { View, ActivityIndicator } from 'react-native';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [fontsLoaded] = useFonts({
+    Sen_400Regular,
+    Sen_700Bold,
+    REM_600SemiBold,
+    REM_700Bold,
+  });
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return <AppNavigator />;
+}

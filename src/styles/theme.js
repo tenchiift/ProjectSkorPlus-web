@@ -1,0 +1,45 @@
+const theme = {
+  colors: {
+    background: '#F2F2F0',
+    surface: '#FFFFFF',
+    card: '#FFFFFF',
+    primary: '#7C7BF0',
+    secondary: '#F5A623',
+    success: '#4CAF50',
+    error: '#FF5252',
+    textPrimary: '#1A1A1A',
+    textSecondary: '#6B7280',
+    border: '#E5E7EB',
+    chalk: '#FFFFFF',
+    gradientVectorStart: '#7C7BF0',
+    gradientVectorEnd: '#5A4FE0',
+    gradientDiffStart: '#F5A623',
+    gradientDiffEnd: '#E8951A',
+    expBlue: '#5B8DEF',
+    streakOrange: '#F5A623',
+    completedRed: '#FF6B6B',
+  },
+  fonts: {
+    main: 'Inter, sans-serif',
+    headingBold: 'REM-Bold',
+    heading: 'REM-Regular',
+    bodyBold: 'Sen-Bold',
+    body: 'Sen-Regular',
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+    xxl: 48,
+  },
+  borderRadius: {
+    sm: 8,
+    md: 16,
+    lg: 24,
+    full: 999,
+  },
+};
+
+export default theme;

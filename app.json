@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "ProjectSkorPlus",
-    "slug": "ProjectSkorPlus",
+    "name": "ProjectSkor+",
+    "slug": "projectskorplus",
+    "scheme": "projectskorplus",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,6 +25,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-web-browser",
+      "expo-font"
+    ]
   }
 }
