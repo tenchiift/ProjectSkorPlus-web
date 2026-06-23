@@ -5,58 +5,50 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Dimensions,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import theme from '../styles/theme';
 
-const { width, height } = Dimensions.get('window');
-
 export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.badge}>Where learning begins</Text>
+      <StatusBar style="dark" />
+
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeTitle}>Welcome to</Text>
       </View>
 
-      {/* Hero */}
-      <View style={styles.hero}>
-        <Text style={styles.symbol}>∫</Text>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+      </View>
+
+      <View style={styles.heroContainer}>
         <Text style={styles.title}>ProjectSkor+</Text>
         <Text style={styles.tagline}>Learn Smarter, Score Better</Text>
       </View>
 
-      {/* Cards */}
-      <View style={styles.cards}>
-        <View style={styles.card}>
-          <Text style={styles.cardSymbol}>∑</Text>
-          <Text style={styles.cardText}>Limits</Text>
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.cardSymbol}>∂</Text>
-          <Text style={styles.cardText}>Derivatives</Text>
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.cardSymbol}>∫</Text>
-          <Text style={styles.cardText}>Integrals</Text>
-        </View>
-      </View>
-
-      {/* Buttons */}
-      
-      <View style={styles.buttons}>
-        <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.navigate('Login')}>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.btnPrimary}
+          onPress={() => navigation.navigate('Register')}
+        >
           <Text style={styles.btnPrimaryText}>Get Started</Text>
         </TouchableOpacity>
 
-    
-        <TouchableOpacity style={styles.btnSecondary} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.btnSecondaryText}>I already have an account</Text>
+        <Text style={styles.dividerText}>or</Text>
+
+        <TouchableOpacity
+          style={styles.btnOutline}
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={styles.btnOutlineText}>I already have an account</Text>
         </TouchableOpacity>
       </View>
-
     </SafeAreaView>
   );
 }
@@ -64,99 +56,92 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: theme.spacing.lg,
   },
-  header: {
+  welcomeContainer: {
     alignItems: 'center',
-    paddingTop: theme.spacing.lg,
+    marginTop: theme.spacing.xxl,
   },
-  badge: {
+  welcomeTitle: {
     fontFamily: theme.fonts.body,
-    color: theme.colors.secondary,
-    fontSize: 12,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    borderWidth: 1,
-    borderColor: theme.colors.secondary,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.full,
+    fontSize: 16,
+    color: '#333333',
   },
-  hero: {
+  logoContainer: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  symbol: {
-    fontFamily: theme.fonts.headingBold,
-    fontSize: 80,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.sm,
+  logoImage: {
+    width: 300,
+    height: 300,
+    marginTop: -65,
+    marginBottom: -65,
+  },
+  heroContainer: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.lg,
   },
   title: {
     fontFamily: theme.fonts.headingBold,
-    fontSize: 42,
-    color: theme.colors.chalk,
+    fontSize: 32,
+    color: theme.colors.textPrimary,
     letterSpacing: 1,
-    textAlign: 'center',
   },
   tagline: {
     fontFamily: theme.fonts.body,
     fontSize: 16,
     color: theme.colors.textSecondary,
-    marginTop: theme.spacing.sm,
-    letterSpacing: 1,
+    marginTop: theme.spacing.xs,
   },
-  cards: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: theme.spacing.xl,
-    gap: theme.spacing.sm,
-  },
-  card: {
-    flex: 1,
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: theme.spacing.lg,
+  buttonContainer: {
+    width: '100%',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  cardSymbol: {
-    fontFamily: theme.fonts.headingBold,
-    fontSize: 28,
-    color: theme.colors.secondary,
-    marginBottom: theme.spacing.xs,
-  },
-  cardText: {
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-  },
-  buttons: {
+    paddingHorizontal: theme.spacing.lg,
     marginBottom: theme.spacing.xl,
-    gap: theme.spacing.sm,
   },
   btnPrimary: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.full,
+    backgroundColor: '#5A4FE0',
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
+    width: '100%',
+    shadowColor: '#5A4FE0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   btnPrimaryText: {
     fontFamily: theme.fonts.bodyBold,
-    color: theme.colors.chalk,
+    color: '#FFFFFF',
     fontSize: 16,
-    letterSpacing: 1,
   },
-  btnSecondary: {
-    paddingVertical: theme.spacing.md,
-    alignItems: 'center',
-  },
-  btnSecondaryText: {
+  dividerText: {
     fontFamily: theme.fonts.body,
-    color: theme.colors.textSecondary,
     fontSize: 14,
+    color: '#8E8E93',
+    marginVertical: 14,
+  },
+  btnOutline: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  btnOutlineText: {
+    fontFamily: theme.fonts.bodyBold,
+    color: '#1A1A1A',
+    fontSize: 16,
   },
 });

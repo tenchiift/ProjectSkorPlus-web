@@ -9,41 +9,42 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft } from 'lucide-react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebase';
 import theme from '../styles/theme';
 
-export default function LoginScreen({ navigation }) {
+export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setError('');
     if (!email.trim() || !password) {
-      setError('Please enter your email and password');
+      setError('Please fill in all fields');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+      const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
       const user = result.user;
-      const userSnap = await getDoc(doc(db, 'users', user.uid));
-      if (userSnap.exists() && userSnap.data().profileSetup) {
-        navigation.replace('Dashboard');
-      } else {
-        navigation.replace('SetupProfile', { userId: user.uid, email: user.email });
-      }
+      navigation.replace('SetupProfile', { userId: user.uid, email: user.email });
     } catch (err) {
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
-        setError('Invalid email or password');
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already registered');
       } else if (err.code === 'auth/invalid-email') {
         setError('Please enter a valid email');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password must be at least 6 characters');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -63,11 +64,16 @@ export default function LoginScreen({ navigation }) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ArrowLeft size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Welcome back</Text>
+          <Text style={styles.headerTitle}>Create account</Text>
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>Sign in to your account</Text>
+          <Image
+            source={require('../assets/images/get started.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>Get started with{'\n'}ProjectSkor+</Text>
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email</Text>
@@ -89,7 +95,7 @@ export default function LoginScreen({ navigation }) {
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Enter your password"
+              placeholder="Min. 6 characters"
               placeholderTextColor={theme.colors.textSecondary}
               secureTextEntry
             />
@@ -99,22 +105,22 @@ export default function LoginScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.btn}
-            onPress={handleLogin}
+            onPress={handleRegister}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.btnText}>Sign In</Text>
+              <Text style={styles.btnText}>Create Account</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.link}
-            onPress={() => navigation.navigate('Register')}
+            onPress={() => navigation.navigate('Login')}
           >
             <Text style={styles.linkText}>
-              Don&apos;t have an account? <Text style={styles.linkBold}>Get Started</Text>
+              Already have an account? <Text style={styles.linkBold}>Sign in</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -151,13 +157,20 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.xxl,
+    paddingTop: theme.spacing.md,
+  },
+  logoImage: {
+    width: 280,
+    height: 280,
+    alignSelf: 'center',
+    marginBottom: theme.spacing.md,
   },
   title: {
     fontFamily: theme.fonts.headingBold,
     fontSize: 26,
     color: theme.colors.textPrimary,
     marginBottom: theme.spacing.xl,
+    lineHeight: 34,
   },
   inputGroup: {
     gap: theme.spacing.xs,

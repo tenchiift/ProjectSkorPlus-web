@@ -5,10 +5,10 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    Sen_400Regular,
-    Sen_700Bold,
-    REM_600SemiBold,
-    REM_700Bold,
+    'Sen-Regular': Sen_400Regular,
+    'Sen-Bold': Sen_700Bold,
+    'REM-Bold': REM_700Bold,
+    'REM-Regular': REM_600SemiBold,
   });
 
   if (!fontsLoaded) {

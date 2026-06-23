@@ -20,7 +20,6 @@ const theme = {
     completedRed: '#FF6B6B',
   },
   fonts: {
-    main: 'Inter, sans-serif',
     headingBold: 'REM-Bold',
     heading: 'REM-Regular',
     bodyBold: 'Sen-Bold',

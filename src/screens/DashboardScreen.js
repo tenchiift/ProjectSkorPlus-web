@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Image, ActivityIndicator, Modal, Pressable, RefreshControl } from 'react-native';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Zap, Flame, CheckCircle2, MoreHorizontal, User, ArrowRight } from 'lucide-react-native';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { getAuth, signOut } from 'firebase/auth';
 import { db } from '../config/firebase';
 import theme from '../styles/theme';
 
@@ -20,24 +21,46 @@ const MODULE_COLORS = {
   amber: [theme.colors.gradientDiffStart, theme.colors.gradientDiffEnd],
 };
 
-// temp userId — later replace with real auth user
-const USER_ID = 'testUser';
-
 export default function DashboardScreen({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [modules, setModules] = useState([]);
   const [moduleProgress, setModuleProgress] = useState({});
   const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [photoURL, setPhotoURL] = useState(null);
+
+  const auth = getAuth();
+  const USER_ID = auth.currentUser?.uid ?? 'testUser';
+
+  const handleLogout = async () => {
+    setMenuVisible(false);
+    try {
+      await signOut(auth);
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     try {
       // fetch user profile
       const userSnap = await getDoc(doc(db, 'users', USER_ID));
-      if (userSnap.exists()) setUserData(userSnap.data());
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        setUserData(data);
+        if (data.photoBase64) {
+          setPhotoURL(`data:image/jpeg;base64,${data.photoBase64}`);
+        } else {
+          setPhotoURL(null);
+        }
+      }
 
       // fetch modules
       const modulesSnap = await getDocs(collection(db, 'modules'));
@@ -60,8 +83,14 @@ export default function DashboardScreen({ navigation }) {
       console.error('Firestore error:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData(true);
+  }, [USER_ID]);
 
   if (loading) {
     return (
@@ -80,22 +109,70 @@ export default function DashboardScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+          />
+        }
+      >
 
         {/* Top bar */}
         <View style={styles.topBar}>
           <View style={styles.avatarCircle}>
-            <User size={22} color={theme.colors.textSecondary} />
+            {photoURL ? (
+              <Image source={{ uri: photoURL }} style={styles.avatarImage} resizeMode="cover" />
+            ) : (
+              <User size={22} color={theme.colors.textSecondary} />
+            )}
           </View>
           <Image
             source={require('../assets/images/logo.png')}
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setMenuVisible(true)}>
             <MoreHorizontal size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
         </View>
+
+        <Modal
+          visible={menuVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)}>
+            <View style={styles.menuContainer}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => { setMenuVisible(false); navigation.navigate('Profile'); }}
+              >
+                <User size={18} color={theme.colors.textPrimary} />
+                <Text style={styles.menuItemText}>Profile</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => { setMenuVisible(false); }}
+              >
+                <MoreHorizontal size={18} color={theme.colors.textPrimary} />
+                <Text style={styles.menuItemText}>Settings</Text>
+              </TouchableOpacity>
+
+              <View style={styles.menuDivider} />
+
+              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+                <Text style={[styles.menuItemText, { color: theme.colors.error }]}>Log Out</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
 
         {/* Welcome */}
         <Text style={styles.welcome}>
@@ -148,7 +225,10 @@ export default function DashboardScreen({ navigation }) {
               </View>
               <View style={styles.moduleFooter}>
                 <Text style={styles.continueText}>Continue Learning</Text>
-                <TouchableOpacity style={styles.continueBtn}>
+                <TouchableOpacity
+                  style={styles.continueBtn}
+                  onPress={() => navigation.navigate('Module', { module: mod })}
+                >
                   <ArrowRight size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
@@ -196,6 +276,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 44,
+    height: 44,
+    borderRadius: theme.borderRadius.full,
   },
   welcome: {
     fontFamily: theme.fonts.heading,
@@ -306,5 +392,41 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  menuContainer: {
+    position: 'absolute',
+    top: 100,
+    right: theme.spacing.lg,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.xs,
+    minWidth: 180,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.borderRadius.sm,
+    gap: theme.spacing.sm,
+  },
+  menuItemText: {
+    fontFamily: theme.fonts.body,
+    fontSize: 15,
+    color: theme.colors.textPrimary,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: 4,
   },
 });
