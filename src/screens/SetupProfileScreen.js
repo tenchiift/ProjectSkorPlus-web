@@ -63,7 +63,6 @@ export default function SetupProfileScreen({ navigation, route }) {
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.emoji}>👋</Text>
             <Text style={styles.title}>Setup your profile</Text>
             <Text style={styles.subtitle}>Let us know who you are before we begin!</Text>
           </View>

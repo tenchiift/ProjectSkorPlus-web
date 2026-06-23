@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft } from 'lucide-react-native';
@@ -67,6 +68,11 @@ export default function RegisterScreen({ navigation }) {
           <Text style={styles.headerTitle}>Create account</Text>
         </View>
 
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
         <View style={styles.content}>
           <Image
             source={require('../assets/images/get started.png')}
@@ -124,6 +130,7 @@ export default function RegisterScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
         </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -133,6 +140,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: theme.spacing.xl,
   },
   header: {
     flexDirection: 'row',
@@ -157,13 +168,14 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
+    paddingTop: theme.spacing.xs,
   },
   logoImage: {
-    width: 280,
-    height: 280,
+    width: 250,
+    height: 250,
     alignSelf: 'center',
-    marginBottom: theme.spacing.md,
+    marginTop: -20,
+    marginBottom: theme.spacing.xs,
   },
   title: {
     fontFamily: theme.fonts.headingBold,
