@@ -16,12 +16,10 @@ import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { ArrowLeft, Camera, Check } from 'lucide-react-native';
-import { getAuth } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import theme from '../styles/theme';
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Other'];
+const GENDER_OPTIONS = ['Male', 'Female'];
 
 export default function ProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
@@ -36,25 +34,34 @@ export default function ProfileScreen({ navigation }) {
   const [bio, setBio] = useState('');
   const [photoURL, setPhotoURL] = useState(null);
 
-  const auth = getAuth();
-  const userId = auth.currentUser?.uid ?? 'testUser';
-
   useEffect(() => {
     loadProfile();
   }, []);
 
+  const getUserId = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id;
+  };
+
   const loadProfile = async () => {
     try {
-      const userSnap = await getDoc(doc(db, 'users', userId));
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        setName(data.name ?? '');
-        setEmail(data.email ?? auth.currentUser?.email ?? '');
-        setGender(data.gender ?? '');
-        setSemester(data.semester ?? '');
-        setBio(data.bio ?? '');
-        if (data.photoBase64) {
-          setPhotoURL(`data:image/jpeg;base64,${data.photoBase64}`);
+      const userId = await getUserId();
+      if (!userId) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profile) {
+        setName(profile.name ?? '');
+        setEmail(profile.email ?? '');
+        setGender(profile.gender ?? '');
+        setSemester(profile.semester ?? '');
+        setBio(profile.bio ?? '');
+        if (profile.photo_url) {
+          setPhotoURL(profile.photo_url);
         }
       }
     } catch (err) {
@@ -66,29 +73,38 @@ export default function ProfileScreen({ navigation }) {
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      return;
-    }
+    if (status !== 'granted') return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 0.5,
     });
 
     if (!result.canceled && result.assets?.length > 0) {
       setUploading(true);
       try {
-        const resized = await ImageManipulator.manipulateAsync(
-          result.assets[0].uri,
-          [{ resize: { width: 300, height: 300 } }],
-          { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
-        );
-        const base64 = resized.base64;
-        const dataUri = `data:image/jpeg;base64,${base64}`;
-        setPhotoURL(dataUri);
-        await setDoc(doc(db, 'users', userId), { photoBase64: base64 }, { merge: true });
+        const uri = result.assets[0].uri;
+        const extension = uri.split('.').pop();
+        const fileName = `${Date.now()}.${extension}`;
+        const userId = await getUserId();
+
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(`${userId}/${fileName}`, blob, { upsert: true, contentType: 'image/jpeg' });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(`${userId}/${fileName}`);
+
+        setPhotoURL(publicUrl);
+        await supabase.from('profiles').upsert({ id: userId, photo_url: publicUrl });
       } catch (err) {
         console.error('Upload error:', err);
       } finally {
@@ -101,14 +117,22 @@ export default function ProfileScreen({ navigation }) {
     setSaving(true);
     setSaved(false);
     try {
-      await setDoc(doc(db, 'users', userId), {
-        name: name.trim(),
-        email,
-        gender,
-        semester,
-        bio: bio.trim(),
-        profileSetup: true,
-      }, { merge: true });
+      const userId = await getUserId();
+      if (!userId) return;
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          name: name.trim(),
+          email,
+          gender,
+          semester,
+          bio: bio.trim(),
+          profile_setup: true,
+        });
+
+      if (error) throw error;
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {

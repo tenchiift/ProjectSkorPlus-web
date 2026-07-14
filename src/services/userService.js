@@ -1,46 +1,57 @@
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 
-// Create user profile when first login
 export const createUserProfile = async (userId, data) => {
-  const userRef = doc(db, 'users', userId);
-  const userSnap = await getDoc(userRef);
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single();
 
-  if (!userSnap.exists()) {
-    await setDoc(userRef, {
-      name: data.name || 'Student',
-      email: data.email || '',
-      totalExp: 0,
-      daysStreak: 0,
-      completed: 0,
-      exerciseProgress: 0,
-      createdAt: new Date().toISOString(),
-    });
+  if (!existing) {
+    const { error } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        name: data.name || 'Student',
+        email: data.email || '',
+        total_exp: 0,
+        days_streak: 0,
+        completed: 0,
+        exercise_progress: 0,
+      });
+
+    if (error) throw error;
   }
 };
 
-// Get user profile
 export const getUserProfile = async (userId) => {
-  const userRef = doc(db, 'users', userId);
-  const userSnap = await getDoc(userRef);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
 
-  if (userSnap.exists()) {
-    return userSnap.data();
-  }
-  return null;
+  if (error) return null;
+  return data;
 };
 
-// Update user stats after completing game
 export const updateUserStats = async (userId, { expGained, completed }) => {
-  const userRef = doc(db, 'users', userId);
-  const userSnap = await getDoc(userRef);
+  const { data: current } = await supabase
+    .from('profiles')
+    .select('total_exp, completed, exercise_progress')
+    .eq('id', userId)
+    .single();
 
-  if (userSnap.exists()) {
-    const current = userSnap.data();
-    await updateDoc(userRef, {
-      totalExp: current.totalExp + expGained,
-      completed: current.completed + completed,
-      exerciseProgress: Math.min((current.exerciseProgress || 0) + 0.05, 1),
-    });
+  if (current) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        total_exp: current.total_exp + expGained,
+        completed: current.completed + completed,
+        exercise_progress: Math.min((current.exercise_progress || 0) + 0.05, 1),
+      })
+      .eq('id', userId);
+
+    if (error) throw error;
   }
 };

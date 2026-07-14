@@ -12,8 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import theme from '../styles/theme';
 
 export default function SetupProfileScreen({ navigation, route }) {
@@ -22,8 +21,7 @@ export default function SetupProfileScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Get userId passed from login screen
-  const userId = route?.params?.userId ?? 'testUser';
+  const userId = route?.params?.userId;
 
   const handleSave = async () => {
     if (!username.trim()) {
@@ -32,17 +30,22 @@ export default function SetupProfileScreen({ navigation, route }) {
     }
     setLoading(true);
     try {
-      await setDoc(doc(db, 'users', userId), {
-        name: username.trim(),
-        semester: semester.trim(),
-        email: route?.params?.email ?? '',
-        totalExp: 0,
-        daysStreak: 0,
-        completed: 0,
-        exerciseProgress: 0,
-        createdAt: new Date().toISOString(),
-        profileSetup: true,
-      });
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          name: username.trim(),
+          semester: semester.trim(),
+          email: route?.params?.email ?? '',
+          total_exp: 0,
+          days_streak: 0,
+          completed: 0,
+          exercise_progress: 0,
+          created_at: new Date().toISOString(),
+          profile_setup: true,
+        });
+
+      if (upsertError) throw upsertError;
       navigation.replace('Onboarding');
     } catch (err) {
       console.error(err);
@@ -61,13 +64,11 @@ export default function SetupProfileScreen({ navigation, route }) {
       >
         <ScrollView contentContainerStyle={styles.scroll}>
 
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Setup your profile</Text>
             <Text style={styles.subtitle}>Let us know who you are before we begin!</Text>
           </View>
 
-          {/* Avatar placeholder */}
           <TouchableOpacity style={styles.avatarContainer}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>+</Text>
@@ -75,7 +76,6 @@ export default function SetupProfileScreen({ navigation, route }) {
             <Text style={styles.avatarLabel}>Add photo (optional)</Text>
           </TouchableOpacity>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Username</Text>

@@ -13,9 +13,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft } from 'lucide-react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import theme from '../styles/theme';
 
 export default function LoginScreen({ navigation }) {
@@ -32,19 +30,30 @@ export default function LoginScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const user = result.user;
-      const userSnap = await getDoc(doc(db, 'users', user.uid));
-      if (userSnap.exists() && userSnap.data().profileSetup) {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (signInError) throw signInError;
+
+      const user = data.user;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('profile_setup')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.profile_setup) {
         navigation.replace('Dashboard');
       } else {
-        navigation.replace('SetupProfile', { userId: user.uid, email: user.email });
+        navigation.replace('SetupProfile', { userId: user.id, email: user.email });
       }
     } catch (err) {
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+      if (err.message?.includes('Invalid login credentials')) {
         setError('Invalid email or password');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Please enter a valid email');
+      } else if (err.message?.includes('Email not confirmed')) {
+        setError('Please confirm your email first');
       } else {
         setError('Something went wrong. Please try again.');
       }

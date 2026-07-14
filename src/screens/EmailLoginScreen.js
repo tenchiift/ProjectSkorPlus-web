@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,25 +12,9 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft } from 'lucide-react-native';
-import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
 import * as Linking from 'expo-linking';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../config/supabase';
 import theme from '../styles/theme';
-
-const ACTION_CODE_SETTINGS = {
-  handleCodeInApp: true,
-  url: 'https://projectskorplus.firebaseapp.com/emailSignIn',
-  iOS: {
-    bundleId: 'com.projectskorplus',
-  },
-  android: {
-    packageName: 'com.projectskorplus',
-    installApp: false,
-  },
-};
-
 
 export default function EmailLoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -38,7 +22,7 @@ export default function EmailLoginScreen({ navigation }) {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSendLink = async () => {
+  const handleSendOTP = async () => {
     if (!email.trim()) {
       setError('Please enter your email');
       return;
@@ -46,8 +30,11 @@ export default function EmailLoginScreen({ navigation }) {
     setLoading(true);
     setError('');
     try {
-      await sendSignInLinkToEmail(auth, email.trim(), ACTION_CODE_SETTINGS);
-      await AsyncStorage.setItem('emailForSignIn', email.trim());
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+      });
+
+      if (otpError) throw otpError;
       setSent(true);
     } catch (err) {
       console.error(err);
@@ -57,47 +44,33 @@ export default function EmailLoginScreen({ navigation }) {
     }
   };
 
-  const checkUserAndNavigate = async (user) => {
-    try {
-      const userSnap = await getDoc(doc(db, 'users', user.uid));
-      if (userSnap.exists() && userSnap.data().profileSetup) {
-        navigation.replace('Dashboard');
-      } else {
-        navigation.replace('SetupProfile', { userId: user.uid, email: user.email });
-      }
-    } catch (err) {
-      navigation.replace('SetupProfile', { userId: user.uid, email: user.email });
-    }
-  };
-
-  // Handle incoming email link
-  React.useEffect(() => {
+  useEffect(() => {
     const handleDeepLink = async (url) => {
-      if (isSignInWithEmailLink(auth, url)) {
-        try {
-          const savedEmail = await AsyncStorage.getItem('emailForSignIn');
-          if (savedEmail) {
-            setLoading(true);
-            const result = await signInWithEmailLink(auth, savedEmail, url);
-            await AsyncStorage.removeItem('emailForSignIn');
-            checkUserAndNavigate(result.user);
-          }
-        } catch (err) {
-          console.error(err);
-          setError('Sign in failed. Please try again.');
-        } finally {
-          setLoading(false);
-        }
+      if (!url) return;
+
+      const urlObj = new URL(url);
+      const hash = urlObj.hash;
+      if (hash && hash.includes('access_token')) {
+        navigation.replace('Dashboard');
       }
     };
 
-    // Check if app opened from email link
     Linking.getInitialURL().then((url) => {
       if (url) handleDeepLink(url);
     });
 
     const sub = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
     return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigation.replace('Dashboard');
+      }
+    });
+
+    return () => listener?.subscription?.unsubscribe();
   }, []);
 
   return (
@@ -107,7 +80,6 @@ export default function EmailLoginScreen({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ArrowLeft size={24} color={theme.colors.textPrimary} />
@@ -141,13 +113,13 @@ export default function EmailLoginScreen({ navigation }) {
 
               <TouchableOpacity
                 style={styles.btn}
-                onPress={handleSendLink}
+                onPress={handleSendOTP}
                 disabled={loading}
               >
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.btnText}>Send Magic Link ✨</Text>
+                  <Text style={styles.btnText}>Send Magic Link</Text>
                 )}
               </TouchableOpacity>
             </>

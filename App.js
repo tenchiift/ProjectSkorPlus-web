@@ -1,6 +1,7 @@
 import { useFonts, Sen_400Regular, Sen_700Bold } from '@expo-google-fonts/sen';
 import { REM_600SemiBold, REM_700Bold } from '@expo-google-fonts/rem';
 import { View, ActivityIndicator } from 'react-native';
+import { ThemeProvider } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
@@ -19,5 +20,9 @@ export default function App() {
     );
   }
 
-  return <AppNavigator />;
+  return (
+    <ThemeProvider>
+      <AppNavigator />
+    </ThemeProvider>
+  );
 }

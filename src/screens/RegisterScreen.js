@@ -14,8 +14,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft } from 'lucide-react-native';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import theme from '../styles/theme';
 
 export default function RegisterScreen({ navigation }) {
@@ -36,16 +35,21 @@ export default function RegisterScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
-      const user = result.user;
-      navigation.replace('SetupProfile', { userId: user.uid, email: user.email });
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (data.user) {
+        navigation.replace('SetupProfile', { userId: data.user.id, email: data.user.email });
+      }
     } catch (err) {
-      if (err.code === 'auth/email-already-in-use') {
+      if (err.message?.includes('already registered')) {
         setError('This email is already registered');
-      } else if (err.code === 'auth/invalid-email') {
+      } else if (err.message?.includes('valid email')) {
         setError('Please enter a valid email');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Password must be at least 6 characters');
       } else {
         setError('Something went wrong. Please try again.');
       }
