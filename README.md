@@ -2,10 +2,6 @@
 
 **Learn Smarter, Score Better** — A mobile learning platform for students to master calculus through interactive modules, access final exam papers, and get AI-powered answer checking.
 
-<div align="center">
-  <img src="src/assets/images/logo.png" alt="ProjectSkor+" width="200" />
-</div>
-
 ---
 
 ## Features
