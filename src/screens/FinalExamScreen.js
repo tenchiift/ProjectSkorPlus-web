@@ -54,7 +54,7 @@ export default function FinalExamScreen({ navigation }) {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Final Exam Papers</Text>
+        <Text style={styles.headerTitle}>Past Papers</Text>
         <View style={{ width: 36 }} />
       </View>
 

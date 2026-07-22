@@ -17,6 +17,8 @@ import SettingsScreen from '../screens/SettingsScreen';
 import AllModulesScreen from '../screens/AllModulesScreen';
 import TaskScreen from '../screens/TaskScreen';
 import SetExamScreen from '../screens/SetExamScreen';
+import QuestionScreen from '../screens/QuestionScreen';
+import GameScreen from '../screens/GameScreen';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +42,8 @@ export default function AppNavigator() {
         <Stack.Screen name="AllModules" component={AllModulesScreen} />
         <Stack.Screen name="Tasks" component={TaskScreen} />
         <Stack.Screen name="SetExam" component={SetExamScreen} />
+        <Stack.Screen name="Question" component={QuestionScreen} />
+        <Stack.Screen name="Game" component={GameScreen} options={{ gestureEnabled: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

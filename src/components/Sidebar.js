@@ -37,7 +37,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData }) {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', route: 'Dashboard' },
-    { icon: FileText, label: 'Final Exam', route: 'FinalExam' },
+    { icon: FileText, label: 'Past Papers', route: 'FinalExam' },
     { icon: Scan, label: 'Scan & Solve', route: 'ScanSolve' },
     { icon: CheckSquare, label: 'Tasks', route: 'Tasks' },
   ];

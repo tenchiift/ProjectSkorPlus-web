@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, BookOpen, Dumbbell, ArrowRight } from 'lucide-react-native';
+import { ArrowLeft, FileQuestion, Gamepad2, ArrowRight } from 'lucide-react-native';
 import theme from '../styles/theme';
 
 const MODULE_COLORS = {
@@ -22,16 +22,18 @@ export default function ModuleScreen({ navigation, route }) {
 
   const items = [
     {
-      id: 'introduction',
-      title: 'Introduction',
-      subtitle: 'Learn the fundamentals and theory',
-      icon: BookOpen,
+      id: 'soalan',
+      title: 'Soalan',
+      subtitle: 'Practice problems to test your skills',
+      icon: FileQuestion,
+      screen: 'Question',
     },
     {
-      id: 'exercise',
-      title: 'Exercise',
-      subtitle: 'Practice problems to test your skills',
-      icon: Dumbbell,
+      id: 'game',
+      title: 'Game',
+      subtitle: 'Play the level and beat the boss',
+      icon: Gamepad2,
+      screen: 'Game',
     },
   ];
 
@@ -82,6 +84,7 @@ export default function ModuleScreen({ navigation, route }) {
                 key={item.id}
                 style={styles.itemCard}
                 activeOpacity={0.7}
+                onPress={() => navigation.navigate(item.screen, { module: moduleData })}
               >
                 <View style={[styles.itemIcon, { backgroundColor: colors[0] + '20' }]}>
                   <Icon size={24} color={colors[0]} />
