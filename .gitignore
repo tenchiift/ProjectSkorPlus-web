@@ -36,10 +36,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# raw game source assets (export spritesheets only to src/assets/game/)
-Free Swordsman Pixel Sprite/
-assets/game assets/
-
 # generated native folders
 /ios
 /android
