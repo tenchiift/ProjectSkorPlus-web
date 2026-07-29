@@ -85,7 +85,7 @@ export default function SetupProfileScreen({ navigation, route }) {
                 onChangeText={setUsername}
                 placeholder="e.g. ahmad123"
                 placeholderTextColor={theme.colors.textSecondary}
-                autoCapitalize="none"
+                autoCapi  talize="none"
               />
             </View>
 

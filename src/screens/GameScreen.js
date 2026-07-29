@@ -1,34 +1,34 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import VectorGame from '../game/VectorGame';
+import PhaserGame from '../game-phaser/PhaserGame';
 import { vectorQuestions, toGamePayload } from '../data/vectorQuestions';
 import { supabase } from '../config/supabase';
 import { updateModuleProgress } from '../services/moduleService';
-
-const resolveSprite = (m) => Image.resolveAssetSource(m).uri;
-
-const spriteModules = {
-  idle: require('../assets/game/sprites/player_idle.png'),
-  walk: require('../assets/game/sprites/player_walk.png'),
-  run: require('../assets/game/sprites/player_run.png'),
-  attack: require('../assets/game/sprites/player_attack.png'),
-  hurt: require('../assets/game/sprites/player_hurt.png'),
-  death: require('../assets/game/sprites/player_death.png'),
-};
+import { resolveCharacter } from '../game/characterAssets';
+import { resolveLevel } from '../game/levelAssets';
+import { resolveAllMobs } from '../game/mobAssets';
+import { resolveButtons } from '../game/uiAssets';
+import { resolvePhaserTextures } from '../game-phaser/phaserAssets';
+import useForceLandscape from '../hooks/useForceLandscape';
 
 export default function GameScreen({ navigation, route }) {
+  // Platformer level is landscape-only; restores portrait on exit.
+  useForceLandscape();
+
   const moduleData = route?.params?.module ?? {};
+  // Use the character the player picked in the open world. Fall back to knight.
+  const charKey = route?.params?.character ?? 'knight';
   const questions = toGamePayload(vectorQuestions);
 
-  const sprites = useMemo(() => ({
-    idle: resolveSprite(spriteModules.idle),
-    walk: resolveSprite(spriteModules.walk),
-    run: resolveSprite(spriteModules.run),
-    attack: resolveSprite(spriteModules.attack),
-    hurt: resolveSprite(spriteModules.hurt),
-    death: resolveSprite(spriteModules.death),
-  }), []);
+  // Individual PNG frames for the chosen character (idle/walk/run/jump/attack),
+  // plus level UI (background, hearts, ability, settings) and enemy mobs.
+  const character = useMemo(() => resolveCharacter(charKey), [charKey]);
+  const level = useMemo(() => resolveLevel(), []);
+  const mobs = useMemo(() => resolveAllMobs(), []);
+  const buttons = useMemo(() => resolveButtons(), []);
+  // Packed Phaser spritesheets resolved to URIs the DOM component can load.
+  const textures = useMemo(() => resolvePhaserTextures(), []);
 
   const handleGameOver = useCallback(async ({ score }) => {
     try {
@@ -48,10 +48,16 @@ export default function GameScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <StatusBar hidden />
-      <VectorGame
+      <PhaserGame
         style={{ flex: 1 }}
-        sprites={sprites}
+        mode="platformer"
+        character={character}
+        characterName={character.name}
+        level={level}
+        mobs={mobs}
+        buttons={buttons}
         questions={questions}
+        textures={textures}
         onGameOver={handleGameOver}
         onExit={handleExit}
       />

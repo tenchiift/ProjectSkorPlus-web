@@ -204,6 +204,24 @@ export default function DashboardScreen({ navigation }) {
           )}
         </View>
 
+        <View style={styles.worldCardWrap}>
+          <LinearGradient
+            colors={[t.colors.gradientVectorStart, t.colors.gradientVectorEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.worldCard, styles.worldCardDisabled]}
+          >
+            <View style={styles.worldInfo}>
+              <Text style={styles.worldKicker}>ADVENTURE MODE</Text>
+              <Text style={styles.worldTitle}>Open World</Text>
+              <Text style={styles.worldDesc}>Pick a hero and explore the map</Text>
+            </View>
+            <View style={styles.comingSoonBadge}>
+              <Text style={styles.comingSoonText}>Coming Soon!</Text>
+            </View>
+          </LinearGradient>
+        </View>
+
         <View style={styles.sectionRow}>
           <Text style={[styles.sectionTitle, { color: t.colors.textPrimary }]}>Continue Learning..</Text>
           <TouchableOpacity onPress={() => navigation.navigate('AllModules')}>
@@ -316,6 +334,60 @@ const styles = StyleSheet.create({
   statValue: { fontFamily: theme.fonts.headingBold, fontSize: 22 },
   statLabel: { fontFamily: theme.fonts.body, fontSize: 11 },
   sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md },
+  worldCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  worldInfo: { flex: 1 },
+  worldKicker: {
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.5,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: 4,
+  },
+  worldTitle: { fontFamily: theme.fonts.headingBold, fontSize: 24, color: '#FFFFFF' },
+  worldDesc: {
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 2,
+  },
+  playBtn: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: theme.spacing.md,
+  },
+  playIcon: { color: '#FFFFFF', fontSize: 22, marginLeft: 3 },
+  worldCardWrap: { position: 'relative' },
+  worldCardDisabled: { opacity: 0.6 },
+  comingSoonBadge: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    marginLeft: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+  },
+  comingSoonText: {
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
   sectionTitle: { fontFamily: theme.fonts.headingBold, fontSize: 18 },
   carouselInner: { paddingRight: theme.spacing.md },
   moduleCard: {

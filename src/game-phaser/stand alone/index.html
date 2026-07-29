@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>SkorPlus — Phaser Game (standalone)</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; touch-action: none; }
+    #game { position: fixed; inset: 0; width: 100%; height: 100%; }
+    #game canvas { display: block; }
+    /* mode switcher */
+    #modes { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 10;
+             display: flex; gap: 8px; font-family: system-ui, sans-serif; }
+    #modes a { background: rgba(26,26,46,0.8); color: #fff; text-decoration: none;
+               padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+    #modes a.active { background: #7c7bf0; }
+  </style>
+  <!-- Same scenes as the Expo app. Phaser from CDN; importmap shims the bare
+       `import Phaser from 'phaser'` used by the shared scene files. -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+  <script type="importmap">
+    { "imports": { "phaser": "data:text/javascript,export default window.Phaser;" } }
+  </script>
+</head>
+<body>
+  <div id="modes">
+    <a href="?mode=platformer" id="m-plat">Platformer</a>
+    <a href="?mode=openworld" id="m-open">Open World</a>
+  </div>
+  <div id="game"></div>
+  <script>
+    const mode = new URLSearchParams(location.search).get('mode') || 'platformer';
+    document.getElementById(mode === 'openworld' ? 'm-open' : 'm-plat').classList.add('active');
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

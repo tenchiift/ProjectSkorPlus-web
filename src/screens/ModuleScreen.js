@@ -77,14 +77,15 @@ export default function ModuleScreen({ navigation, route }) {
         </LinearGradient>
 
         <View style={styles.content}>
-          {items.map((item) => {
+          {          items.map((item) => {
             const Icon = item.icon;
+            const disabled = item.screen === 'Game';
             return (
               <TouchableOpacity
                 key={item.id}
-                style={styles.itemCard}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate(item.screen, { module: moduleData })}
+                style={[styles.itemCard, disabled && styles.itemDisabled]}
+                activeOpacity={disabled ? 1 : 0.7}
+                onPress={disabled ? undefined : () => navigation.navigate(item.screen, { module: moduleData })}
               >
                 <View style={[styles.itemIcon, { backgroundColor: colors[0] + '20' }]}>
                   <Icon size={24} color={colors[0]} />
@@ -210,5 +211,8 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 13,
     color: theme.colors.textSecondary,
+  },
+  itemDisabled: {
+    opacity: 0.5,
   },
 });
