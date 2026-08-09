@@ -1,0 +1,68 @@
+[data-theme="light"] {
+  --color-background: #F2F2F0;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-primary: #7C7BF0;
+  --color-secondary: #F5A623;
+  --color-success: #4CAF50;
+  --color-error: #FF5252;
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #6B7280;
+  --color-border: #E5E7EB;
+  --color-input-bg: #FAFAFA;
+  --color-gradient-vector-start: #7C7BF0;
+  --color-gradient-vector-end: #5A4FE0;
+  --color-gradient-diff-start: #F5A623;
+  --color-gradient-diff-end: #E8951A;
+  --color-exp-blue: #5B8DEF;
+  --color-streak-orange: #F5A623;
+  --color-completed-red: #FF6B6B;
+  --color-sidebar-header-start: #7C7BF0;
+  --color-sidebar-header-end: #5A4FE0;
+}
+
+[data-theme="dark"] {
+  --color-background: #1A1A2E;
+  --color-surface: #2D2D44;
+  --color-card: #2D2D44;
+  --color-primary: #8B8AF5;
+  --color-secondary: #F5A623;
+  --color-success: #66BB6A;
+  --color-error: #FF6B6B;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A0A0B8;
+  --color-border: #3D3D5C;
+  --color-input-bg: #3D3D5C;
+  --color-gradient-vector-start: #7C7BF0;
+  --color-gradient-vector-end: #5A4FE0;
+  --color-gradient-diff-start: #F5A623;
+  --color-gradient-diff-end: #E8951A;
+  --color-exp-blue: #6BA5F7;
+  --color-streak-orange: #F5A623;
+  --color-completed-red: #FF6B6B;
+  --color-sidebar-header-start: #7C7BF0;
+  --color-sidebar-header-end: #5A4FE0;
+}
+
+[data-theme="pink"] {
+  --color-background: #FFF0F5;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-primary: #E8879B;
+  --color-secondary: #F5A623;
+  --color-success: #4CAF50;
+  --color-error: #FF5252;
+  --color-text-primary: #2D1B2E;
+  --color-text-secondary: #8B6B7E;
+  --color-border: #F0D5E0;
+  --color-input-bg: #FFF5F8;
+  --color-gradient-vector-start: #E8879B;
+  --color-gradient-vector-end: #D4607A;
+  --color-gradient-diff-start: #F5A623;
+  --color-gradient-diff-end: #E8951A;
+  --color-exp-blue: #5B8DEF;
+  --color-streak-orange: #F5A623;
+  --color-completed-red: #FF6B6B;
+  --color-sidebar-header-start: #E8879B;
+  --color-sidebar-header-end: #D4607A;
+}

@@ -1,0 +1,140 @@
+.container {
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+.banner {
+  padding-top: var(--spacing-xxl);
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+  padding-bottom: var(--spacing-xl);
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bannerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bannerPill {
+  width: 50px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  margin-bottom: var(--spacing-lg);
+}
+
+.bannerTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 30px;
+  color: #FFFFFF;
+  margin-bottom: var(--spacing-sm);
+}
+
+.bannerDesc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.bannerStats {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  width: 100%;
+}
+
+.statItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statValue {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: #FFFFFF;
+}
+
+.statLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.statDivider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.content {
+  padding: var(--spacing-lg);
+}
+
+.itemCard {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.itemIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.itemSubtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  display: block;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}

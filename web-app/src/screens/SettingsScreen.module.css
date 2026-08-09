@@ -1,0 +1,229 @@
+.container {
+  min-height: 100dvh;
+  background-color: var(--color-background);
+  max-width: var(--phone-width);
+  margin: 0 auto;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.scroll {
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-xxl);
+}
+
+.card {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.row:hover {
+  background-color: rgba(0,0,0,0.03);
+}
+
+[data-theme="dark"] .row:hover {
+  background-color: rgba(255,255,255,0.04);
+}
+
+.rowIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profileIcon {
+  background-color: var(--color-primary);
+}
+
+.themeIcon {
+  background-color: var(--color-secondary);
+}
+
+.rowInfo {
+  flex: 1;
+}
+
+.rowLabel {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.rowHint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.divider {
+  height: 1px;
+  margin: 0 var(--spacing-lg);
+  background-color: var(--color-border);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--spacing-lg);
+  animation: fadeIn 0.2s ease;
+}
+
+.modalContent {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp 0.25s ease;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.modalTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.themeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: opacity 0.15s;
+}
+
+.themeRow:hover {
+  opacity: 0.8;
+}
+
+.themePreview {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.themeInfo {
+  flex: 1;
+}
+
+.themeLabel {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.themeHint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.radio {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.radioActive {
+  border-color: var(--color-primary);
+}
+
+.radioFill {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

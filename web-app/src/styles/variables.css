@@ -1,0 +1,17 @@
+:root {
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 999px;
+  --font-heading-bold: 'REM-Bold', sans-serif;
+  --font-heading: 'REM-Regular', sans-serif;
+  --font-body-bold: 'Sen-Bold', sans-serif;
+  --font-body: 'Sen-Regular', sans-serif;
+  --phone-width: 480px;
+}

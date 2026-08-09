@@ -1,0 +1,142 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-background);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.backButton {
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.headerSpacer {
+  width: 36px;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--spacing-lg) var(--spacing-xxl);
+}
+
+.label {
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: 1px;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.pickerBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  background: var(--color-surface);
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.pickerBtnText {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.saveBtn {
+  width: 100%;
+  margin-top: var(--spacing-xl);
+  padding: 16px 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.saveBtnText {
+  font-family: var(--font-heading-bold);
+  font-size: 16px;
+  color: #FFFFFF;
+}
+
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding: 14px 0;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-error);
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.deleteBtnText {
+  font-family: var(--font-heading-bold);
+  font-size: 14px;
+  color: var(--color-error);
+}
