@@ -1,59 +1,44 @@
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Search, RefreshCw, AlertTriangle } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import styles from './FinalExamScreen.module.css';
 
 export default function FinalExamScreen() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const abortRef = useRef(null);
 
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchExams();
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, [location.key]);
-
-  const fetchExams = async () => {
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
+  const fetchExams = useCallback(async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
+    else setRefreshing(true);
+    setError(null);
 
     try {
       const { data, error: supabaseError } = await supabase
         .from('exams')
         .select('*')
-        .order('created_at', { ascending: false })
-        .abortSignal(controller.signal);
+        .order('created_at', { ascending: false });
 
-      if (controller.signal.aborted) return;
       if (supabaseError) throw supabaseError;
 
       setExams(data || []);
-      setError(null);
     } catch (err) {
-      if (err.name === 'AbortError') return;
       console.error('Fetch exams error:', err);
       setError(err?.message || 'Failed to load exam papers');
+      setExams([]);
     } finally {
-      if (!controller.signal.aborted) {
-        setLoading(false);
-        setRefreshing(false);
-      }
+      setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
+  useEffect(() => {
     fetchExams();
-  };
+  }, [fetchExams]);
 
   if (loading && !refreshing) {
     return (
@@ -72,7 +57,7 @@ export default function FinalExamScreen() {
           <ArrowLeft size={24} color="var(--color-text-primary)" />
         </button>
         <h1 className={styles.headerTitle}>Past Papers</h1>
-        <button className={styles.backButton} onClick={handleRefresh} disabled={refreshing} aria-label="Refresh">
+        <button className={styles.backButton} onClick={() => fetchExams(true)} disabled={refreshing} aria-label="Refresh">
           <RefreshCw size={20} color="var(--color-text-primary)" className={refreshing ? styles.spinIcon : ''} />
         </button>
       </div>
@@ -83,7 +68,7 @@ export default function FinalExamScreen() {
             <AlertTriangle size={48} color="var(--color-error)" />
             <p className={styles.errorTitle}>Failed to load</p>
             <p className={styles.errorMessage}>{error}</p>
-            <button className={styles.retryBtn} onClick={handleRefresh}>
+            <button className={styles.retryBtn} onClick={() => fetchExams(true)}>
               Retry
             </button>
           </div>

@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -6,10 +6,11 @@ import LoadingScreen from './components/LoadingScreen';
 import AppLayout from './components/AppLayout';
 
 function ProtectedLayout() {
+  const location = useLocation();
   return (
     <ProtectedRoute>
       <AppLayout>
-        <Outlet />
+        <Outlet key={location.pathname} />
       </AppLayout>
     </ProtectedRoute>
   );
