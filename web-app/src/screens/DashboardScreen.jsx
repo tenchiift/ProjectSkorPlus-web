@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Flame, CheckCircle2, ArrowRight, MoreHorizontal, Settings, Calendar, RefreshCw, Brain } from 'lucide-react';
+import { Zap, Flame, CheckCircle2, ArrowRight, MoreHorizontal, Settings, Calendar, Brain } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
 import Sidebar from '../components/Sidebar';
@@ -14,7 +14,6 @@ export default function DashboardScreen() {
   const [modules, setModules] = useState([]);
   const [moduleProgress, setModuleProgress] = useState({});
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [countdown, setCountdown] = useState(null);
@@ -97,12 +96,6 @@ export default function DashboardScreen() {
     }
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchData(true);
-    setRefreshing(false);
-  };
-
   const handleCarouselScroll = useCallback(() => {
     if (!carouselRef.current) return;
     const el = carouselRef.current;
@@ -137,9 +130,6 @@ export default function DashboardScreen() {
           <div className={styles.topBarActions}>
             <button className={styles.iconBtn} onClick={() => navigate('/settings')} aria-label="Settings">
               <Settings size={22} color="var(--color-text-primary)" />
-            </button>
-            <button className={styles.iconBtn} onClick={handleRefresh} disabled={refreshing} aria-label="Refresh">
-              <RefreshCw size={20} color="var(--color-text-primary)" className={refreshing ? styles.spinIcon : ''} />
             </button>
           </div>
         </div>
