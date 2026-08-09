@@ -1,17 +1,17 @@
 # Expo App → Pure React Web App Conversion Design
 
-> **Goal**: Create a standalone React web app in `web-app/` that replicates every screen, feature, and pixel of the existing Expo React Native app. Zero shared code — completely separate codebase. Same Supabase backend, same OpenAI integration, same Phaser games.
+> **Goal**: Create a standalone React web app in `web-app/` that replicates every screen, feature, and pixel of the existing Expo React Native app — minus all game-related screens and components. Zero shared code — completely separate codebase. Same Supabase backend, same OpenAI integration.
 
 ## Architecture
 
 - **Location**: `/web-app/` inside the ProjectSkorPlus monorepo
-- **Stack**: Vite + React 19.1 + React Router 7 + Supabase JS + Phaser 3 + Lucide React + CSS Modules
+- **Stack**: Vite + React 19.1 + React Router 7 + Supabase JS + Lucide React + CSS Modules
 - **Build output**: `npm run build` → `web-app/dist/` (deployable static SPA)
 - **Dev server**: `npm run dev` → `http://localhost:5173`
 
 ## Routing (React Router)
 
-Every route maps 1:1 to the existing Expo Stack.Navigator routes:
+Every route maps 1:1 to the existing Expo Stack.Navigator routes (game routes excluded per user request):
 
 | Path | Screen | Notes |
 |------|--------|-------|
@@ -25,16 +25,18 @@ Every route maps 1:1 to the existing Expo Stack.Navigator routes:
 | `/profile` | ProfileScreen | Edit profile, avatar upload |
 | `/settings` | SettingsScreen | Theme switcher modal |
 | `/modules` | AllModulesScreen | Full module list |
-| `/module/:id` | ModuleScreen | Module detail + subscreen list |
+| `/module/:id` | ModuleScreen | Module detail + subscreen list (Game button removed) |
 | `/question/:moduleId` | QuestionScreen | Quiz UI |
 | `/final-exam` | FinalExamScreen | Past exam papers list |
 | `/pdf-viewer` | PDFViewerScreen | PDF viewer via Google Docs iframe |
 | `/scan-solve` | ScanSolveScreen | Camera/gallery → AI solve |
 | `/set-exam` | SetExamScreen | Set/edit exam countdown |
 | `/tasks` | TaskScreen | Todo CRUD |
-| `/character-select` | CharacterSelectScreen | Hero picker |
-| `/open-world` | OpenWorldScreen | Phaser open world game |
-| `/game/:moduleId` | GameScreen | Phaser platformer game |
+
+**Removed routes** (game):
+- `/character-select` — CharacterSelectScreen (hero picker)
+- `/open-world` — OpenWorldScreen (Phaser open world)
+- `/game/:moduleId` — GameScreen (Phaser platformer)
 
 **Auth guard**: A `<ProtectedRoute>` component wraps all routes except `/`, `/login`, `/register`, `/email-login`. Redirects unauthenticated users to `/login`.
 
@@ -67,45 +69,43 @@ web-app/
 │   │   ├── moduleService.js          # Same Supabase queries as Expo
 │   │   └── userService.js            # Same Supabase queries as Expo
 │   ├── data/
-│   │   └── vectorQuestions.js        # 5 vector calculus quiz questions (JSON import)
+│   │   └── vectorQuestions.js        # 5 vector calculus quiz questions
 │   ├── components/
 │   │   ├── Sidebar.jsx               # CSS transition slide-out menu
 │   │   ├── Sidebar.module.css
 │   │   ├── ProtectedRoute.jsx        # Auth gate component
-│   │   ├── LoadingScreen.jsx         # Full-page ActivityIndicator clone
+│   │   ├── LoadingScreen.jsx         # Full-page spinner
 │   │   └── ErrorBoundary.jsx         # Catch rendering errors
-│   ├── screens/
-│   │   ├── HomeScreen.jsx + .module.css
-│   │   ├── LoginScreen.jsx + .module.css
-│   │   ├── RegisterScreen.jsx + .module.css
-│   │   ├── EmailLoginScreen.jsx + .module.css
-│   │   ├── SetupProfileScreen.jsx + .module.css
-│   │   ├── OnboardingScreen.jsx + .module.css
-│   │   ├── DashboardScreen.jsx + .module.css
-│   │   ├── ProfileScreen.jsx + .module.css
-│   │   ├── SettingsScreen.jsx + .module.css
-│   │   ├── AllModulesScreen.jsx + .module.css
-│   │   ├── ModuleScreen.jsx + .module.css
-│   │   ├── QuestionScreen.jsx + .module.css
-│   │   ├── FinalExamScreen.jsx + .module.css
-│   │   ├── PDFViewerScreen.jsx + .module.css
-│   │   ├── ScanSolveScreen.jsx + .module.css
-│   │   ├── SetExamScreen.jsx + .module.css
-│   │   ├── TaskScreen.jsx + .module.css
-│   │   ├── CharacterSelectScreen.jsx + .module.css
-│   │   ├── OpenWorldScreen.jsx + .module.css
-│   │   ├── GameScreen.jsx + .module.css
-│   └── game/                         # Copied from src/game-phaser/
-│       ├── PhaserGame.jsx             # Adapted: no 'use dom', direct React component
-│       ├── phaserAssets.js
-│       ├── events.js
-│       ├── scenes/                    # Unchanged Phaser scenes
-│       │   ├── BootScene.js
-│       │   ├── OpenWorldScene.js
-│       │   ├── PlatformerScene.js
-│       │   └── UIScene.js
-│       └── ...
+│   └── screens/
+│       ├── HomeScreen.jsx + .module.css
+│       ├── LoginScreen.jsx + .module.css
+│       ├── RegisterScreen.jsx + .module.css
+│       ├── EmailLoginScreen.jsx + .module.css
+│       ├── SetupProfileScreen.jsx + .module.css
+│       ├── OnboardingScreen.jsx + .module.css
+│       ├── DashboardScreen.jsx + .module.css
+│       ├── ProfileScreen.jsx + .module.css
+│       ├── SettingsScreen.jsx + .module.css
+│       ├── AllModulesScreen.jsx + .module.css
+│       ├── ModuleScreen.jsx + .module.css
+│       ├── QuestionScreen.jsx + .module.css
+│       ├── FinalExamScreen.jsx + .module.css
+│       ├── PDFViewerScreen.jsx + .module.css
+│       ├── ScanSolveScreen.jsx + .module.css
+│       ├── SetExamScreen.jsx + .module.css
+│       └── TaskScreen.jsx + .module.css
 ```
+
+### Files NOT copied from Expo
+
+- `src/game/` (characterAssets, mobAssets, levelAssets, uiAssets, OpenWorld.js)
+- `src/game-phaser/` (PhaserGame, phaserAssets, events, scenes, sprites)
+- `src/screens/CharacterSelectScreen.js`
+- `src/screens/OpenWorldScreen.js`
+- `src/screens/GameScreen.js`
+- `src/hooks/useForceLandscape.js`
+- `assets/game assets/` (sprite frames, mobs, buttons, level art)
+- `scripts/generate-spritesheets.mjs`
 
 ## Theme System (CSS Custom Properties)
 
@@ -155,7 +155,7 @@ All theme tokens from `src/styles/theme.js` become CSS variables:
   --color-sidebar-header-start: #7C7BF0;
   --color-sidebar-header-end: #5A4FE0;
 }
-/* dark and pink themes follow same pattern */
+/* dark and pink themes follow same pattern — all 3 themes from theme.js */
 ```
 
 In CSS Modules, use: `background: var(--color-background);`
@@ -175,21 +175,20 @@ Every Expo-specific API must have a web-native equivalent:
 | `expo-image-picker` → `requestMediaLibraryPermissionsAsync` | `navigator.permissions.query({name: 'camera'})` — or try/fallback | `ProfileScreen` |
 | `expo-image-manipulator` → `manipulateAsync(resize)` | Canvas API: `ctx.drawImage(img, 0, 0, 1024, auto)` → `canvas.toBlob()` → `URL.createObjectURL()` | `ScanSolveScreen`, `ProfileScreen` |
 | `@react-native-community/datetimepicker` | `<input type="date">` and `<input type="time">` styled to match | `SetExamScreen` |
-| `react-native-webview` → `<WebView>` | `<iframe src={googleDocsUrl}>` | `PDFViewerScreen` (already handles this) |
+| `react-native-webview` → `<WebView>` | `<iframe src={googleDocsUrl}>` | `PDFViewerScreen` |
 | `expo-sharing` → `shareAsync` | `navigator.share({files: [...]})` or fallback to `<a download>` | `PDFViewerScreen` |
 | `expo-linking` → `addEventListener('url')` | `window.addEventListener('hashchange')` + React Router `useLocation` | `EmailLoginScreen` |
-| `expo-screen-orientation` | Not needed on web — CSS `@media (orientation: landscape)` for game screens | `App.js`, `useForceLandscape.js` |
+| `expo-screen-orientation` | Not needed — no game screens use it | `App.js` |
 | `@react-navigation/native` → `useFocusEffect` | `useEffect` with React Router's `useLocation` to detect route changes | `DashboardScreen` |
 | `@react-navigation/stack` → `navigation.navigate(route, params)` | `useNavigate()` → `navigate(path, { state: params })` | All screens |
 | `@react-navigation/stack` → `navigation.replace(route)` | `navigate(path, { replace: true })` | Auth screens |
 | `@react-navigation/stack` → `navigation.goBack()` | `useNavigate()` → `navigate(-1)` | All screens |
 | `@react-navigation/stack` → `navigation.reset()` | `navigate('/', { replace: true })` | Logout |
 | `react-native-safe-area-context` → `<SafeAreaView>` | CSS `padding-top: env(safe-area-inset-top)` | All screens |
-| `expo-linear-gradient` → `<LinearGradient>` | CSS `background: linear-gradient(...)` via a `<div>` wrapper | 7 screens |
+| `expo-linear-gradient` → `<LinearGradient>` | CSS `background: linear-gradient(...)` via a `<div>` wrapper | Dashboard, Module, AllModules, CharacterSelect, Settings |
 | `StatusBar` from expo-status-bar | CSS `theme-color` meta tag + no component needed | `index.html` |
 | `StyleSheet.create({...})` | `.module.css` with same property names | All screens |
 | `Animated.Value` + `Animated.timing` | CSS `transition: transform 250ms ease-out` | `Sidebar` |
-| `useWindowDimensions()` → `width > height` | CSS `@media (orientation: landscape)` | `CharacterSelectScreen` |
 | `RefreshControl` on ScrollView | Manual refresh button with loading state | `DashboardScreen` |
 | `ActivityIndicator` | CSS `@keyframes spin` + `<div className={styles.spinner}>` | All screens |
 | `KeyboardAvoidingView` | Not needed on web — browser handles keyboard natively | 5 auth/profile screens |
@@ -231,7 +230,7 @@ Every Expo-specific API must have a web-native equivalent:
 - On success: navigate to `/onboarding`
 
 ### OnboardingScreen
-- 3 static pages with images from `assets/images/reference pages/`
+- 3 static pages with images from `public/assets/images/reference pages/`
 - **Web approach**: CSS `scroll-snap-type: x mandatory` on container, `scroll-snap-align: center` on each page
 - Or: horizontal scroll with `scrollTo` on button click
 - Skip button always visible → `/dashboard`
@@ -241,13 +240,15 @@ Every Expo-specific API must have a web-native equivalent:
 ### DashboardScreen (heaviest screen)
 - **Stats row**: 3 cards (Total Exp, Days Streak, Completed) from `profiles` table
 - **Exam countdown card**: From `exam_countdowns` table, shows days left + date + edit button
-- **Open World card**: Gradient card with "Coming Soon" badge (disabled)
 - **Module carousel**: Horizontal scroll with snap, progress bars, "Continue Learning" header
-- **Tasks section**: Hidden behind `{false && ...}` — keep hidden
 - **Sidebar**: Hamburger menu → slide-out Sidebar component
-- **Refresh**: Replace `RefreshControl` with a pull-down indicator or refresh button
-- **Loading state**: Full-screen ActivityIndicator clone
+- **Refresh**: Replace `RefreshControl` with a refresh button
+- **Loading state**: Full-screen spinner
 - **Navigation**: Settings gear icon → `/settings`, hamburger → Sidebar
+
+**Removed from Dashboard** (game):
+- The "Open World" gradient card with "Coming Soon" badge is removed entirely
+- The hidden tasks section (already `{false && ...}`) stays hidden
 
 ### Sidebar Component
 - CSS `transform: translateX()` + `transition` for slide animation
@@ -280,8 +281,8 @@ Every Expo-specific API must have a web-native equivalent:
 ### ModuleScreen
 - Gradient banner header with module title
 - Progress stats
-- Two sub-screen buttons: "Soalan" (Questions) → `/question/:moduleId`, "Game" (disabled, shows lock icon)
-- Game item redirects to CharacterSelect → OpenWorld → Game (currently disabled)
+- **Only "Soalan" (Questions) button** → `/question/:moduleId`
+- The disabled "Game" item from the Expo version is removed entirely
 
 ### QuestionScreen
 - Quiz UI with question image/text + 4 option grid
@@ -289,7 +290,7 @@ Every Expo-specific API must have a web-native equivalent:
 - Auto-advance after 750ms
 - Progress bar at top
 - On finish: persist score via `updateModuleProgress`, show results screen
-- Uses `vectorQuestions` data from `src/data/vectorQuestions.js`
+- Uses `vectorQuestions` data from `web-app/src/data/vectorQuestions.js`
 
 ### FinalExamScreen
 - List of past exam papers from `exams` table
@@ -324,36 +325,6 @@ Every Expo-specific API must have a web-native equivalent:
 - Checkbox toggle → updates Supabase `tasks.completed`
 - Delete button per task
 - Empty state
-
-### CharacterSelectScreen
-- 6 characters (Knight, Mage, Rogue, PinkMonster, OwletMonster, DudeMonster)
-- Animated sprites via `AnimatedSprite` component (image cycling)
-- Portrait/landscape responsive layout via CSS media queries
-- Editable player name
-- "Enter Open World" button (currently disabled with `ctaDisabled` style)
-
-### OpenWorldScreen
-- Renders `PhaserGame` component with `mode="openworld"`
-- Handles `onEnterModule` callback → navigates to `GameScreen`
-- Full-screen, no header
-
-### GameScreen
-- Renders `PhaserGame` component with `mode="platformer"`
-- Passes vector questions as game payload
-- Handles `onGameOver` → persists score via `updateModuleProgress`
-- Handles `onExit` → goes back
-- Full-screen, no header
-
-## Phaser Game Integration
-
-The `PhaserGame.js` Expo DOM component uses `'use dom'` directive. For the web app:
-
-1. Copy all files from `src/game-phaser/` into `web-app/src/game/`
-2. Rewrite `PhaserGame.js` as a regular React component (remove `'use dom'`)
-3. The component already uses `useEffect` + `useRef` to mount Phaser to a `<div>` — this pattern works natively on web
-4. All scene files (`BootScene.js`, `OpenWorldScene.js`, `PlatformerScene.js`, `UIScene.js`) remain unchanged
-5. `phaserAssets.js` auto-generated manifest remains unchanged
-6. Static game assets (spritesheets, etc.) are imported via Vite's URL imports
 
 ## Supabase Config
 
@@ -390,7 +361,6 @@ Since the app was designed for mobile (375-430px wide), for desktop:
 - This gives a phone-like container centered on wide screens
 - The background color fills the full viewport outside the container
 - Sidebar width capped at `min(65vw, 320px)`
-- CharacterSelectScreen landscape layout triggers at `@media (min-width: 600px) and (orientation: landscape)`
 
 ## Fonts
 
@@ -402,7 +372,7 @@ Google Fonts loaded via `<link>` in `index.html`:
 
 ## Static Assets
 
-All images from the Expo `src/assets/` and game asset directories are copied to `web-app/public/assets/`. In code:
+All non-game images from the Expo app are copied to `web-app/public/assets/`. In code:
 
 ```jsx
 // Vite handles this
@@ -410,7 +380,13 @@ import logo from '../assets/images/logo.png';
 <img src={logo} alt="Logo" />
 ```
 
-For game assets resolved at runtime by `resolvePhaserTextures()`, the asset URLs come from Vite's `import.meta.url` or are served from `public/`.
+Assets to copy:
+- `src/assets/images/logo.png`
+- `src/assets/images/reference pages/gradient.png`
+- `src/assets/images/reference pages/png/page 1 image.png`
+- `src/assets/images/reference pages/png/page 2 image.png`
+- `src/assets/images/reference pages/png/page 3 image.png`
+- `assets/icon.png`, `assets/splash-icon.png`, `assets/favicon.png`
 
 ## Error Handling
 
@@ -429,8 +405,7 @@ For game assets resolved at runtime by `resolvePhaserTextures()`, the asset URLs
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.0.0",
     "@supabase/supabase-js": "^2.110.4",
-    "lucide-react": "^0.400.0",
-    "phaser": "^3.90.0"
+    "lucide-react": "^0.400.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",
@@ -446,12 +421,11 @@ For game assets resolved at runtime by `resolvePhaserTextures()`, the asset URLs
 
 - Supabase backend (same project, same tables, same RLS)
 - OpenAI API endpoint and prompt structure
-- Phaser game mechanics and scenes
-- All screen layouts, colors, fonts, spacing, border radii
-- All user-facing text and labels
+- All 17 non-game screen layouts, colors, fonts, spacing, border radii
+- All user-facing text and labels (minus game-related)
 - All navigation flows and auth logic
 - Database schema and migrations
-- Asset files (images, spritesheets)
+- Non-game asset files (logo, onboarding images, favicon)
 
 ## What IS Changing
 
@@ -463,4 +437,12 @@ For game assets resolved at runtime by `resolvePhaserTextures()`, the asset URLs
 - Entry point: App.js (RN) → main.jsx (React DOM)
 - Auth storage: AsyncStorage → localStorage
 - Magic link: Linking API → detectSessionInUrl + hashchange
-- Game: 'use dom' component → regular React component
+
+## What Is REMOVED
+
+- 3 game screens: CharacterSelectScreen, OpenWorldScreen, GameScreen
+- Phaser game engine and all game assets
+- Open World card in DashboardScreen
+- Game button in ModuleScreen
+- `useForceLandscape` hook (game-only)
+- All files under `src/game/` and `src/game-phaser/`

@@ -7,7 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
-  Image,
+  Image, 
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -391,7 +391,8 @@ const styles = StyleSheet.create({
   sectionTitle: { fontFamily: theme.fonts.headingBold, fontSize: 18 },
   carouselInner: { paddingRight: theme.spacing.md },
   moduleCard: {
-    width: SCREEN_WIDTH - theme.spacing.lg * 2,
+    width: '100%',
+    maxwidth: 460,
     borderRadius: theme.borderRadius.lg, padding: theme.spacing.lg, minHeight: 200, marginRight: theme.spacing.md,
   },
   moduleTopPill: { width: 60, height: 24, borderRadius: theme.borderRadius.full, backgroundColor: 'rgba(255,255,255,0.25)', alignSelf: 'flex-end', marginBottom: theme.spacing.lg },

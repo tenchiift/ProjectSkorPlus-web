@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(awk '/rogue:/{f=1} f&&/idle: \\\\[/{c=1;next} c&&/require/{n++} c&&/\\\\],/{print \"rogue idle frames:\",n; exit}' src/game/characterAssets.js)",
+      "Bash(node *)",
+      "Bash(python3 -)",
+      "Bash(python3 scripts/normalize_monsters.py)"
+    ]
+  }
+}
