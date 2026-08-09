@@ -206,8 +206,7 @@ export default function DashboardScreen() {
           <button
             className={styles.zepCard}
             onClick={() => {
-              const firstModule = modules[0];
-              navigate(`/question/${firstModule.id}`, { state: { module: firstModule } });
+              window.open('https://quiz.zep.us/en/public', '_blank');
             }}
           >
             <div className={styles.zepCardContent}>
