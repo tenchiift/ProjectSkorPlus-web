@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Flame, CheckCircle2, ArrowRight, MoreHorizontal, Settings, Calendar, RefreshCw } from 'lucide-react';
+import { Zap, Flame, CheckCircle2, ArrowRight, MoreHorizontal, Settings, Calendar, RefreshCw, Brain } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
 import Sidebar from '../components/Sidebar';
@@ -201,6 +201,30 @@ export default function DashboardScreen() {
             </div>
           )}
         </div>
+
+        {modules.length > 0 && (
+          <button
+            className={styles.zepCard}
+            onClick={() => {
+              const firstModule = modules[0];
+              navigate(`/question/${firstModule.id}`, { state: { module: firstModule } });
+            }}
+          >
+            <div className={styles.zepCardContent}>
+              <div className={styles.zepIconWrap}>
+                <Brain size={28} color="#FFFFFF" />
+              </div>
+              <div className={styles.zepTextWrap}>
+                <span className={styles.zepKicker}>QUICK PRACTICE</span>
+                <span className={styles.zepTitle}>Zep Quiz</span>
+                <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
+              </div>
+            </div>
+            <div className={styles.zepArrow}>
+              <ArrowRight size={22} color="#FFFFFF" />
+            </div>
+          </button>
+        )}
 
         <div className={styles.sectionRow}>
           <h2 className={styles.sectionTitle}>Continue Learning..</h2>

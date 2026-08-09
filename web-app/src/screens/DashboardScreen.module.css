@@ -238,6 +238,77 @@
   opacity: 0.9;
 }
 
+/* Zep Quiz card */
+.zepCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--color-gradient-diff-start), var(--color-gradient-diff-end));
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.zepCard:hover {
+  opacity: 0.92;
+}
+
+.zepCardContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.zepIconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zepTextWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zepKicker {
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.zepTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 20px;
+  color: #FFFFFF;
+}
+
+.zepDesc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.zepArrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Carousel */
 .carouselSection {
   position: relative;
