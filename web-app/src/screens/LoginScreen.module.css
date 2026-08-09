@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  max-width: var(--phone-width);
+  margin: 0 auto;
   background: var(--color-surface);
   padding-bottom: var(--spacing-xl);
 }

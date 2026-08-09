@@ -23,6 +23,7 @@ export default function ProfileScreen() {
   const [semester, setSemester] = useState('');
   const [bio, setBio] = useState('');
   const [photoURL, setPhotoURL] = useState(null);
+  const [existingProfileSetup, setExistingProfileSetup] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -47,6 +48,7 @@ export default function ProfileScreen() {
         setGender(profile.gender ?? '');
         setSemester(profile.semester ?? '');
         setBio(profile.bio ?? '');
+        setExistingProfileSetup(profile.profile_setup ?? false);
         if (profile.photo_url) {
           setPhotoURL(profile.photo_url);
         }
@@ -99,17 +101,20 @@ export default function ProfileScreen() {
       const userId = getUserId();
       if (!userId) return;
 
+      const updateData = {
+        id: userId,
+        name: name.trim(),
+        email,
+        gender,
+        semester,
+        bio: bio.trim(),
+      };
+      if (!existingProfileSetup) {
+        updateData.profile_setup = true;
+      }
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          id: userId,
-          name: name.trim(),
-          email,
-          gender,
-          semester,
-          bio: bio.trim(),
-          profile_setup: true,
-        });
+        .upsert(updateData);
 
       if (error) throw error;
       setSaved(true);

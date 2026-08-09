@@ -5,19 +5,19 @@ import styles from './OnboardingScreen.module.css';
 const PAGES = [
   {
     id: 1,
-    image: '/images/page 1 image.png',
+    image: '/assets/images/reference pages/png/page 1 image.png',
     title: 'Interactive Modules',
     subtitle: 'Learn calculus with structured, bite-sized modules designed for students.',
   },
   {
     id: 2,
-    image: '/images/page 2 image.png',
+    image: '/assets/images/reference pages/png/page 2 image.png',
     title: 'Track Your Progress',
     subtitle: 'Monitor your learning journey with stats, streaks, and achievements.',
   },
   {
     id: 3,
-    image: '/images/page 3 image.png',
+    image: '/assets/images/reference pages/png/page 3 image.png',
     title: 'Master Calculus',
     subtitle: 'Practice with exercises and become confident in derivatives, integrals & more.',
   },
@@ -50,7 +50,7 @@ export default function OnboardingScreen() {
   return (
     <div className={styles.container}>
       <img
-        src="/images/gradient.png"
+        src="/assets/images/reference pages/gradient.png"
         alt=""
         className={styles.gradientBg}
       />

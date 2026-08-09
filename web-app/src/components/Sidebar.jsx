@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { LayoutDashboard, FileText, Scan, CheckSquare, X, User, LogOut } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 import styles from './Sidebar.module.css';
 
 const MENU = [
@@ -11,8 +10,6 @@ const MENU = [
 ];
 
 export default function Sidebar({ visible, onClose, onNavigate, userData }) {
-  const { themeMode } = useTheme();
-
   const handleNav = useCallback((route) => {
     onClose();
     setTimeout(() => onNavigate(route), 200);

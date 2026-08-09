@@ -17,6 +17,8 @@
 
 .container {
   min-height: 100vh;
+  max-width: var(--phone-width);
+  margin: 0 auto;
   background: var(--color-background);
   padding-top: env(safe-area-inset-top);
 }

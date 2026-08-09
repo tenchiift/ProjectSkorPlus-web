@@ -34,7 +34,6 @@ export default function SetupProfileScreen() {
           days_streak: 0,
           completed: 0,
           exercise_progress: 0,
-          created_at: new Date().toISOString(),
           profile_setup: true,
         });
       if (upsertError) throw upsertError;
