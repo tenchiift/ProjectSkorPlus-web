@@ -7,6 +7,13 @@
   background: var(--color-background);
 }
 
+@media (min-width: 768px) {
+  .container {
+    max-width: none;
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+}
+
 .loadingContainer {
   flex: 1;
   display: flex;

@@ -23,6 +23,13 @@
   padding-top: env(safe-area-inset-top);
 }
 
+@media (min-width: 768px) {
+  .container {
+    max-width: none;
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+}
+
 .header {
   display: flex;
   align-items: center;

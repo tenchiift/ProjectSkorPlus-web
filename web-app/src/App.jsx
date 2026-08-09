@@ -1,8 +1,19 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Outlet } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingScreen from './components/LoadingScreen';
+import AppLayout from './components/AppLayout';
+
+function ProtectedLayout() {
+  return (
+    <ProtectedRoute>
+      <AppLayout>
+        <Outlet />
+      </AppLayout>
+    </ProtectedRoute>
+  );
+}
 
 const HomeScreen = lazy(() => import('./screens/HomeScreen'));
 const LoginScreen = lazy(() => import('./screens/LoginScreen'));
@@ -31,19 +42,21 @@ export default function App() {
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
           <Route path="/email-login" element={<EmailLoginScreen />} />
-          <Route path="/setup-profile" element={<ProtectedRoute><SetupProfileScreen /></ProtectedRoute>} />
-          <Route path="/onboarding" element={<ProtectedRoute><OnboardingScreen /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardScreen /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
-          <Route path="/modules" element={<ProtectedRoute><AllModulesScreen /></ProtectedRoute>} />
-          <Route path="/module/:id" element={<ProtectedRoute><ModuleScreen /></ProtectedRoute>} />
-          <Route path="/question/:moduleId" element={<ProtectedRoute><QuestionScreen /></ProtectedRoute>} />
-          <Route path="/final-exam" element={<ProtectedRoute><FinalExamScreen /></ProtectedRoute>} />
-          <Route path="/pdf-viewer" element={<ProtectedRoute><PDFViewerScreen /></ProtectedRoute>} />
-          <Route path="/scan-solve" element={<ProtectedRoute><ScanSolveScreen /></ProtectedRoute>} />
-          <Route path="/set-exam" element={<ProtectedRoute><SetExamScreen /></ProtectedRoute>} />
-          <Route path="/tasks" element={<ProtectedRoute><TaskScreen /></ProtectedRoute>} />
+          <Route element={<ProtectedLayout />}>
+            <Route path="/setup-profile" element={<SetupProfileScreen />} />
+            <Route path="/onboarding" element={<OnboardingScreen />} />
+            <Route path="/dashboard" element={<DashboardScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route path="/modules" element={<AllModulesScreen />} />
+            <Route path="/module/:id" element={<ModuleScreen />} />
+            <Route path="/question/:moduleId" element={<QuestionScreen />} />
+            <Route path="/final-exam" element={<FinalExamScreen />} />
+            <Route path="/pdf-viewer" element={<PDFViewerScreen />} />
+            <Route path="/scan-solve" element={<ScanSolveScreen />} />
+            <Route path="/set-exam" element={<SetExamScreen />} />
+            <Route path="/tasks" element={<TaskScreen />} />
+          </Route>
         </Routes>
       </Suspense>
     </ErrorBoundary>

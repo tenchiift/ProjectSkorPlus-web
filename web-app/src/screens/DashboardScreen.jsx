@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Flame, CheckCircle2, ArrowRight, MoreHorizontal, Settings, Calendar, Brain } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
-import Sidebar from '../components/Sidebar';
 import styles from './DashboardScreen.module.css';
 
 export default function DashboardScreen() {
@@ -14,62 +13,28 @@ export default function DashboardScreen() {
   const [modules, setModules] = useState([]);
   const [moduleProgress, setModuleProgress] = useState({});
   const [loading, setLoading] = useState(true);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [countdown, setCountdown] = useState(null);
   const [daysLeft, setDaysLeft] = useState(null);
-
-  const handleLogout = async () => {
-    setSidebarVisible(false);
-    try {
-      await supabase.auth.signOut();
-      navigate('/', { replace: true });
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-  };
-
-  const handleSidebarNavigate = useCallback(
-    (route) => {
-      if (route === 'logout') {
-        handleLogout();
-      } else {
-        setSidebarVisible(false);
-        navigate(route);
-      }
-    },
-    [navigate]
-  );
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async (isRefresh = false) => {
-    if (!isRefresh) setLoading(true);
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
+        .from('profiles').select('*').eq('id', user.id).single();
       if (profile) setUserData(profile);
 
       const [modulesData, progress, countdownData] = await Promise.all([
         getModules(),
         getUserModuleProgress(user.id),
-        supabase
-          .from('exam_countdowns')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('exam_date', { ascending: true })
-          .limit(1),
+        supabase.from('exam_countdowns').select('*').eq('user_id', user.id).order('exam_date', { ascending: true }).limit(1),
       ]);
 
       setModules(modulesData);
@@ -81,10 +46,7 @@ export default function DashboardScreen() {
         const examDate = new Date(cd.exam_date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const diff = Math.ceil(
-          (examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        setDaysLeft(diff);
+        setDaysLeft(Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
       } else {
         setCountdown(null);
         setDaysLeft(null);
@@ -96,12 +58,10 @@ export default function DashboardScreen() {
     }
   };
 
-  const handleCarouselScroll = useCallback(() => {
+  const handleCarouselScroll = () => {
     if (!carouselRef.current) return;
-    const el = carouselRef.current;
-    const idx = Math.round(el.scrollLeft / el.clientWidth);
-    setCarouselIndex(idx);
-  }, []);
+    setCarouselIndex(Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth));
+  };
 
   if (loading) {
     return (
@@ -117,11 +77,40 @@ export default function DashboardScreen() {
     { icon: CheckCircle2, color: 'var(--color-completed-red)', value: String(userData?.completed ?? 0), label: 'Completed' },
   ];
 
+  const ModuleCards = () => (
+    <>
+      {modules.map((mod) => {
+        const progress = moduleProgress[mod.id]?.progress ?? 0;
+        const gradientClass = mod.color === 'amber' ? styles.moduleCardAmber : styles.moduleCardPurple;
+        return (
+          <button
+            key={mod.id}
+            className={`${styles.moduleCardWrapper} ${gradientClass}`}
+            onClick={() => navigate('/module/' + mod.id, { state: { module: mod } })}
+          >
+            <div className={styles.moduleTopPill} />
+            <h3 className={styles.moduleTitle}>{mod.title}</h3>
+            <p className={styles.moduleDesc}>{mod.description}</p>
+            <div className={styles.moduleProgressBarBg}>
+              <div className={styles.moduleProgressBarFill} style={{ width: `${progress * 100}%` }} />
+            </div>
+            <div className={styles.moduleFooter}>
+              <span className={styles.modulePercent}>{Math.round(progress * 100)}%</span>
+              <div className={styles.continueBtn}>
+                <ArrowRight size={20} color="#FFFFFF" />
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </>
+  );
+
   return (
     <div className={styles.container}>
       <div className={styles.scrollContent}>
         <div className={styles.topBar}>
-          <button className={styles.iconBtn} onClick={() => setSidebarVisible(true)} aria-label="Menu">
+          <button className={styles.mobileHamburger} onClick={() => document.dispatchEvent(new CustomEvent('toggle-sidebar'))} aria-label="Menu">
             <MoreHorizontal size={24} color="var(--color-text-primary)" />
           </button>
           <div className={styles.logoWrap}>
@@ -151,9 +140,7 @@ export default function DashboardScreen() {
           {countdown ? (
             <div>
               <div className={styles.countdownDaysRow}>
-                <span className={styles.countdownDays}>
-                  {daysLeft !== null ? daysLeft : '0'}
-                </span>
+                <span className={styles.countdownDays}>{daysLeft !== null ? daysLeft : '0'}</span>
                 <span className={styles.countdownDaysLabel}>days left</span>
               </div>
               <p className={styles.countdownCompactTitle}>{countdown.title}</p>
@@ -162,131 +149,61 @@ export default function DashboardScreen() {
                   <Calendar size={13} color="var(--color-text-secondary)" />
                   <span className={styles.countdownDate}>
                     {new Date(countdown.exam_date).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
+                      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
                     })}
                   </span>
                 </div>
-                <button
-                  className={styles.countdownEditBtn}
-                  onClick={() => navigate('/set-exam', { state: { countdown } })}
-                >
-                  Edit
-                </button>
+                <button className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</button>
               </div>
             </div>
           ) : (
             <div className={styles.countdownEmpty}>
               <Calendar size={28} color="var(--color-text-secondary)" />
               <p className={styles.countdownEmptyText}>Set your final exam</p>
-              <button
-                className={styles.countdownSetBtn}
-                onClick={() => navigate('/set-exam')}
-              >
-                Set Date &amp; Time
-              </button>
+              <button className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</button>
             </div>
           )}
         </div>
 
         {modules.length > 0 && (
-          <button
-            className={styles.zepCard}
-            onClick={() => {
-              window.open('https://quiz.zep.us/en/public', '_blank');
-            }}
-          >
+          <button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
             <div className={styles.zepCardContent}>
-              <div className={styles.zepIconWrap}>
-                <Brain size={28} color="#FFFFFF" />
-              </div>
+              <div className={styles.zepIconWrap}><Brain size={28} color="#FFFFFF" /></div>
               <div className={styles.zepTextWrap}>
                 <span className={styles.zepKicker}>QUICK PRACTICE</span>
                 <span className={styles.zepTitle}>Zep Quiz</span>
                 <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
               </div>
             </div>
-            <div className={styles.zepArrow}>
-              <ArrowRight size={22} color="#FFFFFF" />
-            </div>
+            <div className={styles.zepArrow}><ArrowRight size={22} color="#FFFFFF" /></div>
           </button>
         )}
 
         <div className={styles.sectionRow}>
           <h2 className={styles.sectionTitle}>Continue Learning..</h2>
-          <button className={styles.showAllLink} onClick={() => navigate('/modules')}>
-            Show All &rarr;
-          </button>
+          <button className={styles.showAllLink} onClick={() => navigate('/modules')}>Show All &rarr;</button>
         </div>
 
         {modules.length > 0 ? (
-          <div className={styles.carouselSection}>
-            <div
-              className={styles.carousel}
-              ref={carouselRef}
-              onScroll={handleCarouselScroll}
-            >
-              {modules.map((mod) => {
-                const progress = moduleProgress[mod.id]?.progress ?? 0;
-                const gradientClass =
-                  mod.color === 'amber' ? styles.moduleCardAmber : styles.moduleCardPurple;
-
-                return (
-                  <button
-                    key={mod.id}
-                    className={styles.moduleCardWrapper}
-                    onClick={() =>
-                      navigate('/module/' + mod.id, { state: { module: mod } })
-                    }
-                  >
-                    <div className={`${styles.moduleCard} ${gradientClass}`}>
-                      <div className={styles.moduleTopPill} />
-                      <h3 className={styles.moduleTitle}>{mod.title}</h3>
-                      <p className={styles.moduleDesc}>{mod.description}</p>
-                      <div className={styles.moduleProgressBarBg}>
-                        <div
-                          className={styles.moduleProgressBarFill}
-                          style={{ width: `${progress * 100}%` }}
-                        />
-                      </div>
-                      <div className={styles.moduleFooter}>
-                        <span className={styles.modulePercent}>
-                          {Math.round(progress * 100)}%
-                        </span>
-                        <div className={styles.continueBtn}>
-                          <ArrowRight size={20} color="#FFFFFF" />
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+          <>
+            <div className={styles.moduleGrid}>
+              <ModuleCards />
             </div>
-            <div className={styles.dotsRow}>
-              {modules.map((_, i) => (
-                <div
-                  key={i}
-                  className={`${styles.dot} ${i === carouselIndex ? styles.dotActive : ''}`}
-                />
-              ))}
+            <div className={styles.mobileCarousel}>
+              <div className={styles.carousel} ref={carouselRef} onScroll={handleCarouselScroll}>
+                <ModuleCards />
+              </div>
+              <div className={styles.dotsRow}>
+                {modules.map((_, i) => (
+                  <div key={i} className={`${styles.dot} ${i === carouselIndex ? styles.dotActive : ''}`} />
+                ))}
+              </div>
             </div>
-          </div>
+          </>
         ) : (
-          <div className={styles.emptyCard}>
-            <p className={styles.emptyText}>No modules available</p>
-          </div>
+          <div className={styles.emptyCard}><p className={styles.emptyText}>No modules available</p></div>
         )}
       </div>
-
-      <Sidebar
-        visible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-        onNavigate={handleSidebarNavigate}
-        userData={userData}
-      />
     </div>
   );
 }

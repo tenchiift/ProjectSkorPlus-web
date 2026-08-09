@@ -9,11 +9,57 @@ const MENU = [
   { icon: CheckSquare, label: 'Tasks', route: '/tasks' },
 ];
 
-export default function Sidebar({ visible, onClose, onNavigate, userData }) {
+export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const handleNav = useCallback((route) => {
     onClose();
     setTimeout(() => onNavigate(route), 200);
   }, [onClose, onNavigate]);
+
+  if (persistent) {
+    return (
+      <aside className={styles.persistent}>
+        <div className={styles.persistentInner}>
+          <div
+            className={styles.header}
+            style={{
+              background: `linear-gradient(135deg, var(--color-sidebar-header-start), var(--color-sidebar-header-end))`,
+            }}
+          >
+            <div className={styles.userInfo}>
+              {userData?.photo_url ? (
+                <img src={userData.photo_url} className={styles.avatar} alt="" />
+              ) : (
+                <div className={styles.avatarPlaceholder}>
+                  <User size={28} color="#FFFFFF" />
+                </div>
+              )}
+              <div>
+                <p className={styles.userName}>{userData?.name ?? 'Student'}</p>
+                <p className={styles.userSem}>{userData?.semester ?? 'Semester'}</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.menu}>
+            {MENU.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button key={item.route} className={styles.menuItem} onClick={() => onNavigate(item.route)}>
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className={styles.footer}>
+            <button className={styles.logoutBtn} onClick={() => onNavigate('logout')}>
+              <LogOut size={20} color="var(--color-error)" />
+              <span style={{ color: 'var(--color-error)' }}>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <div className={styles.wrapper} style={{ pointerEvents: visible ? 'auto' : 'none' }}>

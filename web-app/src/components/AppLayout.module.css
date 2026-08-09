@@ -1,0 +1,11 @@
+.desktopLayout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+.desktopContent {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
