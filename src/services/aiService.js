@@ -1,13 +1,26 @@
-import * as FileSystem from 'expo-file-system/legacy';
-
 const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY';
-
 const API_URL = 'https://api.openai.com/v1/chat/completions';
 
+async function imageUriToBase64(imageUri) {
+  if (imageUri instanceof File || imageUri instanceof Blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result;
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(imageUri);
+    });
+  }
+  const response = await fetch(imageUri);
+  const blob = await response.blob();
+  return imageUriToBase64(blob);
+}
+
 export async function solveWithDeepSeek(imageUri, paperContext) {
-  const base64 = await FileSystem.readAsStringAsync(imageUri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  const base64 = await imageUriToBase64(imageUri);
 
   let prompt;
   if (paperContext) {
@@ -52,11 +65,6 @@ Format your response nicely with line breaks between steps.`;
   });
 
   const data = await res.json();
-
-  if (data.error) {
-    throw new Error(data.error.message || 'OpenAI API error');
-  }
-
-  const text = data?.choices?.[0]?.message?.content;
-  return text || 'No response from AI. Please try again.';
+  if (data.error) throw new Error(data.error.message || 'OpenAI API error');
+  return data?.choices?.[0]?.message?.content || 'No response from AI. Please try again.';
 }
