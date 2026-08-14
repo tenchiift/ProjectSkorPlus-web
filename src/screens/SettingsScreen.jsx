@@ -5,9 +5,9 @@ import { useTheme } from '../context/ThemeContext';
 import styles from './SettingsScreen.module.css';
 
 const THEME_OPTIONS = [
-  { mode: 'light', icon: Sun, label: 'Light', color: '#F2F2F0', accent: '#7C7BF0', hint: 'Bright & clean' },
-  { mode: 'dark', icon: Moon, label: 'Dark', color: '#1A1A2E', accent: '#8B8AF5', hint: 'Easy on the eyes' },
-  { mode: 'pink', icon: Heart, label: 'Soft Pink', color: '#FFF0F5', accent: '#E8879B', hint: 'Warm & cozy' },
+  { mode: 'light', icon: Sun, label: 'Light', color: '#FFFFFF', accent: '#8E6BE2', hint: 'Bright & clean' },
+  { mode: 'dark', icon: Moon, label: 'Dark', color: '#151517', accent: '#8E6BE2', hint: 'Easy on the eyes' },
+  { mode: 'pink', icon: Heart, label: 'Soft Pink', color: '#FBF0F1', accent: '#8E6BE2', hint: 'Warm & cozy' },
 ];
 
 export default function SettingsScreen() {

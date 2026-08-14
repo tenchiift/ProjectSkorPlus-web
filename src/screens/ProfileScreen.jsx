@@ -18,6 +18,7 @@ export default function ProfileScreen() {
   const [uploading, setUploading] = useState(false);
 
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('');
   const [semester, setSemester] = useState('');
@@ -44,6 +45,7 @@ export default function ProfileScreen() {
 
       if (profile) {
         setName(profile.name ?? '');
+        setUsername(profile.username ?? '');
         setEmail(profile.email ?? '');
         setGender(profile.gender ?? '');
         setSemester(profile.semester ?? '');
@@ -101,6 +103,25 @@ export default function ProfileScreen() {
       const userId = getUserId();
       if (!userId) return;
 
+      const trimmedUsername = username.trim();
+      if (trimmedUsername && !/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
+        setSaving(false);
+        return;
+      }
+
+      if (trimmedUsername) {
+        const { data: taken } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', trimmedUsername)
+          .neq('id', userId)
+          .maybeSingle();
+        if (taken) {
+          setSaving(false);
+          return;
+        }
+      }
+
       const updateData = {
         id: userId,
         name: name.trim(),
@@ -109,6 +130,7 @@ export default function ProfileScreen() {
         semester,
         bio: bio.trim(),
       };
+      if (trimmedUsername) updateData.username = trimmedUsername;
       if (!existingProfileSetup) {
         updateData.profile_setup = true;
       }
@@ -193,6 +215,17 @@ export default function ProfileScreen() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Username</label>
+          <input
+            className={styles.input}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="e.g. ahmad123"
+            autoCapitalize="none"
           />
         </div>
 

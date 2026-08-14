@@ -16,7 +16,7 @@
 .welcomeTitle {
   font-family: var(--font-body);
   font-size: 16px;
-  color: #333;
+  color: #222222;
 }
 
 .logoContainer {
@@ -83,7 +83,7 @@
 .dividerText {
   font-family: var(--font-body);
   font-size: 14px;
-  color: #8E8E93;
+  color: #7B7B81;
   text-align: center;
   margin: 14px 0;
 }

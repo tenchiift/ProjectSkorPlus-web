@@ -33,6 +33,14 @@ const PDFViewerScreen = lazy(() => import('./screens/PDFViewerScreen'));
 const ScanSolveScreen = lazy(() => import('./screens/ScanSolveScreen'));
 const SetExamScreen = lazy(() => import('./screens/SetExamScreen'));
 const TaskScreen = lazy(() => import('./screens/TaskScreen'));
+const FriendsScreen = lazy(() => import('./screens/FriendsScreen'));
+const FriendProfileScreen = lazy(() => import('./screens/FriendProfileScreen'));
+const SubmitWorkScreen = lazy(() => import('./screens/SubmitWorkScreen'));
+const MySubmissionsScreen = lazy(() => import('./screens/MySubmissionsScreen'));
+const LecturerInboxScreen = lazy(() => import('./screens/LecturerInboxScreen'));
+const SubmissionThreadScreen = lazy(() => import('./screens/SubmissionThreadScreen'));
+const NotificationsScreen = lazy(() => import('./screens/NotificationsScreen'));
+const AiChatScreen = lazy(() => import('./screens/AiChatScreen'));
 
 export default function App() {
   return (
@@ -57,6 +65,14 @@ export default function App() {
             <Route path="/scan-solve" element={<ScanSolveScreen />} />
             <Route path="/set-exam" element={<SetExamScreen />} />
             <Route path="/tasks" element={<TaskScreen />} />
+            <Route path="/friends" element={<FriendsScreen />} />
+            <Route path="/friend/:id" element={<FriendProfileScreen />} />
+            <Route path="/submit-work" element={<SubmitWorkScreen />} />
+            <Route path="/my-submissions" element={<MySubmissionsScreen />} />
+            <Route path="/inbox" element={<LecturerInboxScreen />} />
+            <Route path="/submission/:id" element={<SubmissionThreadScreen />} />
+            <Route path="/notifications" element={<NotificationsScreen />} />
+            <Route path="/ai-chat" element={<AiChatScreen />} />
           </Route>
         </Routes>
       </Suspense>

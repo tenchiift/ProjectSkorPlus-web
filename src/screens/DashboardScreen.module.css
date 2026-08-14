@@ -110,6 +110,101 @@
   object-fit: contain;
 }
 
+.semesterCard {
+  background: var(--color-card);
+  border-radius: 30px;
+  padding: 18px 24px;
+  margin: 0 0 var(--spacing-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.semesterTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.semesterTitle {
+  font-family: var(--font-semester);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.semesterBadge {
+  font-family: var(--font-semester);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  padding: 10px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.semesterPulse {
+  font-family: var(--font-semester);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.semesterLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.semesterLabel {
+  font-family: var(--font-semester);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--color-text-secondary);
+}
+
+.semesterLabelRight {
+  font-family: var(--font-semester);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--color-text-primary);
+}
+
+.semesterBar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.semesterBarFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.semesterDateInput {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-semester);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  outline: none;
+  width: fit-content;
+}
+
 .statsRow {
   display: flex;
   gap: var(--spacing-sm);
@@ -128,10 +223,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 14px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg) 0;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.statCard:active {
+  transform: scale(0.97);
 }
 
 @media (min-width: 768px) {
@@ -148,8 +251,9 @@
 
 .statLabel {
   font-family: var(--font-body);
-  font-size: 11px;
-  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .sectionRow {
@@ -184,6 +288,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 @media (min-width: 768px) {
@@ -286,7 +391,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, var(--color-gradient-diff-start), var(--color-gradient-diff-end));
+  background: linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end));
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
@@ -294,6 +399,7 @@
   cursor: pointer;
   width: 100%;
   text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .zepCard:hover {
@@ -315,6 +421,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .zepTextWrap {
@@ -350,6 +457,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 /* Desktop: module grid */
@@ -366,10 +474,9 @@
 
   .moduleGrid .moduleCardWrapper {
     min-height: 220px;
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     flex: none;
     scroll-snap-align: none;
-    padding-right: 0;
   }
 }
 
@@ -410,6 +517,7 @@
   min-height: 200px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .moduleCardPurple {
@@ -434,6 +542,10 @@
   font-size: 24px;
   color: #ffffff;
   margin-bottom: var(--spacing-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .moduleDesc {
@@ -442,6 +554,10 @@
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: var(--spacing-md);
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .moduleProgressBarBg {
@@ -515,4 +631,24 @@
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--color-text-secondary);
+}
+
+.aiFab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 50;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }

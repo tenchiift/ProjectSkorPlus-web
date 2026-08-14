@@ -1,12 +1,21 @@
 import { useCallback } from 'react';
-import { LayoutDashboard, FileText, Scan, CheckSquare, X, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Scan, CheckSquare, Users, Send, Inbox, FolderOpen, X, User, LogOut } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
-const MENU = [
+const STUDENT_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
   { icon: FileText, label: 'Past Papers', route: '/final-exam' },
   { icon: Scan, label: 'Scan & Solve', route: '/scan-solve' },
   { icon: CheckSquare, label: 'Tasks', route: '/tasks' },
+  { icon: Users, label: 'Friends', route: '/friends' },
+  { icon: Send, label: 'Send Work', route: '/submit-work' },
+  { icon: FolderOpen, label: 'My Submissions', route: '/my-submissions' },
+];
+
+const LECTURER_MENU = [
+  { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
+  { icon: Inbox, label: 'Inbox', route: '/inbox' },
+  { icon: Users, label: 'Friends', route: '/friends' },
 ];
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
@@ -15,6 +24,8 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
     setTimeout(() => onNavigate(route), 200);
   }, [onClose, onNavigate]);
 
+  const MENU = userData?.role === 'lecturer' ? LECTURER_MENU : STUDENT_MENU;
+
   if (persistent) {
     return (
       <aside className={styles.persistent}>
@@ -22,7 +33,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
           <div
             className={styles.header}
             style={{
-              background: `linear-gradient(135deg, var(--color-sidebar-header-start), var(--color-sidebar-header-end))`,
+              background: `linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end))`,
             }}
           >
             <div className={styles.userInfo}>
@@ -71,7 +82,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         <div
           className={styles.header}
           style={{
-            background: `linear-gradient(135deg, var(--color-sidebar-header-start), var(--color-sidebar-header-end))`,
+            background: `linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end))`,
           }}
         >
           <button className={styles.closeBtn} onClick={onClose}>

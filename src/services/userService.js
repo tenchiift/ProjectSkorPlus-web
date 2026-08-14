@@ -17,6 +17,13 @@ export const getUserProfile = async (userId) => {
   return data;
 };
 
+export const setSemesterStartDate = async (userId, dateStr) => {
+  const { error } = await supabase
+    .from('profiles')
+    .upsert({ id: userId, semester_start_date: dateStr });
+  if (error) throw error;
+};
+
 export const updateUserStats = async (userId, { expGained, completed }) => {
   const { data: current } = await supabase.from('profiles').select('total_exp, completed, exercise_progress').eq('id', userId).single();
   if (current) {

@@ -8,8 +8,8 @@ const MODULE_COLORS = {
 };
 
 const ICON_BG_COLORS = {
-  purple: 'rgba(124, 123, 240, 0.13)',
-  amber: 'rgba(245, 166, 35, 0.13)',
+  purple: 'rgba(142, 107, 226, 0.13)',
+  amber: 'rgba(254, 201, 167, 0.13)',
 };
 
 export default function ModuleScreen() {

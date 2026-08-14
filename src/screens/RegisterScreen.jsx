@@ -8,6 +8,7 @@ import styles from './RegisterScreen.module.css';
 export default function RegisterScreen() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
+  const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,7 +46,7 @@ export default function RegisterScreen() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        navigate('/setup-profile', { state: { userId: data.user.id, email: data.user.email }, replace: true });
+        navigate('/setup-profile', { state: { userId: data.user.id, email: data.user.email, username: username.trim(), role }, replace: true });
       }
     } catch (err) {
       if (err.message?.includes('already registered')) {
@@ -72,6 +73,22 @@ export default function RegisterScreen() {
       <div className={styles.content}>
         <img src={registerImage} alt="Get started" className={styles.logoImage} />
         <h1 className={styles.title}>Get started with ProjectSkor+</h1>
+
+        <div className={styles.roleRow}>
+          {[
+            { key: 'student', label: 'Student' },
+            { key: 'lecturer', label: 'Lecturer' },
+          ].map((opt) => (
+            <button
+              key={opt.key}
+              type="button"
+              className={`${styles.roleOption} ${role === opt.key ? styles.roleOptionActive : ''}`}
+              onClick={() => setRole(opt.key)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
         <form onSubmit={handleRegister}>
           <div className={styles.inputGroup}>

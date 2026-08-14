@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Flame, CheckCircle2, ArrowRight, MoreHorizontal, Settings, Calendar, Brain } from 'lucide-react';
+import { ArrowRight, MoreHorizontal, Settings, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
+import { setSemesterStartDate } from '../services/userService';
 import styles from './DashboardScreen.module.css';
 
 export default function DashboardScreen() {
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+  const fabDrag = useRef(null);
+  const fabMoved = useRef(false);
+  const [fabPos, setFabPos] = useState(null);
+
+  const FAB_SIZE = 60;
 
   const [userData, setUserData] = useState(null);
   const [modules, setModules] = useState([]);
@@ -16,6 +22,8 @@ export default function DashboardScreen() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [countdown, setCountdown] = useState(null);
   const [daysLeft, setDaysLeft] = useState(null);
+  const [semesterStartDate, setSemesterStartDate] = useState(null);
+  const [savingDate, setSavingDate] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -29,7 +37,10 @@ export default function DashboardScreen() {
 
       const { data: profile } = await supabase
         .from('profiles').select('*').eq('id', user.id).single();
-      if (profile) setUserData(profile);
+      if (profile) {
+        setUserData(profile);
+        if (profile.semester_start_date) setSemesterStartDate(profile.semester_start_date);
+      }
 
       const [modulesData, progress, countdownData] = await Promise.all([
         getModules(),
@@ -63,6 +74,81 @@ export default function DashboardScreen() {
     setCarouselIndex(Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth));
   };
 
+  const getSemesterWeek = () => {
+    if (!semesterStartDate) return null;
+    const start = new Date(semesterStartDate + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.max(0, Math.floor((today - start) / (1000 * 60 * 60 * 24)));
+    const week = Math.floor(diffDays / 7) + 1;
+
+    if (week <= 14) {
+      return { phase: 'teaching', week, progress: week / 14 };
+    }
+    if (week === 15) {
+      return { phase: 'study', week: 0, progress: 1 };
+    }
+    return { phase: 'exam', week: 0, progress: 1 };
+  };
+
+  const handleDateChange = async (e) => {
+    const value = e.target.value;
+    if (!value) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setSavingDate(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const picked = new Date(value + 'T00:00:00');
+      const anchor = picked > today
+        ? value
+        : today.toLocaleDateString('en-CA');
+      await setSemesterStartDate(user.id, anchor);
+      setSemesterStartDate(anchor);
+    } catch (err) {
+      console.error('Save start date error:', err);
+    } finally {
+      setSavingDate(false);
+    }
+  };
+
+  const semester = getSemesterWeek();
+
+  const handleFabPointerDown = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    fabDrag.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      baseLeft: rect.left,
+      baseTop: rect.top,
+    };
+    fabMoved.current = false;
+    setFabPos({ left: rect.left, top: rect.top });
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleFabPointerMove = (e) => {
+    const d = fabDrag.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (!fabMoved.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) fabMoved.current = true;
+    const left = Math.max(0, Math.min(window.innerWidth - FAB_SIZE, d.baseLeft + dx));
+    const top = Math.max(0, Math.min(window.innerHeight - FAB_SIZE, d.baseTop + dy));
+    setFabPos({ left, top });
+  };
+
+  const handleFabPointerUp = () => {
+    fabDrag.current = null;
+  };
+
+  const handleFabClick = () => {
+    if (fabMoved.current) return;
+    navigate('/ai-chat');
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -71,10 +157,10 @@ export default function DashboardScreen() {
     );
   }
 
-  const stats = [
-    { icon: Zap, color: 'var(--color-exp-blue)', value: String(userData?.total_exp ?? 0), label: 'Totals Exp' },
-    { icon: Flame, color: 'var(--color-streak-orange)', value: String(userData?.days_streak ?? 0), label: 'Days Streak' },
-    { icon: CheckCircle2, color: 'var(--color-completed-red)', value: String(userData?.completed ?? 0), label: 'Completed' },
+  const actionCards = [
+    { icon: ScanLine, label: 'Scan Solve', path: '/scan-solve' },
+    { icon: Sparkles, label: 'AI Study Buddy', path: '/ai-chat' },
+    { icon: Send, label: 'Send Work', path: '/submit-work' },
   ];
 
   const ModuleCards = () => (
@@ -117,21 +203,77 @@ export default function DashboardScreen() {
             <img src="/assets/images/logo.png" className={styles.logoImage} alt="SkorPlus" />
           </div>
           <div className={styles.topBarActions}>
+            <button className={styles.iconBtn} onClick={() => navigate('/notifications')} aria-label="Notifications">
+              <Bell size={22} color="var(--color-text-primary)" />
+            </button>
             <button className={styles.iconBtn} onClick={() => navigate('/settings')} aria-label="Settings">
               <Settings size={22} color="var(--color-text-primary)" />
             </button>
           </div>
         </div>
 
+        <div className={styles.semesterCard}>
+          <div className={styles.semesterTitleRow}>
+            <span className={styles.semesterTitle}>
+              {semesterStartDate
+                ? semester.phase === 'teaching'
+                  ? `Week ${semester.week}`
+                  : semester.phase === 'study'
+                    ? 'Study Week'
+                    : semester.phase === 'exam'
+                      ? 'Exam Week'
+                      : 'Semester Break'
+                : 'Get Started'}
+            </span>
+            <span className={styles.semesterBadge}>
+              {semesterStartDate
+                ? semester.phase === 'teaching'
+                  ? `Week ${semester.week} of 14`
+                  : semester.phase === 'study'
+                    ? 'Study week'
+                    : semester.phase === 'exam'
+                      ? 'Exam week'
+                      : 'Between semesters'
+                : 'Pick your start date'}
+            </span>
+          </div>
+
+          <span className={styles.semesterPulse}>SEMESTER PULSE</span>
+
+          <div className={styles.semesterLabelRow}>
+            <span className={styles.semesterLabel}>PROGRESS</span>
+            <span className={styles.semesterLabelRight}>W14 FINAL</span>
+          </div>
+
+          <div className={styles.semesterBar}>
+            <div
+              className={styles.semesterBarFill}
+              style={{ width: `${semesterStartDate ? semester.progress * 100 : 0}%` }}
+            />
+          </div>
+
+          {!semesterStartDate && (
+            <input
+              type="date"
+              className={styles.semesterDateInput}
+              onChange={handleDateChange}
+              disabled={savingDate}
+            />
+          )}
+        </div>
+
         <div className={styles.statsRow}>
-          {stats.map((stat, i) => {
-            const Icon = stat.icon;
+          {actionCards.map((item, i) => {
+            const Icon = item.icon;
             return (
-              <div key={i} className={styles.statCard}>
-                <Icon size={28} color={stat.color} />
-                <span className={styles.statValue}>{stat.value}</span>
-                <span className={styles.statLabel}>{stat.label}</span>
-              </div>
+              <button
+                key={i}
+                className={styles.statCard}
+                onClick={() => navigate(item.path)}
+              >
+                <Icon size={28} color="var(--color-primary)" />
+                <span className={styles.statLabel}>{item.label}</span>
+              </button>
             );
           })}
         </div>
@@ -168,14 +310,14 @@ export default function DashboardScreen() {
         {modules.length > 0 && (
           <button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
             <div className={styles.zepCardContent}>
-              <div className={styles.zepIconWrap}><Brain size={28} color="#FFFFFF" /></div>
+              <div className={styles.zepIconWrap}><Brain size={26} color="#FFFFFF" /></div>
               <div className={styles.zepTextWrap}>
                 <span className={styles.zepKicker}>QUICK PRACTICE</span>
                 <span className={styles.zepTitle}>Zep Quiz</span>
                 <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
               </div>
             </div>
-            <div className={styles.zepArrow}><ArrowRight size={22} color="#FFFFFF" /></div>
+            <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
           </button>
         )}
 
@@ -204,6 +346,18 @@ export default function DashboardScreen() {
           <div className={styles.emptyCard}><p className={styles.emptyText}>No modules available</p></div>
         )}
       </div>
+
+      <button
+        className={styles.aiFab}
+        style={fabPos ? { left: fabPos.left, top: fabPos.top, bottom: 'auto', right: 'auto' } : undefined}
+        onPointerDown={handleFabPointerDown}
+        onPointerMove={handleFabPointerMove}
+        onPointerUp={handleFabPointerUp}
+        onClick={handleFabClick}
+        aria-label="AI Study Buddy"
+      >
+        <Sparkles size={26} color="var(--color-primary)" />
+      </button>
     </div>
   );
 }

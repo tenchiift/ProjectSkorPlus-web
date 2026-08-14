@@ -1,0 +1,314 @@
+.container {
+  min-height: 100vh;
+  max-width: var(--phone-width);
+  margin: 0 auto;
+  background: var(--color-background);
+  padding-top: env(safe-area-inset-top);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: none;
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.headerSpacer {
+  width: 36px;
+}
+
+.searchRow {
+  padding: 0 var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.searchBtn {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchResultCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.searchResultInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.searchResultName {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.searchResultUsername {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.addBtn {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 8px 18px;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.searchMsg {
+  font-family: var(--font-body);
+  font-size: 12px;
+  margin-top: var(--spacing-sm);
+  padding: 0 var(--spacing-xs);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: none;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.tabActive {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.scroll {
+  flex: 1;
+  padding: 0 var(--spacing-lg) var(--spacing-xxl);
+  overflow-y: auto;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl) 0;
+  gap: var(--spacing-md);
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.friendCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-exp-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.friendInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.friendName {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.friendUsername {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.sectionLabel {
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--color-text-secondary);
+  margin: var(--spacing-md) 0 var(--spacing-sm);
+  text-transform: uppercase;
+}
+
+.requestActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.acceptBtn {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.declineBtn {
+  background: none;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pendingLabel {
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.leaderCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.rank {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-primary);
+  width: 28px;
+  text-align: center;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.smallSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

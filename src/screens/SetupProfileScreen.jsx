@@ -6,28 +6,50 @@ import styles from './SetupProfileScreen.module.css';
 export default function SetupProfileScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState(location.state?.username ?? '');
+  const [username, setUsername] = useState(location.state?.username ?? '');
   const [semester, setSemester] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const userId = location.state?.userId;
   const email = location.state?.email ?? '';
+  const role = location.state?.role ?? 'student';
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!username.trim()) {
-      setError('Please enter a username');
+    const trimmedName = name.trim();
+    const trimmedUsername = username.trim();
+    if (!trimmedName) {
+      setError('Please enter your name');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
+      setError('Username must be 3-20 chars (letters, numbers, underscore)');
       return;
     }
     setLoading(true);
     setError('');
     try {
+      const { data: taken } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', trimmedUsername)
+        .neq('id', userId)
+        .maybeSingle();
+      if (taken) {
+        setError('That username is already taken');
+        setLoading(false);
+        return;
+      }
+
       const { error: upsertError } = await supabase
         .from('profiles')
         .upsert({
           id: userId,
-          name: username.trim(),
+          name: trimmedName,
+          username: trimmedUsername,
+          role,
           semester: semester.trim(),
           email,
           total_exp: 0,
@@ -62,6 +84,16 @@ export default function SetupProfileScreen() {
         </div>
 
         <form className={styles.form} onSubmit={handleSave}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Display Name</label>
+            <input
+              className={styles.input}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Ahmad"
+            />
+          </div>
+
           <div className={styles.inputGroup}>
             <label className={styles.label}>Username</label>
             <input
