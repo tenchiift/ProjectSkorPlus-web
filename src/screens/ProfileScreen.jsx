@@ -25,6 +25,7 @@ export default function ProfileScreen() {
   const [bio, setBio] = useState('');
   const [photoURL, setPhotoURL] = useState(null);
   const [existingProfileSetup, setExistingProfileSetup] = useState(false);
+  const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -71,6 +72,7 @@ export default function ProfileScreen() {
     if (!file) return;
 
     setUploading(true);
+    setProfileError('');
     try {
       const extension = file.name.split('.').pop() || 'jpg';
       const fileName = `${Date.now()}.${extension}`;
@@ -87,9 +89,11 @@ export default function ProfileScreen() {
         .getPublicUrl(`${userId}/${fileName}`);
 
       setPhotoURL(publicUrl);
-      await supabase.from('profiles').upsert({ id: userId, photo_url: publicUrl });
+      const { error: urlErr } = await supabase.from('profiles').upsert({ id: userId, photo_url: publicUrl });
+      if (urlErr) throw urlErr;
     } catch (err) {
       console.error('Upload error:', err);
+      setProfileError('Photo upload failed: ' + (err.message || 'Unknown error'));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -99,12 +103,14 @@ export default function ProfileScreen() {
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
+    setProfileError('');
     try {
       const userId = getUserId();
       if (!userId) return;
 
       const trimmedUsername = username.trim();
       if (trimmedUsername && !/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
+        setProfileError('Username must be 3-20 characters (letters, numbers, underscores only).');
         setSaving(false);
         return;
       }
@@ -117,6 +123,7 @@ export default function ProfileScreen() {
           .neq('id', userId)
           .maybeSingle();
         if (taken) {
+          setProfileError('That username is already taken.');
           setSaving(false);
           return;
         }
@@ -143,6 +150,7 @@ export default function ProfileScreen() {
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       console.error('Save profile error:', err);
+      setProfileError('Save failed: ' + (err.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
@@ -179,6 +187,11 @@ export default function ProfileScreen() {
       </div>
 
       <div className={styles.scroll}>
+        {profileError && (
+          <div className={styles.errorBanner} role="alert">
+            {profileError}
+          </div>
+        )}
         <div className={styles.avatarContainer}>
           <button className={styles.avatarWrapper} onClick={handlePickImage} type="button">
             {photoURL ? (
