@@ -69,6 +69,7 @@
 }
 
 .iconBtn {
+  position: relative;
   background: none;
   border: none;
   cursor: pointer;
@@ -77,6 +78,22 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
+}
+
+.notifBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #F04444;
+  color: #ffffff;
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
 }
 
 .iconBtn:hover {

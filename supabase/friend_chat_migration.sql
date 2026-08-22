@@ -1,4 +1,4 @@
--- Friends Chat + Presence migration
+-- Friends Chat + Presence migration (idempotent — safe to re-run)
 -- Run this in the Supabase SQL editor.
 
 -- 1. friend_conversations
@@ -35,15 +35,18 @@ create index if not exists friend_conversations_pair_idx
 alter table public.friend_conversations enable row level security;
 alter table public.friend_messages enable row level security;
 
+drop policy if exists "read own conversations" on public.friend_conversations;
 create policy "read own conversations"
   on public.friend_conversations for select
   using (auth.uid() = user1_id or auth.uid() = user2_id);
 
+drop policy if exists "insert own conversations" on public.friend_conversations;
 create policy "insert own conversations"
   on public.friend_conversations for insert
   with check (auth.uid() = user1_id or auth.uid() = user2_id);
 
 -- Participants may only update the two timestamp columns; never the participant ids.
+drop policy if exists "update own conversations" on public.friend_conversations;
 create policy "update own conversations"
   on public.friend_conversations for update
   using (auth.uid() = user1_id or auth.uid() = user2_id)
@@ -52,6 +55,7 @@ create policy "update own conversations"
     and user2_id = (select user2_id from public.friend_conversations where id = id)
   );
 
+drop policy if exists "read own messages" on public.friend_messages;
 create policy "read own messages"
   on public.friend_messages for select
   using (
@@ -62,6 +66,7 @@ create policy "read own messages"
     )
   );
 
+drop policy if exists "insert own messages" on public.friend_messages;
 create policy "insert own messages"
   on public.friend_messages for insert
   with check (
@@ -73,8 +78,18 @@ create policy "insert own messages"
     )
   );
 
--- 5. Realtime: enable for friend_messages (Dashboard -> Database -> Realtime -> toggle table).
---    Presence channels need no SQL.
+-- 5. Realtime: add tables to the publication (idempotent-safe) so postgres_changes streams.
+do $$
+begin
+  begin
+    alter publication supabase_realtime add table public.friend_messages;
+  exception when duplicate_object then null;
+  end;
+  begin
+    alter publication supabase_realtime add table public.friend_conversations;
+  exception when duplicate_object then null;
+  end;
+end $$;
 
 -- 6. Realtime: ensure replica identity is set to full so INSERT/UPDATE/DELETE stream fully.
 alter table public.friend_messages replica identity full;

@@ -4,6 +4,7 @@ import { ArrowRight, MoreHorizontal, Settings, Calendar, Brain, ScanLine, Send, 
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
 import { setWeekAnchor, setSemesterPaused } from '../services/userService';
+import { ensureDailyNotifications, subscribeToNotifications, getUnreadCount } from '../services/notificationService';
 import styles from './DashboardScreen.module.css';
 
 export default function DashboardScreen() {
@@ -28,6 +29,7 @@ export default function DashboardScreen() {
   const [pickerStep, setPickerStep] = useState('week'); // 'week' | 'day'
   const [pendingWeek, setPendingWeek] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [unreadNotif, setUnreadNotif] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -73,12 +75,37 @@ export default function DashboardScreen() {
         setCountdown(null);
         setDaysLeft(null);
       }
+
+      // Seed daily quote/reminder notifications (idempotent) and load unread count.
+      try {
+        await ensureDailyNotifications(user.id, profile, countdownData.data?.[0] ?? null);
+      } catch (e) {
+        console.error('Seed notifications error:', e);
+      }
+      try {
+        const c = await getUnreadCount(user.id);
+        setUnreadNotif(c);
+      } catch (e) {
+        console.error('Unread count error:', e);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let sub;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      sub = subscribeToNotifications(user.id, (n) => {
+        if (!n.read) setUnreadNotif((c) => c + 1);
+      });
+    })();
+    return () => { sub?.unsubscribe(); };
+  }, []);
 
   const handleCarouselScroll = () => {
     if (!carouselRef.current) return;
@@ -259,6 +286,7 @@ export default function DashboardScreen() {
           <div className={styles.topBarActions}>
             <button className={styles.iconBtn} onClick={() => navigate('/notifications')} aria-label="Notifications">
               <Bell size={22} color="var(--color-text-primary)" />
+              {unreadNotif > 0 && <span className={styles.notifBadge}>{unreadNotif > 9 ? '9+' : unreadNotif}</span>}
             </button>
             <button className={styles.iconBtn} onClick={() => navigate('/settings')} aria-label="Settings">
               <Settings size={22} color="var(--color-text-primary)" />

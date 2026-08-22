@@ -10,7 +10,9 @@ import {
   uploadChatImage,
   subscribeToMessages,
   subscribeToPresence,
+  getProfile,
 } from '../services/friendChatService';
+import { notifyEvent } from '../services/notificationService';
 import styles from './FriendChatScreen.module.css';
 
 export default function FriendChatScreen() {
@@ -20,6 +22,7 @@ export default function FriendChatScreen() {
   const { user } = useAuth();
 
   const friend = location.state?.friend;
+  const [friendProfile, setFriendProfile] = useState(location.state?.friend ?? null);
   const [conversationId, setConversationId] = useState(location.state?.conversationId ?? null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -35,16 +38,25 @@ export default function FriendChatScreen() {
     let cancelled = false;
     (async () => {
       if (!user || !friendId) return;
-      let convId = conversationId;
-      if (!convId) {
-        const conv = await getOrCreateConversation(user.id, friendId);
-        convId = conv.id;
-        setConversationId(conv.id);
+      try {
+        if (!friendProfile) {
+          const profile = await getProfile(friendId);
+          if (!cancelled && profile) setFriendProfile(profile);
+        }
+        let convId = conversationId;
+        if (!convId) {
+          const conv = await getOrCreateConversation(user.id, friendId);
+          convId = conv.id;
+          setConversationId(conv.id);
+        }
+        const msgs = await getMessages(convId);
+        if (!cancelled) setMessages(msgs);
+        await markRead(convId, user.id);
+      } catch (err) {
+        console.error('Load chat error:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      const msgs = await getMessages(convId);
-      if (!cancelled) setMessages(msgs);
-      await markRead(convId, user.id);
-      if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [user, friendId]);
@@ -56,7 +68,12 @@ export default function FriendChatScreen() {
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
-      if (user) markRead(conversationId, user.id);
+      if (user) {
+        markRead(conversationId, user.id);
+        if (msg.sender_id !== user.id) {
+          notifyEvent(user.id, 'message', 'New message 💬', (friendProfile?.name ?? 'Someone') + ' hantar mesej kat kau.');
+        }
+      }
     });
     return () => { sub.unsubscribe(); };
   }, [conversationId, user]);
@@ -76,11 +93,17 @@ export default function FriendChatScreen() {
     const text = input.trim();
     if ((!text && uploading) || !conversationId) return;
     if (!text) return;
+
+    // Optimistic append so the sender sees the message immediately.
+    const tempId = `tmp-${Date.now()}`;
+    setMessages((prev) => [...prev, { id: tempId, sender_id: user.id, body: text, image_url: null }]);
+    setInput('');
     try {
       await sendMessage(conversationId, user.id, text, null);
-      setInput('');
     } catch (err) {
       console.error('Send error:', err);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setInput(text);
     }
   };
 
@@ -107,7 +130,7 @@ export default function FriendChatScreen() {
           <ArrowLeft size={22} color="var(--color-text-primary)" />
         </button>
         <div className={styles.headerInfo}>
-          <h1 className={styles.headerTitle}>{friend?.name ?? 'Chat'}</h1>
+          <h1 className={styles.headerTitle}>{friendProfile?.name ?? friend?.name ?? 'Chat'}</h1>
           <span className={`${styles.status} ${online ? styles.statusOnline : ''}`}>
             {online ? 'online' : 'offline'}
           </span>

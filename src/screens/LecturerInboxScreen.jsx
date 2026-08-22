@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getLecturerSubmissions } from '../services/submissionService';
+import { supabase } from '../config/supabase';
+import { notifyEvent } from '../services/notificationService';
 import styles from './SubmissionListScreen.module.css';
 
 export default function LecturerInboxScreen() {
@@ -17,6 +19,22 @@ export default function LecturerInboxScreen() {
       .then(setSubmissions)
       .catch(console.error)
       .finally(() => setLoading(false));
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const sub = supabase
+      .channel(`submissions-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'submissions', filter: `lecturer_id=eq.${user.id}` },
+        (payload) => {
+          notifyEvent(user.id, 'submission', 'Kerja baru masuk 📄', 'Ada student hantar kerja. Jom check!');
+          getLecturerSubmissions(user.id).then(setSubmissions).catch(console.error);
+        }
+      )
+      .subscribe();
+    return () => { sub.unsubscribe(); };
   }, [user]);
 
   return (

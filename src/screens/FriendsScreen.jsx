@@ -13,6 +13,8 @@ import {
   getLeaderboard,
 } from '../services/friendService';
 import { getOrCreateConversation } from '../services/friendChatService';
+import { supabase } from '../config/supabase';
+import { notifyEvent } from '../services/notificationService';
 import styles from './FriendsScreen.module.css';
 
 const TABS = [
@@ -60,6 +62,22 @@ export default function FriendsScreen() {
 
   useEffect(() => {
     loadAll();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const sub = supabase
+      .channel(`friend-requests-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'friendships', filter: `addressee_id=eq.${user.id}` },
+        (payload) => {
+          notifyEvent(user.id, 'friend_request', 'Friend request 👋', 'Ada orang nak jadi kawan kau. Jom approve!');
+          loadAll();
+        }
+      )
+      .subscribe();
+    return () => { sub.unsubscribe(); };
   }, [user]);
 
   const handleSearch = async () => {

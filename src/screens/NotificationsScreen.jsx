@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, CheckCircle2, Volume2, Trash2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Trash2, Sparkles, Clock, Users, MessageCircle, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   getNotifications,
@@ -10,6 +10,14 @@ import {
   deleteAllNotifications,
 } from '../services/notificationService';
 import styles from './NotificationsScreen.module.css';
+
+const TYPE_META = {
+  quote: { icon: Sparkles, color: 'var(--color-primary)', bg: 'var(--color-soft-blue-bg)' },
+  reminder: { icon: Clock, color: '#E8B500', bg: 'var(--color-soft-cream-bg)' },
+  friend_request: { icon: Users, color: 'var(--color-exp-blue)', bg: 'var(--color-soft-blue-bg)' },
+  message: { icon: MessageCircle, color: '#2E7D4F', bg: 'var(--color-soft-green-bg)' },
+  submission: { icon: FileText, color: '#F04444', bg: 'var(--color-soft-pink-bg)' },
+};
 
 function timeAgo(dateStr) {
   const then = new Date(dateStr);
@@ -130,6 +138,8 @@ export default function NotificationsScreen() {
         ) : (
           notifications.map((n) => {
             const isSelected = selected.includes(n.id);
+            const meta = TYPE_META[n.type] ?? TYPE_META.quote;
+            const Icon = meta.icon;
             return (
               <button
                 key={n.id}
@@ -137,8 +147,8 @@ export default function NotificationsScreen() {
                 onClick={() => handleOpen(n)}
               >
                 {!n.read && <span className={styles.unreadDot} />}
-                <div className={`${styles.iconCircle} ${!n.read ? styles.iconCircleUnread : ''}`}>
-                  <Volume2 size={22} color={n.read ? 'var(--color-text-secondary)' : 'var(--color-primary)'} />
+                <div className={styles.iconCircle} style={{ background: meta.bg }}>
+                  <Icon size={22} color={meta.color} />
                 </div>
                 <div className={styles.cardBody}>
                   <div className={styles.cardTitleRow}>
@@ -147,7 +157,7 @@ export default function NotificationsScreen() {
                   </div>
                   {n.body && (
                     <div className={styles.bodyRow}>
-                      <Volume2 size={16} color="var(--color-text-secondary)" />
+                      <Icon size={16} color="var(--color-text-secondary)" />
                       <span className={styles.cardBodyText}>{n.body}</span>
                     </div>
                   )}

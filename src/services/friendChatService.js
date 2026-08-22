@@ -38,10 +38,20 @@ export const getConversations = async (userId) => {
 export const getMessages = async (conversationId) => {
   const { data, error } = await supabase
     .from('friend_messages')
-    .select('*, sender:profiles!friend_messages_sender_id_fkey(id, name, username, photo_url)')
+    .select('*')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: true });
   if (error) throw error;
+  return data;
+};
+
+export const getProfile = async (userId) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, username, photo_url')
+    .eq('id', userId)
+    .single();
+  if (error) return null;
   return data;
 };
 
@@ -114,7 +124,9 @@ export const subscribeToMessages = (conversationId, callback) => {
       { event: 'INSERT', schema: 'public', table: 'friend_messages', filter: `conversation_id=eq.${conversationId}` },
       (payload) => callback(payload.new)
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (err) console.error('Realtime subscribe error:', err);
+    });
 };
 
 export const subscribeToPresence = (callback) => {
