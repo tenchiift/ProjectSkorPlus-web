@@ -193,16 +193,85 @@
   transition: width 0.3s ease;
 }
 
-.semesterDateInput {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+.semesterHint {
   font-family: var(--font-semester);
-  font-size: 14px;
-  color: var(--color-text-primary);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.semesterWeekPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.semesterWeekDot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
   background: var(--color-surface);
-  outline: none;
-  width: fit-content;
+  font-family: var(--font-semester);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.semesterWeekDot:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.semesterControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.semesterActionBtn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-semester);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.semesterActionBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.semesterActionBtnSecondary {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-semester);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.semesterActionBtnSecondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pickerWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .statsRow {

@@ -37,6 +37,20 @@ export default function AppLayout({ children }) {
       .catch(() => {});
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase.channel('online-users');
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
+      }
+    });
+    return () => {
+      channel.untrack();
+      channel.unsubscribe();
+    };
+  }, [user]);
+
   const handleLogout = useCallback(async () => {
     setSidebarVisible(false);
     await supabase.auth.signOut();

@@ -17,10 +17,26 @@ export const getUserProfile = async (userId) => {
   return data;
 };
 
-export const setSemesterStartDate = async (userId, dateStr) => {
+export const setWeekAnchor = async (userId, { week, day }) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const { error } = await supabase
     .from('profiles')
-    .upsert({ id: userId, semester_start_date: dateStr });
+    .update({
+      week_anchor_date: today.toISOString().slice(0, 10),
+      week_anchor_week: week,
+      week_anchor_day: day,
+      semester_paused: false,
+    })
+    .eq('id', userId);
+  if (error) throw error;
+};
+
+export const setSemesterPaused = async (userId, paused) => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ semester_paused: paused })
+    .eq('id', userId);
   if (error) throw error;
 };
 

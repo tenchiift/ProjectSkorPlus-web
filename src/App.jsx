@@ -41,6 +41,8 @@ const LecturerInboxScreen = lazy(() => import('./screens/LecturerInboxScreen'));
 const SubmissionThreadScreen = lazy(() => import('./screens/SubmissionThreadScreen'));
 const NotificationsScreen = lazy(() => import('./screens/NotificationsScreen'));
 const AiChatScreen = lazy(() => import('./screens/AiChatScreen'));
+const MessagesScreen = lazy(() => import('./screens/MessagesScreen'));
+const FriendChatScreen = lazy(() => import('./screens/FriendChatScreen'));
 
 export default function App() {
   return (
@@ -73,6 +75,8 @@ export default function App() {
             <Route path="/submission/:id" element={<SubmissionThreadScreen />} />
             <Route path="/notifications" element={<NotificationsScreen />} />
             <Route path="/ai-chat" element={<AiChatScreen />} />
+            <Route path="/messages" element={<MessagesScreen />} />
+            <Route path="/chat/:friendId" element={<FriendChatScreen />} />
           </Route>
         </Routes>
       </Suspense>

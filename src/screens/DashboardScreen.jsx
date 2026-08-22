@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MoreHorizontal, Settings, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
-import { setSemesterStartDate } from '../services/userService';
+import { setWeekAnchor, setSemesterPaused } from '../services/userService';
 import styles from './DashboardScreen.module.css';
 
 export default function DashboardScreen() {
@@ -22,8 +22,12 @@ export default function DashboardScreen() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [countdown, setCountdown] = useState(null);
   const [daysLeft, setDaysLeft] = useState(null);
-  const [semesterStartDate, setSemesterStartDate] = useState(null);
-  const [savingDate, setSavingDate] = useState(false);
+  const [anchor, setAnchor] = useState(null); // { date, week, day }
+  const [paused, setPaused] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerStep, setPickerStep] = useState('week'); // 'week' | 'day'
+  const [pendingWeek, setPendingWeek] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -39,7 +43,14 @@ export default function DashboardScreen() {
         .from('profiles').select('*').eq('id', user.id).single();
       if (profile) {
         setUserData(profile);
-        if (profile.semester_start_date) setSemesterStartDate(profile.semester_start_date);
+        setPaused(profile.semester_paused ?? false);
+        if (profile.week_anchor_date && profile.week_anchor_week && profile.week_anchor_day) {
+          setAnchor({
+            date: profile.week_anchor_date,
+            week: profile.week_anchor_week,
+            day: profile.week_anchor_day,
+          });
+        }
       }
 
       const [modulesData, progress, countdownData] = await Promise.all([
@@ -74,47 +85,90 @@ export default function DashboardScreen() {
     setCarouselIndex(Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth));
   };
 
-  const getSemesterWeek = () => {
-    if (!semesterStartDate) return null;
-    const start = new Date(semesterStartDate + 'T00:00:00');
+  const computeSemester = () => {
+    if (!anchor) return null;
+    const anchorDate = new Date(anchor.date + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const diffDays = Math.max(0, Math.floor((today - start) / (1000 * 60 * 60 * 24)));
-    const week = Math.floor(diffDays / 7) + 1;
+    let elapsedDays = Math.max(0, Math.floor((today - anchorDate) / (1000 * 60 * 60 * 24)));
+    if (paused) elapsedDays = 0;
 
-    if (week <= 14) {
-      return { phase: 'teaching', week, progress: week / 14 };
-    }
-    if (week === 15) {
-      return { phase: 'study', week: 0, progress: 1 };
-    }
-    return { phase: 'exam', week: 0, progress: 1 };
+    const totalDays = (anchor.week - 1) * 7 + (anchor.day - 1) + elapsedDays;
+    const week = Math.floor(totalDays / 7) + 1;
+    const day = (totalDays % 7) + 1;
+
+    let phase = 'teaching';
+    if (week > 14) phase = week === 15 ? 'study' : 'exam';
+
+    return { phase, week: Math.min(week, 14), day, progress: Math.min(week, 14) / 14 };
   };
 
-  const handleDateChange = async (e) => {
-    const value = e.target.value;
-    if (!value) return;
+  const getUserId = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    setSavingDate(true);
+    return user?.id;
+  };
+
+  const handlePickWeek = (week) => {
+    setPendingWeek(week);
+    setPickerStep('day');
+  };
+
+  const handlePickDay = async (day) => {
+    const userId = await getUserId();
+    if (!userId || pendingWeek == null) return;
+    setSaving(true);
     try {
+      await setWeekAnchor(userId, { week: pendingWeek, day });
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const picked = new Date(value + 'T00:00:00');
-      const anchor = picked > today
-        ? value
-        : today.toLocaleDateString('en-CA');
-      await setSemesterStartDate(user.id, anchor);
-      setSemesterStartDate(anchor);
+      setAnchor({ date: today.toISOString().slice(0, 10), week: pendingWeek, day });
+      setPaused(false);
+      setPickerOpen(false);
+      setPickerStep('week');
+      setPendingWeek(null);
     } catch (err) {
-      console.error('Save start date error:', err);
+      console.error('Save week anchor error:', err);
     } finally {
-      setSavingDate(false);
+      setSaving(false);
     }
   };
 
-  const semester = getSemesterWeek();
+  const handleStartBreak = async () => {
+    const userId = await getUserId();
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await setSemesterPaused(userId, true);
+      setPaused(true);
+    } catch (err) {
+      console.error('Pause error:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEndBreak = async () => {
+    const userId = await getUserId();
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await setSemesterPaused(userId, false);
+      setPaused(false);
+    } catch (err) {
+      console.error('Resume error:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openUpdate = () => {
+    setPickerStep('week');
+    setPendingWeek(null);
+    setPickerOpen(true);
+  };
+
+  const semester = computeSemester();
 
   const handleFabPointerDown = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -159,7 +213,7 @@ export default function DashboardScreen() {
 
   const actionCards = [
     { icon: ScanLine, label: 'Scan Solve', path: '/scan-solve' },
-    { icon: Sparkles, label: 'AI Study Buddy', path: '/ai-chat' },
+    { icon: Sparkles, label: <>AI Study<br />Buddy</>, path: '/ai-chat' },
     { icon: Send, label: 'Send Work', path: '/submit-work' },
   ];
 
@@ -215,26 +269,26 @@ export default function DashboardScreen() {
         <div className={styles.semesterCard}>
           <div className={styles.semesterTitleRow}>
             <span className={styles.semesterTitle}>
-              {semesterStartDate
-                ? semester.phase === 'teaching'
-                  ? `Week ${semester.week}`
-                  : semester.phase === 'study'
-                    ? 'Study Week'
-                    : semester.phase === 'exam'
-                      ? 'Exam Week'
-                      : 'Semester Break'
-                : 'Get Started'}
+              {paused && semester
+                ? 'Mid-Sem Break'
+                : semester
+                  ? semester.phase === 'teaching'
+                    ? `Week ${semester.week} · Day ${semester.day}`
+                    : semester.phase === 'study'
+                      ? 'Study Week'
+                      : 'Exam Week'
+                  : 'Get Started'}
             </span>
             <span className={styles.semesterBadge}>
-              {semesterStartDate
-                ? semester.phase === 'teaching'
-                  ? `Week ${semester.week} of 14`
-                  : semester.phase === 'study'
-                    ? 'Study week'
-                    : semester.phase === 'exam'
-                      ? 'Exam week'
-                      : 'Between semesters'
-                : 'Pick your start date'}
+              {paused && semester
+                ? 'On break'
+                : semester
+                  ? semester.phase === 'teaching'
+                    ? `Week ${semester.week} of 14`
+                    : semester.phase === 'study'
+                      ? 'Study week'
+                      : 'Exam week'
+                  : 'Set your week'}
             </span>
           </div>
 
@@ -248,17 +302,83 @@ export default function DashboardScreen() {
           <div className={styles.semesterBar}>
             <div
               className={styles.semesterBarFill}
-              style={{ width: `${semesterStartDate ? semester.progress * 100 : 0}%` }}
+              style={{ width: `${semester ? semester.progress * 100 : 0}%` }}
             />
           </div>
 
-          {!semesterStartDate && (
-            <input
-              type="date"
-              className={styles.semesterDateInput}
-              onChange={handleDateChange}
-              disabled={savingDate}
-            />
+          {paused && semester && (
+            <div className={styles.semesterControls}>
+              <span className={styles.semesterHint}>Break active — progress is paused.</span>
+              <button className={styles.semesterActionBtn} onClick={handleEndBreak} disabled={saving}>
+                End mid-sem break
+              </button>
+            </div>
+          )}
+
+          {!paused && semester && !pickerOpen && (
+            <div className={styles.semesterControls}>
+              <button className={styles.semesterActionBtn} onClick={openUpdate}>Update week</button>
+              <button className={styles.semesterActionBtnSecondary} onClick={handleStartBreak} disabled={saving}>
+                Start mid-sem break
+              </button>
+            </div>
+          )}
+
+          {!semester && !pickerOpen && (
+            <button className={styles.semesterActionBtn} onClick={openUpdate}>
+              Set your week
+            </button>
+          )}
+
+          {pickerOpen && (
+            <div className={styles.pickerWrap}>
+              {pickerStep === 'week' ? (
+                <>
+                  <span className={styles.semesterHint}>What week are you on?</span>
+                  <div className={styles.semesterWeekPicker}>
+                    {Array.from({ length: 14 }, (_, i) => {
+                      const week = i + 1;
+                      return (
+                        <button
+                          key={week}
+                          type="button"
+                          className={styles.semesterWeekDot}
+                          onClick={() => handlePickWeek(week)}
+                        >
+                          {week}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className={styles.semesterHint}>Which day?</span>
+                  <div className={styles.semesterWeekPicker}>
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const day = i + 1;
+                      return (
+                        <button
+                          key={day}
+                          type="button"
+                          className={styles.semesterWeekDot}
+                          onClick={() => handlePickDay(day)}
+                          disabled={saving}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    className={styles.semesterActionBtnSecondary}
+                    onClick={() => { setPickerStep('week'); setPendingWeek(null); }}
+                  >
+                    Back
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </div>
 

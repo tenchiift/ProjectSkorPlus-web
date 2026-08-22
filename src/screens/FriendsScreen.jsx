@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, UserPlus, Users, Trophy, User } from 'lucide-react';
+import { ArrowLeft, Search, UserPlus, Users, Trophy, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   getUserByUsername,
@@ -12,6 +12,7 @@ import {
   getPendingRequests,
   getLeaderboard,
 } from '../services/friendService';
+import { getOrCreateConversation } from '../services/friendChatService';
 import styles from './FriendsScreen.module.css';
 
 const TABS = [
@@ -207,17 +208,28 @@ export default function FriendsScreen() {
             <div className={styles.center}><p className={styles.emptyText}>No friends yet. Search above to add one.</p></div>
           ) : (
             friends.map(({ friendshipId, friend }) => (
-              <button
-                key={friendshipId}
-                className={styles.friendCard}
-                onClick={() => navigate(`/friend/${friend.id}`, { state: { friend } })}
-              >
-                {renderAvatar(friend)}
-                <div className={styles.friendInfo}>
-                  <span className={styles.friendName}>{friend.name}</span>
-                  <span className={styles.friendUsername}>@{friend.username ?? 'unknown'}</span>
-                </div>
-              </button>
+              <div key={friendshipId} className={styles.friendCard}>
+                <button
+                  className={styles.friendCardMain}
+                  onClick={() => navigate(`/friend/${friend.id}`, { state: { friend } })}
+                >
+                  {renderAvatar(friend)}
+                  <div className={styles.friendInfo}>
+                    <span className={styles.friendName}>{friend.name}</span>
+                    <span className={styles.friendUsername}>@{friend.username ?? 'unknown'}</span>
+                  </div>
+                </button>
+                <button
+                  className={styles.chatBtn}
+                  onClick={async () => {
+                    const conv = await getOrCreateConversation(user.id, friend.id);
+                    navigate(`/chat/${friend.id}`, { state: { friend, conversationId: conv.id } });
+                  }}
+                  aria-label={`Chat with ${friend.name}`}
+                >
+                  <MessageCircle size={20} color="var(--color-primary)" />
+                </button>
+              </div>
             ))
           )
         ) : tab === 'requests' ? (

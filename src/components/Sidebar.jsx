@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { LayoutDashboard, FileText, Scan, CheckSquare, Users, Send, Inbox, FolderOpen, X, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Scan, CheckSquare, Users, Send, Inbox, FolderOpen, MessageCircle, X, User, LogOut } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 const STUDENT_MENU = [
@@ -8,6 +8,7 @@ const STUDENT_MENU = [
   { icon: Scan, label: 'Scan & Solve', route: '/scan-solve' },
   { icon: CheckSquare, label: 'Tasks', route: '/tasks' },
   { icon: Users, label: 'Friends', route: '/friends' },
+  { icon: MessageCircle, label: 'Messages', route: '/messages' },
   { icon: Send, label: 'Send Work', route: '/submit-work' },
   { icon: FolderOpen, label: 'My Submissions', route: '/my-submissions' },
 ];
@@ -16,6 +17,7 @@ const LECTURER_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
   { icon: Inbox, label: 'Inbox', route: '/inbox' },
   { icon: Users, label: 'Friends', route: '/friends' },
+  { icon: MessageCircle, label: 'Messages', route: '/messages' },
 ];
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
