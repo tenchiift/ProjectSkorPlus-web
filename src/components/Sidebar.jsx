@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, KeyRound } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 // Level naik setiap 100 EXP; `into` ialah progress dalam level semasa.
@@ -26,9 +26,8 @@ const LECTURER_MENU = [
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
 ];
 
-const ADMIN_MENU = [
-  { icon: KeyRound, label: 'Admin', route: '/admin' },
-];
+// Admin access lives in Settings, not the sidebar.
+const MENU = STUDENT_MENU;
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const handleNav = useCallback((route) => {
@@ -38,7 +37,6 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
 
   const MENU =
     userData?.role === 'lecturer' ? LECTURER_MENU
-    : userData?.role === 'admin' ? [...STUDENT_MENU, ...ADMIN_MENU]
     : STUDENT_MENU;
   const xp = xpInfo(userData?.total_exp);
   const streak = userData?.days_streak ?? 0;

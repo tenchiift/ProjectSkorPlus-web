@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Sun, Moon, Heart, Waves, TreePine, Stars, ChevronRight, X,
-  Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette,
+  Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette, ShieldCheck,
 } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -44,6 +44,7 @@ export default function SettingsScreen() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
+  const [role, setRole] = useState(null);
   const [themeModal, setThemeModal] = useState(false);
   const [langModal, setLangModal] = useState(false);
   const [personaModal, setPersonaModal] = useState(false);
@@ -64,6 +65,17 @@ export default function SettingsScreen() {
   const [passMsg, setPassMsg] = useState(null);
   const [clearBusy, setClearBusy] = useState(false);
   const [clearError, setClearError] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => setRole(data?.role ?? null))
+      .catch(() => {});
+  }, [user]);
 
   const toggleNotif = (key) => {
     const next = !notifPrefs[key];
@@ -231,6 +243,19 @@ export default function SettingsScreen() {
             <ChevronRight size={18} color="var(--color-text-secondary)" />
           </button>
         </div>
+
+        {role === 'admin' && (
+          <div className={styles.card}>
+            <button className={styles.row} onClick={() => navigate('/admin')}>
+              <ShieldCheck size={20} color="var(--color-text-secondary)" />
+              <div className={styles.rowInfo}>
+                <span className={styles.rowLabel}>Admin</span>
+                <span className={styles.rowHint}>Manage lecturer codes</span>
+              </div>
+              <ChevronRight size={18} color="var(--color-text-secondary)" />
+            </button>
+          </div>
+        )}
 
         <div className={styles.card}>
           <button className={styles.row} onClick={handleLogout}>
