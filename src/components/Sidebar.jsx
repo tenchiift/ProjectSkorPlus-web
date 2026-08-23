@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { LayoutDashboard, FileText, Scan, CheckSquare, Users, Send, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, KeyRound } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, KeyRound } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 // Level naik setiap 100 EXP; `into` ialah progress dalam level semasa.
@@ -11,11 +11,9 @@ const xpInfo = (exp) => {
 const STUDENT_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
   { icon: FileText, label: 'Past Papers', route: '/final-exam' },
-  { icon: Scan, label: 'Scan & Solve', route: '/scan-solve' },
   { icon: CheckSquare, label: 'Tasks', route: '/tasks' },
   { icon: Users, label: 'Friends', route: '/friends' },
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
-  { icon: Send, label: 'Send Work', route: '/submit-work' },
   { icon: FolderOpen, label: 'My Submissions', route: '/my-submissions' },
 ];
 
