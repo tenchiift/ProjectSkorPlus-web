@@ -1,0 +1,419 @@
+.container {
+  min-height: 100dvh;
+  background-color: var(--color-background);
+  max-width: var(--phone-width);
+  margin: 0 auto;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: none;
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.scroll {
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-xxl);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pageTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 26px;
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm) var(--spacing-sm) 0;
+}
+
+.pageSub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  padding: 0 var(--spacing-sm);
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl) 0;
+}
+
+.emptyCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+
+[data-theme="light"] .emptyCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.card {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  overflow: hidden;
+}
+
+[data-theme="light"] .card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.pdfBadge {
+  align-self: flex-start;
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+}
+
+.pdfYes {
+  color: var(--color-success);
+  background: var(--color-soft-green-badge);
+}
+
+.pdfNo {
+  color: var(--color-text-secondary);
+  background: var(--color-soft-blue-badge);
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background: var(--color-soft-blue-bg);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+@media (min-width: 768px) {
+  .modalOverlay {
+    align-items: center;
+  }
+}
+
+.modalContent {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: 24px 24px 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (min-width: 768px) {
+  .modalContent {
+    border-radius: 24px;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+}
+
+.modalTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.formBody {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputPair {
+  display: flex;
+  gap: 12px;
+}
+
+.inputPair .inputGroup {
+  flex: 1;
+}
+
+.label {
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  background: var(--color-input-bg);
+  outline: none;
+  width: 100%;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.uploadRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-md);
+}
+
+.pdfFileName {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.errorText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-error);
+}
+
+.submitBtn {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: mmSpin 0.8s linear infinite;
+}
+
+@keyframes mmSpin {
+  to { transform: rotate(360deg); }
+}
+
+.colorDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.colorPurple {
+  background: var(--color-gradient-vector-end);
+}
+
+.colorAmber {
+  background: var(--color-gradient-diff-end);
+}
+
+.orderBadge {
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-soft-blue-badge);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  flex-shrink: 0;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.colorRow {
+  display: flex;
+  gap: 8px;
+}
+
+.colorOption {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: none;
+  padding: 10px;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.colorOptionActive {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-soft-blue-bg);
+}
+
+.uploadRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-md);
+}
+
+.pdfFileName {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getSubmission, getMessages, sendMessage } from '../services/submissionService';
+import { getSubmission, getMessages, sendMessage, markSubmissionStatus } from '../services/submissionService';
 import styles from './SubmissionThreadScreen.module.css';
 
 export default function SubmissionThreadScreen() {
@@ -63,6 +63,17 @@ export default function SubmissionThreadScreen() {
   }
 
   const other = submission?.student_id === user.id ? submission?.lecturer : submission?.student;
+  const isLecturer = submission?.lecturer_id === user.id;
+
+  const handleMarkReviewed = async () => {
+    const next = submission.status === 'reviewed' ? 'submitted' : 'reviewed';
+    try {
+      await markSubmissionStatus(id, next);
+      setSubmission((s) => ({ ...s, status: next }));
+    } catch (err) {
+      console.error('Mark reviewed error:', err);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -74,6 +85,17 @@ export default function SubmissionThreadScreen() {
         <div className={styles.headerSpacer} />
       </div>
 
+      {isLecturer && (
+        <div className={styles.reviewBar}>
+          <button
+            className={`${styles.markBtn} ${submission.status === 'reviewed' ? styles.markBtnDone : ''}`}
+            onClick={handleMarkReviewed}
+          >
+            {submission.status === 'reviewed' ? '✓ Reviewed' : 'Mark as Reviewed'}
+          </button>
+        </div>
+      )}
+
       <div className={styles.scroll}>
         {submission?.message && (
           <div className={styles.initialMessage}>
@@ -82,28 +104,37 @@ export default function SubmissionThreadScreen() {
         )}
 
         {submission?.files?.length > 0 && (
-          <div className={styles.filesRow}>
+          <div className={styles.fileCards}>
             {submission.files.map((f) => (
-              f.file_type === 'image' ? (
-                <a key={f.id} href={f.file_url} target="_blank" rel="noreferrer">
-                  <img src={f.file_url} alt="" className={styles.fileImage} />
-                </a>
-              ) : (
-                <a key={f.id} href={f.file_url} target="_blank" rel="noreferrer" className={styles.filePdf}>
-                  <FileText size={20} color="var(--color-primary)" />
-                  <span>PDF</span>
-                </a>
-              )
+              <button
+                key={f.id}
+                className={styles.fileCard}
+                onClick={() => {
+                  if (f.file_type === 'pdf') {
+                    navigate('/pdf-viewer', {
+                      state: { exam: { title: f.file_name ?? 'Attachment', pdf_url: f.file_url } },
+                    });
+                  } else {
+                    window.open(f.file_url, '_blank', 'noopener');
+                  }
+                }}
+              >
+                <FileText size={18} color="var(--color-primary)" />
+                <span className={styles.fileCardName}>{f.file_name ?? 'Attachment'}</span>
+                <span className={styles.fileCardType}>{f.file_type === 'pdf' ? 'PDF' : 'Image'}</span>
+              </button>
             ))}
           </div>
         )}
 
         <div className={styles.messages}>
           {messages.map((m) => {
-            const mine = m.sender_id === user.id;
+            // Lecturer bubbles sit on the right, student bubbles on the left,
+            // no matter who is viewing the thread.
+            const fromLecturer = m.sender_id === submission?.lecturer_id;
             return (
-              <div key={m.id} className={`${styles.bubbleRow} ${mine ? styles.bubbleRowMine : ''}`}>
-                <div className={`${styles.bubble} ${mine ? styles.bubbleMine : styles.bubbleTheirs}`}>
+              <div key={m.id} className={`${styles.bubbleRow} ${fromLecturer ? styles.bubbleRowMine : ''}`}>
+                <div className={`${styles.bubble} ${fromLecturer ? styles.bubbleMine : styles.bubbleTheirs}`}>
                   <p className={styles.bubbleText}>{m.body}</p>
                 </div>
               </div>

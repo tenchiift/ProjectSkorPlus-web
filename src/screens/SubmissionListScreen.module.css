@@ -42,7 +42,7 @@
 }
 
 .scroll {
-  padding: 0 var(--spacing-lg) var(--spacing-xxl);
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-xxl);
 }
 
 .card {
@@ -54,8 +54,8 @@
   background: var(--color-surface);
   border: none;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
+  padding: 16px;
+  margin-bottom: 10px;
   cursor: pointer;
 }
 
@@ -112,4 +112,289 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.filterRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--spacing-md);
+}
+
+.filterChip {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: none;
+  padding: 6px 16px;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.filterChipActive {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-soft-blue-bg);
+}
+
+.statusBadge {
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  flex-shrink: 0;
+}
+
+.statusPending {
+  color: var(--color-priority-medium);
+  background: var(--color-soft-cream-badge);
+}
+
+.statusReviewed {
+  color: var(--color-success);
+  background: var(--color-soft-green-badge);
+}
+
+/* Lecturer groups (My Submissions) */
+.groupWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: var(--spacing-xl);
+}
+
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 var(--spacing-xs);
+}
+
+.groupAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.groupAvatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-soft-blue-bg);
+  color: var(--color-primary);
+  font-family: var(--font-heading-bold);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.groupNameCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.groupName {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.groupUsername {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.cardRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Message + status badge on one line */
+.cardBodyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.cardBodyRow .cardMessage {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Inbox student cards */
+.studentRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.countRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.countChip {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-soft-blue-bg);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+}
+
+.countChip b {
+  font-family: var(--font-body-bold);
+  color: var(--color-text-primary);
+}
+
+.countPending {
+  background: var(--color-soft-cream-badge);
+  margin-left: auto;
+}
+
+.countPending b {
+  color: var(--color-priority-medium);
+}
+
+.countReviewed {
+  background: var(--color-soft-green-badge);
+}
+
+.countReviewed b {
+  color: var(--color-success);
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* iOS-style big title + inset grouped student list (Inbox) */
+.pageTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 26px;
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm) var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-sm);
+}
+
+.studentList {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+[data-theme="light"] .studentList {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.rowSep {
+  height: 1px;
+  background: var(--color-border);
+  margin-left: 66px;
+}
+
+.studentRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.studentRow:hover {
+  background: var(--color-soft-blue-bg);
+}
+
+.rowAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.rowAvatarPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-soft-blue-bg);
+  color: var(--color-primary);
+  font-family: var(--font-heading-bold);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowNameLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowName {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowPendingBadge {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--color-error);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.rowSub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }

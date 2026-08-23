@@ -51,7 +51,7 @@ export default function MessagesScreen() {
     };
   }, []);
 
-  const otherProfile = (c) => (c.user1_id === user.id ? c.user2 : c.user1);
+  const otherProfile = (c) => (c.user1_id === user?.id ? c.user2 : c.user1);
 
   return (
     <div className={styles.container}>
@@ -80,7 +80,7 @@ export default function MessagesScreen() {
               <button
                 key={c.id}
                 className={styles.convoCard}
-                onClick={() => navigate(`/chat/${other.id}`, { state: { friend: other, conversationId: c.id } })}
+                onClick={() => other && navigate(`/chat/${other.id}`, { state: { friend: other, conversationId: c.id } })}
               >
                 <div className={styles.avatarWrap}>
                   {other?.photo_url ? (

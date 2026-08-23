@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
-const THEME_MODES = { light: true, dark: true, pink: true };
+const THEME_MODES = { light: true, dark: true, pink: true, ocean: true, forest: true, midnight: true };
 
 const ThemeContext = createContext({
   themeMode: 'light',

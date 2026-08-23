@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { notifyEvent } from '../services/notificationService';
 import Sidebar from './Sidebar';
 import styles from './AppLayout.module.css';
 
@@ -26,7 +27,7 @@ export default function AppLayout({ children }) {
     return () => document.removeEventListener('toggle-sidebar', toggle);
   }, []);
 
-  useEffect(() => {
+  const fetchProfile = useCallback(() => {
     if (!user) return;
     supabase
       .from('profiles')
@@ -36,6 +37,44 @@ export default function AppLayout({ children }) {
       .then(({ data }) => { if (data) setUserData(data); })
       .catch(() => {});
   }, [user]);
+
+  useEffect(() => {
+    fetchProfile();
+    window.addEventListener('skorplus-profile-refresh', fetchProfile);
+    return () => window.removeEventListener('skorplus-profile-refresh', fetchProfile);
+  }, [fetchProfile]);
+
+  // App-wide submission notifications: lecturers hear about new work,
+  // students hear when their work is reviewed. Lives here (not in the
+  // inbox screen) so it works on every screen.
+  useEffect(() => {
+    if (!user) return;
+    const isLecturer = userData?.role === 'lecturer';
+    const channel = supabase.channel(`submission-notify-${user.id}`);
+
+    if (isLecturer) {
+      channel.on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'submissions', filter: `lecturer_id=eq.${user.id}` },
+        () => {
+          notifyEvent(user.id, 'submission', 'Kerja baru masuk 📄', 'Ada student hantar kerja. Jom check!');
+        }
+      );
+    } else {
+      channel.on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'submissions', filter: `student_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.new?.status === 'reviewed' && payload.old?.status !== 'reviewed') {
+            notifyEvent(user.id, 'submission', 'Kerja dah direview ✅', 'Lecturer dah check kerja kamu!');
+          }
+        }
+      );
+    }
+
+    channel.subscribe();
+    return () => { channel.unsubscribe(); };
+  }, [user, userData?.role]);
 
   useEffect(() => {
     if (!user) return;

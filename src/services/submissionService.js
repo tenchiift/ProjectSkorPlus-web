@@ -11,6 +11,17 @@ export const searchLecturers = async (query) => {
   return data;
 };
 
+// All lecturers, for the pick-a-lecturer list on Send Work.
+export const getAllLecturers = async () => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, username, photo_url, semester')
+    .eq('role', 'lecturer')
+    .order('name', { ascending: true });
+  if (error) throw error;
+  return data;
+};
+
 export const createSubmission = async (studentId, lecturerId, message, files) => {
   const { data: submission, error: subErr } = await supabase
     .from('submissions')
@@ -39,6 +50,7 @@ export const createSubmission = async (studentId, lecturerId, message, files) =>
         submission_id: submission.id,
         file_url: publicUrl,
         file_type: file.type?.startsWith('image/') ? 'image' : 'pdf',
+        file_name: file.name,
       });
     }
 
@@ -54,7 +66,7 @@ export const createSubmission = async (studentId, lecturerId, message, files) =>
 export const getStudentSubmissions = async (studentId) => {
   const { data, error } = await supabase
     .from('submissions')
-    .select('*, lecturer:profiles!submissions_lecturer_id_fkey(name, username, photo_url)')
+    .select('*, lecturer:profiles!submissions_lecturer_id_fkey(name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
     .eq('student_id', studentId)
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -64,8 +76,21 @@ export const getStudentSubmissions = async (studentId) => {
 export const getLecturerSubmissions = async (lecturerId) => {
   const { data, error } = await supabase
     .from('submissions')
-    .select('*, student:profiles!submissions_student_id_fkey(name, username, photo_url)')
+    .select('*, student:profiles!submissions_student_id_fkey(name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
     .eq('lecturer_id', lecturerId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+};
+
+// All submissions between one lecturer and one student (lecturer's
+// per-student page).
+export const getStudentSubmissionsForLecturer = async (lecturerId, studentId) => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*, student:profiles!submissions_student_id_fkey(name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
+    .eq('lecturer_id', lecturerId)
+    .eq('student_id', studentId)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data;
@@ -107,4 +132,31 @@ export const sendMessage = async (submissionId, senderId, body) => {
     .single();
   if (error) throw error;
   return data;
+};
+
+// Review workflow — lecturers mark a submission reviewed from the thread.
+export const markSubmissionStatus = async (submissionId, status) => {
+  const { error } = await supabase
+    .from('submissions')
+    .update({ status })
+    .eq('id', submissionId);
+  if (error) throw error;
+};
+
+// Counts for the lecturer dashboard.
+export const getSubmissionCounts = async (lecturerId) => {
+  const { count: total, error: totalErr } = await supabase
+    .from('submissions')
+    .select('*', { count: 'exact', head: true })
+    .eq('lecturer_id', lecturerId);
+  if (totalErr) throw totalErr;
+
+  const { count: pending, error: pendingErr } = await supabase
+    .from('submissions')
+    .select('*', { count: 'exact', head: true })
+    .eq('lecturer_id', lecturerId)
+    .eq('status', 'submitted');
+  if (pendingErr) throw pendingErr;
+
+  return { total: total ?? 0, pending: pending ?? 0 };
 };

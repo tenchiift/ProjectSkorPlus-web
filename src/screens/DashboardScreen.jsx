@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, MoreHorizontal, Settings, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
+import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
-import { setWeekAnchor, setSemesterPaused } from '../services/userService';
+import { setWeekAnchor, setSemesterPaused, claimDailyStreak } from '../services/userService';
 import { ensureDailyNotifications, subscribeToNotifications, getUnreadCount } from '../services/notificationService';
+import LecturerDashboardScreen from './LecturerDashboardScreen';
 import styles from './DashboardScreen.module.css';
 
 export default function DashboardScreen() {
@@ -12,7 +13,12 @@ export default function DashboardScreen() {
   const carouselRef = useRef(null);
   const fabDrag = useRef(null);
   const fabMoved = useRef(false);
-  const [fabPos, setFabPos] = useState(null);
+  const [fabPos, setFabPos] = useState(() => {
+    try {
+      const raw = localStorage.getItem('skorplus-fab-pos');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
 
   const FAB_SIZE = 60;
 
@@ -30,6 +36,7 @@ export default function DashboardScreen() {
   const [pendingWeek, setPendingWeek] = useState(null);
   const [saving, setSaving] = useState(false);
   const [unreadNotif, setUnreadNotif] = useState(0);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -45,6 +52,7 @@ export default function DashboardScreen() {
         .from('profiles').select('*').eq('id', user.id).single();
       if (profile) {
         setUserData(profile);
+        setRole(profile.role ?? 'student');
         setPaused(profile.semester_paused ?? false);
         if (profile.week_anchor_date && profile.week_anchor_week && profile.week_anchor_day) {
           setAnchor({
@@ -54,6 +62,13 @@ export default function DashboardScreen() {
           });
         }
       }
+
+      // Daily login streak (+EXP). Needs streak_migration.sql; degrades quietly.
+      // The sidebar header shows the streak — nudge AppLayout to refresh it.
+      try {
+        const result = await claimDailyStreak(user.id);
+        if (result?.claimed) window.dispatchEvent(new CustomEvent('skorplus-profile-refresh'));
+      } catch { /* ignore */ }
 
       const [modulesData, progress, countdownData] = await Promise.all([
         getModules(),
@@ -222,6 +237,12 @@ export default function DashboardScreen() {
   };
 
   const handleFabPointerUp = () => {
+    if (fabMoved.current) {
+      setFabPos((prev) => {
+        try { localStorage.setItem('skorplus-fab-pos', JSON.stringify(prev)); } catch { /* ignore */ }
+        return prev;
+      });
+    }
     fabDrag.current = null;
   };
 
@@ -238,6 +259,11 @@ export default function DashboardScreen() {
     );
   }
 
+  // Lecturers get their own dashboard (stats, content management, submissions).
+  if (role === 'lecturer') {
+    return <LecturerDashboardScreen unreadNotif={unreadNotif} />;
+  }
+
   const actionCards = [
     { icon: ScanLine, label: 'Scan Solve', path: '/scan-solve' },
     { icon: Sparkles, label: <>AI Study<br />Buddy</>, path: '/ai-chat' },
@@ -248,7 +274,8 @@ export default function DashboardScreen() {
     <>
       {modules.map((mod) => {
         const progress = moduleProgress[mod.id]?.progress ?? 0;
-        const gradientClass = mod.color === 'amber' ? styles.moduleCardAmber : styles.moduleCardPurple;
+        // All module cards share the same purple gradient (theme-aware).
+        const gradientClass = 'bg-graph-purple';
         return (
           <button
             key={mod.id}
@@ -287,9 +314,6 @@ export default function DashboardScreen() {
             <button className={styles.iconBtn} onClick={() => navigate('/notifications')} aria-label="Notifications">
               <Bell size={22} color="var(--color-text-primary)" />
               {unreadNotif > 0 && <span className={styles.notifBadge}>{unreadNotif > 9 ? '9+' : unreadNotif}</span>}
-            </button>
-            <button className={styles.iconBtn} onClick={() => navigate('/settings')} aria-label="Settings">
-              <Settings size={22} color="var(--color-text-primary)" />
             </button>
           </div>
         </div>

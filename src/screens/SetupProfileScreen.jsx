@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import styles from './SetupProfileScreen.module.css';
@@ -14,7 +14,16 @@ export default function SetupProfileScreen() {
 
   const userId = location.state?.userId;
   const email = location.state?.email ?? '';
-  const role = location.state?.role ?? 'student';
+  // Role comes via router state normally; falls back to signup metadata
+  // when the user lands here through the email redirect.
+  const [role, setRole] = useState(location.state?.role ?? null);
+
+  useEffect(() => {
+    if (role) return;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setRole(user?.user_metadata?.role ?? 'student');
+    });
+  }, [role]);
 
   const handleSave = async (e) => {
     e.preventDefault();

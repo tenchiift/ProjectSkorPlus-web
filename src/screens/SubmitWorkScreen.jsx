@@ -1,20 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Camera, ImageIcon, FileText, X, Send } from 'lucide-react';
+import { ArrowLeft, Camera, ImageIcon, FileText, X, Send, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { searchLecturers, createSubmission } from '../services/submissionService';
+import { getAllLecturers, createSubmission } from '../services/submissionService';
 import styles from './SubmitWorkScreen.module.css';
 
 export default function SubmitWorkScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [lecturers, setLecturers] = useState([]);
+  const [loadingLecturers, setLoadingLecturers] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedLecturer, setSelectedLecturer] = useState(null);
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState([]);
-  const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const cameraRef = useRef(null);
@@ -22,23 +22,11 @@ export default function SubmitWorkScreen() {
   const pdfRef = useRef(null);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-    const t = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const data = await searchLecturers(query);
-        setResults(data);
-      } catch (err) {
-        console.error('Search lecturers error:', err);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [query]);
+    getAllLecturers()
+      .then(setLecturers)
+      .catch(console.error)
+      .finally(() => setLoadingLecturers(false));
+  }, []);
 
   const addFiles = (fileList) => {
     const arr = Array.from(fileList || []);
@@ -74,41 +62,57 @@ export default function SubmitWorkScreen() {
 
       <div className={styles.scroll}>
         <label className={styles.label}>TO LECTURER</label>
-        {selectedLecturer ? (
-          <div className={styles.selectedCard}>
-            <span className={styles.selectedName}>{selectedLecturer.name}</span>
-            <span className={styles.selectedUsername}>@{selectedLecturer.username}</span>
-            <button className={styles.clearBtn} onClick={() => setSelectedLecturer(null)}>
-              <X size={16} color="var(--color-text-secondary)" />
-            </button>
-          </div>
-        ) : (
-          <div className={styles.searchBox}>
-            <Search size={18} color="var(--color-text-secondary)" />
-            <input
-              className={styles.searchInput}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search lecturer by username"
-              autoCapitalize="none"
+        <div className={styles.dropdownWrap}>
+          <button className={styles.dropdownBtn} onClick={() => setDropdownOpen((v) => !v)}>
+            <span className={`${styles.dropdownText} ${!selectedLecturer ? styles.dropdownPlaceholder : ''}`}>
+              {selectedLecturer
+                ? `${selectedLecturer.name} (@${selectedLecturer.username})`
+                : 'Pick a lecturer'}
+            </span>
+            <ChevronDown
+              size={18}
+              color="var(--color-text-secondary)"
+              className={dropdownOpen ? styles.chevronUp : undefined}
+              style={dropdownOpen ? { transform: 'rotate(180deg)' } : undefined}
             />
-          </div>
-        )}
+          </button>
 
-        {!selectedLecturer && results.length > 0 && (
-          <div className={styles.resultList}>
-            {results.map((lecturer) => (
-              <button
-                key={lecturer.id}
-                className={styles.resultItem}
-                onClick={() => setSelectedLecturer(lecturer)}
-              >
-                <span className={styles.resultName}>{lecturer.name}</span>
-                <span className={styles.resultUsername}>@{lecturer.username}</span>
-              </button>
-            ))}
-          </div>
-        )}
+          {dropdownOpen && (
+            <>
+              <div className={styles.dropdownBackdrop} onClick={() => setDropdownOpen(false)} />
+              <div className={styles.dropdownPanel}>
+                {loadingLecturers ? (
+                  <div className={styles.lecturerLoading}><div className={styles.spinnerSmall} /></div>
+                ) : lecturers.length === 0 ? (
+                  <p className={styles.lecturerEmpty}>No lecturers available yet.</p>
+                ) : (
+                  lecturers.map((lecturer) => (
+                    <button
+                      key={lecturer.id}
+                      className={styles.resultItem}
+                      onClick={() => {
+                        setSelectedLecturer(lecturer);
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      {lecturer.photo_url ? (
+                        <img src={lecturer.photo_url} alt="" className={styles.lecturerAvatar} />
+                      ) : (
+                        <div className={styles.lecturerAvatarPlaceholder}>
+                          <span>{(lecturer?.name?.[0] || 'L').toUpperCase()}</span>
+                        </div>
+                      )}
+                      <div className={styles.lecturerInfo}>
+                        <span className={styles.resultName}>{lecturer.name}</span>
+                        <span className={styles.resultUsername}>@{lecturer.username}</span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </>
+          )}
+        </div>
 
         <label className={styles.label}>YOUR WORK</label>
         <div className={styles.fileRow}>

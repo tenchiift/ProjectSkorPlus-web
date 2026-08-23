@@ -28,6 +28,11 @@ export const notifyEvent = async (userId, type, title, body) => {
   if (error) throw error;
 };
 
+// Per-type user preferences (Settings screen toggles). Default: on.
+const notifPrefOn = (key) => {
+  try { return localStorage.getItem(`skorplus-notif-${key}`) !== 'off'; } catch { return true; }
+};
+
 export const ensureDailyNotifications = async (userId, profile, countdown) => {
   if (!userId) return;
 
@@ -52,36 +57,43 @@ export const ensureDailyNotifications = async (userId, profile, countdown) => {
 
   const { quote, tip } = pickDaily(todayStr);
 
-  const rows = [
-    { user_id: userId, type: 'quote', title: quote.title, body: quote.body },
-    { user_id: userId, type: 'reminder', title: tip.title, body: tip.body },
-  ];
-
-  // Data-driven study reminder.
-  const daysLeft = countdown?.exam_date
-    ? Math.ceil((new Date(countdown.exam_date) - new Date()) / (1000 * 60 * 60 * 24))
-    : null;
-  if (daysLeft != null && daysLeft > 0 && daysLeft <= 14) {
-    rows.push({
-      user_id: userId,
-      type: 'reminder',
-      title: `${daysLeft} hari je lagi 📅`,
-      body: `Exam "${countdown.title}" makin dekat. Sikit hari ni, menang nanti.`,
-    });
+  const rows = [];
+  if (notifPrefOn('quote')) {
+    rows.push({ user_id: userId, type: 'quote', title: quote.title, body: quote.body });
+  }
+  if (notifPrefOn('study')) {
+    rows.push({ user_id: userId, type: 'reminder', title: tip.title, body: tip.body });
   }
 
-  const week = profile?.week_anchor_week ?? null;
-  if (week != null && week > 0) {
-    rows.push({
-      user_id: userId,
-      type: 'reminder',
-      title: `Week ${week} — keep the streak 🔥`,
-      body: 'Dah separuh jalan. Jangan drop momentum sekarang, bro.',
-    });
+  if (notifPrefOn('exam')) {
+    // Data-driven study reminder.
+    const daysLeft = countdown?.exam_date
+      ? Math.ceil((new Date(countdown.exam_date) - new Date()) / (1000 * 60 * 60 * 24))
+      : null;
+    if (daysLeft != null && daysLeft > 0 && daysLeft <= 14) {
+      rows.push({
+        user_id: userId,
+        type: 'reminder',
+        title: `${daysLeft} hari je lagi 📅`,
+        body: `Exam "${countdown.title}" makin dekat. Sikit hari ni, menang nanti.`,
+      });
+    }
+
+    const week = profile?.week_anchor_week ?? null;
+    if (week != null && week > 0) {
+      rows.push({
+        user_id: userId,
+        type: 'reminder',
+        title: `Week ${week} — keep the streak 🔥`,
+        body: 'Dah separuh jalan. Jangan drop momentum sekarang, bro.',
+      });
+    }
   }
 
-  const { error } = await supabase.from('notifications').insert(rows);
-  if (error) throw error;
+  if (rows.length > 0) {
+    const { error } = await supabase.from('notifications').insert(rows);
+    if (error) throw error;
+  }
 
   try { localStorage.setItem(key, todayStr); } catch { /* ignore */ }
 };

@@ -594,7 +594,6 @@
   flex: 0 0 100%;
   scroll-snap-align: start;
   padding-right: var(--spacing-md);
-  background: none;
   border: none;
   cursor: pointer;
   text-align: left;
@@ -606,13 +605,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-.moduleCardPurple {
-  background: linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end));
-}
-
-.moduleCardAmber {
-  background: linear-gradient(135deg, var(--color-gradient-diff-start), var(--color-gradient-diff-end));
-}
+/* Module card background lives in global.css (.bg-graph-purple). */
 
 .moduleTopPill {
   width: 60px;
@@ -738,3 +731,4 @@
   user-select: none;
   -webkit-user-drag: none;
 }
+

@@ -45,3 +45,6 @@ final exams/
 
 # ZCode session data
 .zcode/
+
+# local course material PDFs
+VECTOR MODULES/

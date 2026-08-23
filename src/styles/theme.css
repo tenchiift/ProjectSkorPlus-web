@@ -1,3 +1,7 @@
+/* SkorPlus themes — light (baseline), dark, soft pink, ocean, forest, midnight.
+   Shared values stay identical across themes; each theme overrides surface,
+   text, border and accent colors. */
+
 [data-theme="light"] {
   --color-background: #FFFFFF;
   --color-surface: #FFFFFF;
@@ -12,8 +16,8 @@
   --color-input-bg: #FFFFFF;
   --color-gradient-vector-start: #997AE5;
   --color-gradient-vector-end: #8E6BE2;
-  --color-gradient-diff-start: #E8791A;
-  --color-gradient-diff-end: #C95409;
+  --color-gradient-diff-start: #F97316;
+  --color-gradient-diff-end: #C2410C;
   --color-exp-blue: #8E6BE2;
   --color-streak-orange: #E8B500;
   --color-completed-red: #F04444;
@@ -33,28 +37,130 @@
 }
 
 [data-theme="dark"] {
-  --color-background: #FFFFFF;
-  --color-surface: #FFFFFF;
-  --color-card: #FFFFFF;
-  --color-primary: #8E6BE2;
+  --color-background: #121214;
+  --color-surface: #1C1C20;
+  --color-card: #1C1C20;
+  --color-primary: #9D82E8;
   --color-secondary: #FEC9A7;
-  --color-success: #2E7D4F;
+  --color-success: #4CAF7D;
   --color-error: #F04444;
-  --color-text-primary: #222222;
-  --color-text-secondary: #7B7B81;
-  --color-border: #E0E0E0;
-  --color-input-bg: #FFFFFF;
+  --color-text-primary: #F2F2F5;
+  --color-text-secondary: #9B9BA3;
+  --color-border: #2C2C33;
+  --color-input-bg: #17171B;
   --color-gradient-vector-start: #997AE5;
   --color-gradient-vector-end: #8E6BE2;
-  --color-gradient-diff-start: #E8791A;
-  --color-gradient-diff-end: #C95409;
-  --color-exp-blue: #8E6BE2;
+  --color-gradient-diff-start: #F97316;
+  --color-gradient-diff-end: #C2410C;
+  --color-exp-blue: #9D82E8;
   --color-streak-orange: #E8B500;
   --color-completed-red: #F04444;
   --color-sidebar-header-start: #151517;
   --color-sidebar-header-end: #151517;
+  --color-soft-green-bg: #18251C;
+  --color-soft-green-badge: #203424;
+  --color-soft-blue-bg: #16202E;
+  --color-soft-blue-badge: #1C2B40;
+  --color-soft-cream-bg: #2A2118;
+  --color-soft-cream-badge: #352A1C;
+  --color-soft-pink-bg: #2A1B1E;
+  --color-soft-pink-badge: #382227;
+  --color-priority-high: #F04444;
+  --color-priority-medium: #E8B500;
+  --color-priority-low: #9AA0AA;
+}
+
+[data-theme="pink"] {
+  --color-background: #FDF6F7;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-primary: #E0698C;
+  --color-secondary: #FEC9A7;
+  --color-success: #2E7D4F;
+  --color-error: #F04444;
+  --color-text-primary: #2B1E23;
+  --color-text-secondary: #9C8189;
+  --color-border: #F2DDE2;
+  --color-input-bg: #FFFFFF;
+  --color-gradient-vector-start: #EC8FAE;
+  --color-gradient-vector-end: #DE5F87;
+  --color-gradient-diff-start: #F97316;
+  --color-gradient-diff-end: #C2410C;
+  --color-exp-blue: #E0698C;
+  --color-streak-orange: #E8B500;
+  --color-completed-red: #F04444;
+  --color-sidebar-header-start: #3B2128;
+  --color-sidebar-header-end: #3B2128;
   --color-soft-green-bg: #F1F8F2;
   --color-soft-green-badge: #E3F3E4;
+  --color-soft-blue-bg: #FDF0F3;
+  --color-soft-blue-badge: #F8DFE7;
+  --color-soft-cream-bg: #FCF6EF;
+  --color-soft-cream-badge: #FFF0D9;
+  --color-soft-pink-bg: #FBECF0;
+  --color-soft-pink-badge: #F6DCE4;
+  --color-priority-high: #F04444;
+  --color-priority-medium: #E8B500;
+  --color-priority-low: #9AA0AA;
+}
+
+[data-theme="ocean"] {
+  --color-background: #F4F8FC;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-primary: #3E7BD6;
+  --color-secondary: #BFD9F5;
+  --color-success: #2E7D4F;
+  --color-error: #F04444;
+  --color-text-primary: #1B2530;
+  --color-text-secondary: #66788C;
+  --color-border: #DCE7F2;
+  --color-input-bg: #FFFFFF;
+  --color-gradient-vector-start: #5E9AE8;
+  --color-gradient-vector-end: #3E7BD6;
+  --color-gradient-diff-start: #F97316;
+  --color-gradient-diff-end: #C2410C;
+  --color-exp-blue: #3E7BD6;
+  --color-streak-orange: #E8B500;
+  --color-completed-red: #F04444;
+  --color-sidebar-header-start: #122033;
+  --color-sidebar-header-end: #122033;
+  --color-soft-green-bg: #F1F8F2;
+  --color-soft-green-badge: #E3F3E4;
+  --color-soft-blue-bg: #EAF2FB;
+  --color-soft-blue-badge: #D7E8F9;
+  --color-soft-cream-bg: #FCF6EF;
+  --color-soft-cream-badge: #FFF0D9;
+  --color-soft-pink-bg: #FBF0F1;
+  --color-soft-pink-badge: #FEE5EA;
+  --color-priority-high: #F04444;
+  --color-priority-medium: #E8B500;
+  --color-priority-low: #9AA0AA;
+}
+
+[data-theme="forest"] {
+  --color-background: #F4FAF5;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-primary: #2F9E5F;
+  --color-secondary: #B9E5C8;
+  --color-success: #2E7D4F;
+  --color-error: #F04444;
+  --color-text-primary: #1D2A20;
+  --color-text-secondary: #6F8276;
+  --color-border: #DCEEE0;
+  --color-input-bg: #FFFFFF;
+  --color-gradient-vector-start: #4FB97C;
+  --color-gradient-vector-end: #2F9E5F;
+  --color-gradient-diff-start: #F97316;
+  --color-gradient-diff-end: #C2410C;
+  --color-exp-blue: #2F9E5F;
+  --color-streak-orange: #E8B500;
+  --color-completed-red: #F04444;
+  --color-sidebar-header-start: #10241A;
+  --color-sidebar-header-end: #10241A;
+  --color-soft-green-bg: #EBF7EE;
+  --color-soft-green-badge: #D9F0E0;
   --color-soft-blue-bg: #EFF5FC;
   --color-soft-blue-badge: #DDEFFC;
   --color-soft-cream-bg: #FCF6EF;
@@ -66,35 +172,35 @@
   --color-priority-low: #9AA0AA;
 }
 
-[data-theme="pink"] {
-  --color-background: #FFFFFF;
-  --color-surface: #FFFFFF;
-  --color-card: #FFFFFF;
-  --color-primary: #8E6BE2;
-  --color-secondary: #FEC9A7;
-  --color-success: #2E7D4F;
+[data-theme="midnight"] {
+  --color-background: #0D1220;
+  --color-surface: #161D2E;
+  --color-card: #161D2E;
+  --color-primary: #6C8CFF;
+  --color-secondary: #93A9E0;
+  --color-success: #4CAF7D;
   --color-error: #F04444;
-  --color-text-primary: #222222;
-  --color-text-secondary: #7B7B81;
-  --color-border: #E0E0E0;
-  --color-input-bg: #FFFFFF;
-  --color-gradient-vector-start: #997AE5;
-  --color-gradient-vector-end: #8E6BE2;
-  --color-gradient-diff-start: #E8791A;
-  --color-gradient-diff-end: #C95409;
-  --color-exp-blue: #8E6BE2;
+  --color-text-primary: #EDF1F8;
+  --color-text-secondary: #8A94AB;
+  --color-border: #242E45;
+  --color-input-bg: #121828;
+  --color-gradient-vector-start: #7D9BFF;
+  --color-gradient-vector-end: #5F7FE8;
+  --color-gradient-diff-start: #F97316;
+  --color-gradient-diff-end: #C2410C;
+  --color-exp-blue: #6C8CFF;
   --color-streak-orange: #E8B500;
   --color-completed-red: #F04444;
-  --color-sidebar-header-start: #151517;
-  --color-sidebar-header-end: #151517;
-  --color-soft-green-bg: #F1F8F2;
-  --color-soft-green-badge: #E3F3E4;
-  --color-soft-blue-bg: #EFF5FC;
-  --color-soft-blue-badge: #DDEFFC;
-  --color-soft-cream-bg: #FCF6EF;
-  --color-soft-cream-badge: #FFF0D9;
-  --color-soft-pink-bg: #FBF0F1;
-  --color-soft-pink-badge: #FEE5EA;
+  --color-sidebar-header-start: #0A0F1B;
+  --color-sidebar-header-end: #0A0F1B;
+  --color-soft-green-bg: #14201A;
+  --color-soft-green-badge: #1B2A22;
+  --color-soft-blue-bg: #17202F;
+  --color-soft-blue-badge: #1F2B40;
+  --color-soft-cream-bg: #241F15;
+  --color-soft-cream-badge: #2E2818;
+  --color-soft-pink-bg: #241419;
+  --color-soft-pink-badge: #2E1B22;
   --color-priority-high: #F04444;
   --color-priority-medium: #E8B500;
   --color-priority-low: #9AA0AA;

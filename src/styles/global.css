@@ -30,3 +30,15 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Module card/banner backgrounds — layered: graph-paper grid + soft glow
+   over a deep gradient. Used on dashboard module cards, All Modules cards,
+   and module banners. */
+.bg-graph-purple {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 18px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 18px),
+    radial-gradient(140% 100% at 85% 0%, rgba(255, 255, 255, 0.18), transparent 55%),
+    linear-gradient(135deg, var(--color-gradient-vector-start) 0%, #9370E4 55%, var(--color-gradient-vector-end) 100%);
+}
+

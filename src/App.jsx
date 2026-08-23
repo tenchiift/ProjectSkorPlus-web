@@ -38,15 +38,23 @@ const FriendProfileScreen = lazy(() => import('./screens/FriendProfileScreen'));
 const SubmitWorkScreen = lazy(() => import('./screens/SubmitWorkScreen'));
 const MySubmissionsScreen = lazy(() => import('./screens/MySubmissionsScreen'));
 const LecturerInboxScreen = lazy(() => import('./screens/LecturerInboxScreen'));
+const LecturerStudentScreen = lazy(() => import('./screens/LecturerStudentScreen'));
+const LecturerStudentsScreen = lazy(() => import('./screens/LecturerStudentsScreen'));
 const SubmissionThreadScreen = lazy(() => import('./screens/SubmissionThreadScreen'));
 const NotificationsScreen = lazy(() => import('./screens/NotificationsScreen'));
 const AiChatScreen = lazy(() => import('./screens/AiChatScreen'));
 const MessagesScreen = lazy(() => import('./screens/MessagesScreen'));
 const FriendChatScreen = lazy(() => import('./screens/FriendChatScreen'));
+const LecturerDashboardScreen = lazy(() => import('./screens/LecturerDashboardScreen'));
+const ManageExamsScreen = lazy(() => import('./screens/ManageExamsScreen'));
+const ManageModulesScreen = lazy(() => import('./screens/ManageModulesScreen'));
+const ManageTopicsScreen = lazy(() => import('./screens/ManageTopicsScreen'));
+const AdminScreen = lazy(() => import('./screens/AdminScreen'));
 
 export default function App() {
+  const location = useLocation();
   return (
-    <ErrorBoundary>
+    <ErrorBoundary key={location.pathname}>
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
@@ -72,6 +80,12 @@ export default function App() {
             <Route path="/submit-work" element={<SubmitWorkScreen />} />
             <Route path="/my-submissions" element={<MySubmissionsScreen />} />
             <Route path="/inbox" element={<LecturerInboxScreen />} />
+            <Route path="/student/:studentId" element={<LecturerStudentScreen />} />
+            <Route path="/students" element={<LecturerStudentsScreen />} />
+            <Route path="/manage-exams" element={<ManageExamsScreen />} />
+            <Route path="/manage-modules" element={<ManageModulesScreen />} />
+            <Route path="/manage-topics/:moduleId" element={<ManageTopicsScreen />} />
+            <Route path="/admin" element={<AdminScreen />} />
             <Route path="/submission/:id" element={<SubmissionThreadScreen />} />
             <Route path="/notifications" element={<NotificationsScreen />} />
             <Route path="/ai-chat" element={<AiChatScreen />} />

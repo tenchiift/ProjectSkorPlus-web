@@ -183,3 +183,10 @@
 .linkBold:hover {
   text-decoration: underline;
 }
+
+.hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}

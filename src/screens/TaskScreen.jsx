@@ -4,11 +4,20 @@ import { ArrowLeft, Plus, Check, Trash2 } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import styles from './TaskScreen.module.css';
 
+const PRIORITIES = [
+  { value: 'high', label: 'High', rank: 0 },
+  { value: 'medium', label: 'Med', rank: 1 },
+  { value: 'low', label: 'Low', rank: 2 },
+];
+
+const priorityRank = (p) => PRIORITIES.find((x) => x.value === p)?.rank ?? 1;
+
 export default function TaskScreen() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState('');
+  const [newPriority, setNewPriority] = useState('medium');
 
   useEffect(() => {
     fetchTasks();
@@ -39,7 +48,7 @@ export default function TaskScreen() {
       if (!user) return;
       const { data, error } = await supabase
         .from('tasks')
-        .insert({ user_id: user.id, title })
+        .insert({ user_id: user.id, title, priority: newPriority })
         .select()
         .single();
       if (error) throw error;
@@ -63,8 +72,13 @@ export default function TaskScreen() {
     await supabase.from('tasks').delete().eq('id', id);
   };
 
-  const incomplete = tasks.filter((t) => !t.completed);
+  const incomplete = tasks
+    .filter((t) => !t.completed)
+    .sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
   const complete = tasks.filter((t) => t.completed);
+
+  const priorityDotClass = (p) =>
+    p === 'high' ? styles.dotHigh : p === 'low' ? styles.dotLow : styles.dotMedium;
 
   if (loading) {
     return (
@@ -92,6 +106,17 @@ export default function TaskScreen() {
           placeholder="Add a new task..."
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
         />
+        <div className={styles.priorityPicker}>
+          {PRIORITIES.map((p) => (
+            <button
+              key={p.value}
+              className={`${styles.priorityBtn} ${newPriority === p.value ? styles.priorityBtnActive : ''}`}
+              onClick={() => setNewPriority(p.value)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
         <button className={styles.addBtn} onClick={handleAdd}>
           <Plus size={20} color="#FFFFFF" />
         </button>
@@ -110,6 +135,7 @@ export default function TaskScreen() {
                 {incomplete.map((task) => (
                   <div key={task.id} className={styles.taskRow}>
                     <button className={styles.checkbox} onClick={() => toggleTask(task)} />
+                    <span className={`${styles.priorityDot} ${priorityDotClass(task.priority)}`} />
                     <span className={styles.taskText}>{task.title}</span>
                     <button className={styles.deleteBtn} onClick={() => deleteTask(task.id)}>
                       <Trash2 size={16} color="var(--color-error)" />

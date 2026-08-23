@@ -1,33 +1,37 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, FileQuestion } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { ArrowLeft, FileText, Zap } from 'lucide-react';
+import { getTopics } from '../services/moduleService';
 import styles from './ModuleScreen.module.css';
-
-const MODULE_COLORS = {
-  purple: 'var(--color-gradient-vector-start), var(--color-gradient-vector-end)',
-  amber: 'var(--color-gradient-diff-start), var(--color-gradient-diff-end)',
-};
-
-const ICON_BG_COLORS = {
-  purple: 'rgba(142, 107, 226, 0.13)',
-  amber: 'rgba(254, 201, 167, 0.13)',
-};
 
 export default function ModuleScreen() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams();
   const moduleData = location.state?.module ?? {};
-  const gradientColors = MODULE_COLORS[moduleData.color] ?? MODULE_COLORS.purple;
-  const accentColor = moduleData.color === 'amber'
-    ? 'var(--color-gradient-diff-start)'
-    : 'var(--color-gradient-vector-start)';
-  const iconBg = ICON_BG_COLORS[moduleData.color] ?? ICON_BG_COLORS.purple;
+  const moduleId = moduleData.id ?? id;
+
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [zepCode, setZepCode] = useState('');
+
+  useEffect(() => {
+    if (!moduleId) return;
+    getTopics(moduleId)
+      .then((list) => setTopics(list.filter((t) => t.pdf_url)))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [moduleId]);
+
+  const zepReady = /^\d{7}$/.test(zepCode.trim());
+  const joinZep = () => {
+    if (!zepReady) return;
+    window.open(`https://quiz.zep.us/en/join?code=${zepCode.trim()}`, '_blank', 'noopener');
+  };
 
   return (
     <div className={styles.container}>
-      <div
-        className={styles.banner}
-        style={{ background: `linear-gradient(135deg, ${gradientColors})` }}
-      >
+      <div className={`${styles.banner} bg-graph-purple`}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <ArrowLeft size={24} color="#FFFFFF" />
         </button>
@@ -37,39 +41,54 @@ export default function ModuleScreen() {
           <h1 className={styles.bannerTitle}>{moduleData.title ?? 'Module'}</h1>
           <p className={styles.bannerDesc}>{moduleData.description ?? ''}</p>
 
-          <div className={styles.bannerStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>12</span>
-              <span className={styles.statLabel}>Lessons</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>45min</span>
-              <span className={styles.statLabel}>Est. Time</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.statItem}>
-              <span className={styles.statValue}>20</span>
-              <span className={styles.statLabel}>Problems</span>
-            </div>
+          <div className={styles.zepBannerRow}>
+            <Zap size={18} color="#FFFFFF" />
+            <input
+              className={styles.zepBannerInput}
+              value={zepCode}
+              onChange={(e) => setZepCode(e.target.value.replace(/\D/g, '').slice(0, 7))}
+              onKeyDown={(e) => e.key === 'Enter' && joinZep()}
+              placeholder="Zep quiz code"
+              inputMode="numeric"
+              autoComplete="off"
+            />
+            <button className={styles.zepBannerJoin} onClick={joinZep} disabled={!zepReady}>
+              Join
+            </button>
           </div>
         </div>
       </div>
 
       <div className={styles.content}>
-        <button
-          className={styles.itemCard}
-          onClick={() => navigate(`/question/${moduleData.id}`, { state: { module: moduleData } })}
-        >
-          <div className={styles.itemIcon} style={{ backgroundColor: iconBg }}>
-            <FileQuestion size={24} style={{ color: accentColor }} />
+        <span className={styles.sectionLabel}>NOTES</span>
+
+        {loading ? (
+          <div className={styles.center}><div className={styles.spinner} /></div>
+        ) : topics.length === 0 ? (
+          <div className={styles.emptyCard}>
+            <FileText size={28} color="var(--color-text-secondary)" />
+            <span className={styles.emptyText}>No notes yet — your lecturer will add them.</span>
           </div>
-          <div className={styles.itemInfo}>
-            <span className={styles.itemTitle}>Soalan</span>
-            <span className={styles.itemSubtitle}>Practice problems to test your skills</span>
+        ) : (
+          <div className={styles.topicList}>
+            {topics.map((topic) => (
+              <div key={topic.id} className={styles.topicRow}>
+                <span className={styles.topicTitle}>{topic.title}</span>
+                <button
+                  className={styles.pdfBtn}
+                  onClick={() =>
+                    navigate('/pdf-viewer', {
+                      state: { exam: { title: topic.title, pdf_url: topic.pdf_url } },
+                    })
+                  }
+                >
+                  <FileText size={15} color="var(--color-primary)" />
+                  <span>PDF</span>
+                </button>
+              </div>
+            ))}
           </div>
-          <ArrowRight size={20} className={styles.chevron} />
-        </button>
+        )}
       </div>
     </div>
   );

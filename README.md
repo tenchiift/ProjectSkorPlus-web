@@ -22,9 +22,16 @@ SkorPlus is a student study companion web app — track your semester progress, 
 
 ### Social & Collaboration
 - **Friends** — add friends and view their profiles/progress
-- **Send Work / Submissions** — submit your work to lecturers and track submissions
-- **Lecturer Inbox** — review student submissions (lecturer role)
+- **Send Work / Submissions** — submit your work to lecturers and track submissions (with **reviewed status** badges)
+- **Lecturer Inbox** — review student submissions, mark them reviewed
 - **Notifications** — read/receive app notifications
+
+### Lecturer & Admin
+- **Verified lecturer signup** — lecturers register with a single-use code (admin-issued)
+- **Lecturer dashboard** — students count, submissions stats, pending review, recent submissions
+- **Past Papers manager** (`/manage-exams`) — CRUD + PDF upload, students see changes instantly
+- **Modules manager** (`/manage-modules`) — CRUD modules (title, description, color, order)
+- **Admin screen** (`/admin`) — create/deactivate lecturer codes (requires `role='admin'` on your profile)
 
 ## 🛠 Tech Stack
 
@@ -77,6 +84,18 @@ Run the SQL migrations inside the **Supabase SQL editor**, one at a time (found 
 | `send_work_migration.sql` | work submissions |
 | `notifications_migration.sql` | notifications |
 | `ai_chat_migration.sql` | AI chat history |
+| `lecturer_codes_migration.sql` | lecturer verification codes + verify RPC |
+| `content_policies_migration.sql` | lecturer/admin write access for modules & exams + exams PDF bucket |
+| `streak_migration.sql` | daily streak column on profiles |
+| `tasks_priority_migration.sql` | task priorities |
+| `ai_chat_delete_policy.sql` | allow users to clear their AI history |
+| `submission_fixes.sql` | submissions storage bucket + status update policy (Mark as Reviewed) |
+
+After running `lecturer_codes_migration.sql`, promote your own account to admin:
+
+```sql
+update public.profiles set role = 'admin' where email = 'your-email@example.com';
+```
 
 ### Run locally
 

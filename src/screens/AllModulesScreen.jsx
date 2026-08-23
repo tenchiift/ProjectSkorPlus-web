@@ -5,11 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
 import styles from './AllModulesScreen.module.css';
 
-const MODULE_COLORS = {
-  purple: 'var(--color-gradient-vector-start), var(--color-gradient-vector-end)',
-  amber: 'var(--color-gradient-diff-start), var(--color-gradient-diff-end)',
-};
-
 export default function AllModulesScreen() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -63,12 +58,10 @@ export default function AllModulesScreen() {
         ) : (
           modules.map((mod) => {
             const progress = moduleProgress[mod.id]?.progress ?? 0;
-            const gradientColors = MODULE_COLORS[mod.color] ?? MODULE_COLORS.purple;
             return (
               <div
                 key={mod.id}
-                className={styles.moduleCard}
-                style={{ background: `linear-gradient(135deg, ${gradientColors})` }}
+                className={`${styles.moduleCard} bg-graph-purple`}
               >
                 <div className={styles.moduleTopPill} />
                 <h2 className={styles.moduleTitle}>{mod.title}</h2>

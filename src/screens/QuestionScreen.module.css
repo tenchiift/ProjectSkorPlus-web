@@ -182,3 +182,10 @@
   padding: var(--spacing-md) var(--spacing-xxl);
   cursor: pointer;
 }
+
+.doneExp {
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  color: var(--color-streak-orange);
+  margin-top: var(--spacing-xs);
+}

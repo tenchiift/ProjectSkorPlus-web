@@ -25,6 +25,18 @@ Rules:
 - Encourage good study habits and suggest practice when relevant.
 - If you're not sure about something, say so instead of guessing.`;
 
+// Settings-driven prompt extras (from the app's Settings screen).
+const PERSONA_PROMPTS = {
+  chill:
+    '- Persona: talk like a supportive friend — casual tone, a few emojis where natural, light Manglish/slang is welcome.',
+  formal:
+    '- Persona: act as a formal tutor — professional and structured, no slang or emojis.',
+};
+const LANGUAGE_PROMPTS = {
+  bm: '- IMPORTANT: Always reply in Bahasa Melayu, regardless of the language the student writes in.',
+  en: '- IMPORTANT: Always reply in English, regardless of the language the student writes in.',
+};
+
 export const maxDuration = 30;
 
 async function isAuthenticated(req) {
@@ -69,6 +81,11 @@ export default async function handler(req, res) {
     return;
   }
 
+  const { language, persona } = req.body || {};
+  let systemPrompt = SYSTEM_PROMPT;
+  if (PERSONA_PROMPTS[persona]) systemPrompt += `\n${PERSONA_PROMPTS[persona]}`;
+  if (LANGUAGE_PROMPTS[language]) systemPrompt += `\n${LANGUAGE_PROMPTS[language]}`;
+
   try {
     const aiRes = await fetch(OPENROUTER_URL, {
       method: 'POST',
@@ -82,7 +99,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         models: [CHAT_MODEL, ...CHAT_FALLBACK_MODELS.filter((m) => m !== CHAT_MODEL)].slice(0, 3),
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
         max_tokens: 1000,
       }),
     });

@@ -38,55 +38,145 @@
 }
 
 .header {
+  position: relative;
   padding: 60px 24px 32px;
   border-radius: 0 24px 0 0;
+  overflow: hidden;
+}
+
+/* Avatar sebagai background penuh — blur sikit supaya text jelas. */
+.headerBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(3px) saturate(1.15);
+  transform: scale(1.06);
+  z-index: 0;
+}
+
+/* Gradient tint overlay ikut tema — avatar nampak kat atas, warna dalam
+   kat bawah supaya nama & XP bar jelas. */
+.headerOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-gradient-vector-start) 50%, transparent),
+    color-mix(in srgb, var(--color-gradient-vector-end) 85%, transparent)
+  );
 }
 
 .closeBtn {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
   background: none;
   border: none;
   cursor: pointer;
   display: flex;
-  align-self: flex-end;
   padding: 4px;
-  margin-bottom: 16px;
 }
 
-.userInfo {
+.streakPill {
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #F59E0B, #EA580C);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+}
+
+.profileCenter {
+  position: relative;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
 }
 
-.avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+.avatarBig {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.9);
   object-fit: cover;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  margin-bottom: 4px;
 }
 
-.avatarPlaceholder {
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
+.avatarBigPlaceholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  margin-bottom: 4px;
 }
 
-.userName {
+.profileName {
   font-family: var(--font-heading-bold);
   font-size: 18px;
   color: #FFFFFF;
+  text-align: center;
 }
 
-.userSem {
+.profileSem {
   font-family: var(--font-body);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.75);
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.xpRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.xpLevel {
+  font-family: var(--font-body-bold);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-full);
+  padding: 3px 8px;
+  flex-shrink: 0;
+}
+
+.xpBar {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.xpFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: #FFFFFF;
+  transition: width 0.4s ease;
+}
+
+.xpCount {
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  color: #FFFFFF;
+  flex-shrink: 0;
 }
 
 .menu {
@@ -120,6 +210,21 @@
 .footer {
   padding: 0 24px 40px;
   border-top: 1px solid var(--color-border);
+}
+
+.footerBtn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 15px;
+  width: 100%;
+  color: var(--color-text-primary);
 }
 
 .logoutBtn {
@@ -170,3 +275,5 @@
 .persistent .footer {
   padding: 0 12px 24px;
 }
+
+

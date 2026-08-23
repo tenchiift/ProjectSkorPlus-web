@@ -91,7 +91,7 @@ export default function FriendChatScreen() {
 
   const handleSend = async () => {
     const text = input.trim();
-    if ((!text && uploading) || !conversationId) return;
+    if (!user || ((!text && uploading) || !conversationId)) return;
     if (!text) return;
 
     // Optimistic append so the sender sees the message immediately.
@@ -147,7 +147,7 @@ export default function FriendChatScreen() {
           </div>
         ) : (
           messages.map((m) => {
-            const mine = m.sender_id === user.id;
+            const mine = m.sender_id === user?.id;
             return (
               <div key={m.id} className={`${styles.bubbleRow} ${mine ? styles.bubbleRowMine : ''}`}>
                 <div className={`${styles.bubble} ${mine ? styles.bubbleMine : styles.bubbleTheirs}`}>

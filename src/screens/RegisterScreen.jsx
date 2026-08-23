@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../config/supabase';
+import { verifyLecturerCode } from '../services/adminService';
 import registerImage from '../assets/images/get-started.png';
 import styles from './RegisterScreen.module.css';
 
@@ -12,6 +13,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [lecturerCode, setLecturerCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,6 +33,10 @@ export default function RegisterScreen() {
       setError('Passwords do not match');
       return;
     }
+    if (role === 'lecturer' && !lecturerCode.trim()) {
+      setError('Lecturer code is required. Get it from the admin.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -38,7 +44,8 @@ export default function RegisterScreen() {
         email: email.trim(),
         password,
         options: {
-          data: { username: username.trim() },
+          // Role in metadata too — survives the email-redirect setup path.
+          data: { username: username.trim(), role },
           emailRedirectTo: window.location.origin + '/setup-profile',
         },
       });
@@ -46,6 +53,15 @@ export default function RegisterScreen() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
+        if (role === 'lecturer') {
+          // Atomically claim the single-use code for this new account.
+          const ok = await verifyLecturerCode(lecturerCode);
+          if (!ok) {
+            await supabase.auth.signOut();
+            setError('Invalid or already-used lecturer code. Please check with the admin.');
+            return;
+          }
+        }
         navigate('/setup-profile', { state: { userId: data.user.id, email: data.user.email, username: username.trim(), role }, replace: true });
       }
     } catch (err) {
@@ -91,6 +107,22 @@ export default function RegisterScreen() {
         </div>
 
         <form onSubmit={handleRegister}>
+          {role === 'lecturer' && (
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="register-lecturer-code">Lecturer Code</label>
+              <input
+                id="register-lecturer-code"
+                className={styles.input}
+                type="text"
+                value={lecturerCode}
+                onChange={(e) => setLecturerCode(e.target.value)}
+                placeholder="e.g. SKOR-ABCD1234"
+                autoCapitalize="characters"
+              />
+              <p className={styles.hint}>Required — verify you're a real lecturer.</p>
+            </div>
+          )}
+
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="register-username">Username</label>
             <input

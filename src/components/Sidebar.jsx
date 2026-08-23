@@ -1,6 +1,12 @@
 import { useCallback } from 'react';
-import { LayoutDashboard, FileText, Scan, CheckSquare, Users, Send, Inbox, FolderOpen, MessageCircle, X, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Scan, CheckSquare, Users, Send, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, KeyRound } from 'lucide-react';
 import styles from './Sidebar.module.css';
+
+// Level naik setiap 100 EXP; `into` ialah progress dalam level semasa.
+const xpInfo = (exp) => {
+  const total = exp ?? 0;
+  return { total, level: Math.floor(total / 100) + 1, into: total % 100 };
+};
 
 const STUDENT_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
@@ -16,8 +22,14 @@ const STUDENT_MENU = [
 const LECTURER_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
   { icon: Inbox, label: 'Inbox', route: '/inbox' },
+  { icon: FileText, label: 'Past Papers', route: '/manage-exams' },
+  { icon: Layers, label: 'Modules', route: '/manage-modules' },
   { icon: Users, label: 'Friends', route: '/friends' },
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
+];
+
+const ADMIN_MENU = [
+  { icon: KeyRound, label: 'Admin', route: '/admin' },
 ];
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
@@ -26,31 +38,51 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
     setTimeout(() => onNavigate(route), 200);
   }, [onClose, onNavigate]);
 
-  const MENU = userData?.role === 'lecturer' ? LECTURER_MENU : STUDENT_MENU;
+  const MENU =
+    userData?.role === 'lecturer' ? LECTURER_MENU
+    : userData?.role === 'admin' ? [...STUDENT_MENU, ...ADMIN_MENU]
+    : STUDENT_MENU;
+  const xp = xpInfo(userData?.total_exp);
+  const streak = userData?.days_streak ?? 0;
+
+  const isLecturer = userData?.role === 'lecturer';
+
+  const profileBlock = (
+    <div className={styles.profileCenter}>
+      {userData?.photo_url ? (
+        <img src={userData.photo_url} className={styles.avatarBig} alt="" />
+      ) : (
+        <div className={styles.avatarBigPlaceholder}>
+          <User size={32} color="#FFFFFF" />
+        </div>
+      )}
+      <p className={styles.profileName}>{userData?.name ?? 'Student'}</p>
+      <p className={styles.profileSem}>{userData?.semester ?? 'Semester'}</p>
+      {!isLecturer && (
+        <>
+          <span className={styles.streakPill}>
+            {streak > 0 ? `🔥 ${streak} Day Streak` : '🔥 Start Streak!'}
+          </span>
+          <div className={styles.xpRow}>
+            <span className={styles.xpLevel}>LVL {xp.level}</span>
+            <div className={styles.xpBar}>
+              <div className={styles.xpFill} style={{ width: `${xp.into}%` }} />
+            </div>
+            <span className={styles.xpCount}>{xp.total} XP</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
 
   if (persistent) {
     return (
       <aside className={styles.persistent}>
         <div className={styles.persistentInner}>
-          <div
-            className={styles.header}
-            style={{
-              background: `linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end))`,
-            }}
-          >
-            <div className={styles.userInfo}>
-              {userData?.photo_url ? (
-                <img src={userData.photo_url} className={styles.avatar} alt="" />
-              ) : (
-                <div className={styles.avatarPlaceholder}>
-                  <User size={28} color="#FFFFFF" />
-                </div>
-              )}
-              <div>
-                <p className={styles.userName}>{userData?.name ?? 'Student'}</p>
-                <p className={styles.userSem}>{userData?.semester ?? 'Semester'}</p>
-              </div>
-            </div>
+          <div className={`${styles.header} bg-graph-purple`}>
+            {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
+            <div className={styles.headerOverlay} />
+            {profileBlock}
           </div>
           <div className={styles.menu}>
             {MENU.map((item) => {
@@ -64,6 +96,10 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
             })}
           </div>
           <div className={styles.footer}>
+            <button className={styles.footerBtn} onClick={() => onNavigate('/settings')}>
+              <Settings size={20} color="var(--color-text-primary)" />
+              <span>Settings</span>
+            </button>
             <button className={styles.logoutBtn} onClick={() => onNavigate('logout')}>
               <LogOut size={20} color="var(--color-error)" />
               <span style={{ color: 'var(--color-error)' }}>Log Out</span>
@@ -81,29 +117,14 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         onClick={onClose}
       />
       <div className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ''}`}>
-        <div
-          className={styles.header}
-          style={{
-            background: `linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end))`,
-          }}
-        >
-          <button className={styles.closeBtn} onClick={onClose}>
-            <X size={22} color="#FFFFFF" />
-          </button>
-          <div className={styles.userInfo}>
-            {userData?.photo_url ? (
-              <img src={userData.photo_url} className={styles.avatar} alt="" />
-            ) : (
-              <div className={styles.avatarPlaceholder}>
-                <User size={28} color="#FFFFFF" />
-              </div>
-            )}
-            <div>
-              <p className={styles.userName}>{userData?.name ?? 'Student'}</p>
-              <p className={styles.userSem}>{userData?.semester ?? 'Semester'}</p>
-            </div>
+          <div className={`${styles.header} bg-graph-purple`}>
+            {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
+            <div className={styles.headerOverlay} />
+            <button className={styles.closeBtn} onClick={onClose}>
+              <X size={22} color="#FFFFFF" />
+            </button>
+            {profileBlock}
           </div>
-        </div>
 
         <div className={styles.menu}>
           {MENU.map((item) => {
@@ -118,6 +139,10 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         </div>
 
         <div className={styles.footer}>
+          <button className={styles.footerBtn} onClick={() => handleNav('/settings')}>
+            <Settings size={20} color="var(--color-text-primary)" />
+            <span>Settings</span>
+          </button>
           <button className={styles.logoutBtn} onClick={() => handleNav('logout')}>
             <LogOut size={20} color="var(--color-error)" />
             <span style={{ color: 'var(--color-error)' }}>Log Out</span>

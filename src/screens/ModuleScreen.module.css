@@ -147,3 +147,166 @@
   flex-shrink: 0;
   color: var(--color-text-secondary);
 }
+
+.sectionLabel {
+  display: block;
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: var(--spacing-md) 0 var(--spacing-xs);
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) 0;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: msSpin 0.8s linear infinite;
+}
+
+@keyframes msSpin {
+  to { transform: rotate(360deg); }
+}
+
+.emptyCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+
+[data-theme="light"] .emptyCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.topicList {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+[data-theme="light"] .topicList {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.topicRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.topicRow + .topicRow {
+  border-top: 1px solid var(--color-border);
+}
+
+
+
+.topicTitle {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+
+.pdfBtn {
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-primary);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+
+[data-theme="light"] .zepCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+
+
+.zepInput:focus {
+  border-color: var(--color-primary);
+}
+
+
+.zepJoin:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* Zep quiz join — lives inside the purple banner. */
+.zepBannerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--spacing-lg);
+}
+
+.zepBannerInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  letter-spacing: 3px;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.95);
+  outline: none;
+}
+
+.zepBannerInput::placeholder {
+  letter-spacing: 0;
+  font-family: var(--font-body);
+  font-weight: normal;
+  color: var(--color-text-secondary);
+}
+
+.zepBannerJoin {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  background: #FFFFFF;
+  color: var(--color-gradient-vector-end);
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.zepBannerJoin:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

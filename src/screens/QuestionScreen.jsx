@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Check, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { updateModuleProgress } from '../services/moduleService';
+import { updateUserStats } from '../services/userService';
 import { vectorQuestions } from '../data/vectorQuestions';
 import styles from './QuestionScreen.module.css';
 
@@ -25,6 +26,7 @@ export default function QuestionScreen() {
     try {
       if (user && moduleData.id) {
         await updateModuleProgress(user.id, moduleData.id, finalScore);
+        await updateUserStats(user.id, { expGained: 10, completed: 1 });
       }
     } catch (e) {
       // best-effort
@@ -70,6 +72,7 @@ export default function QuestionScreen() {
           <p className={styles.doneScore}>
             You got {correct} / {total} correct
           </p>
+          <p className={styles.doneExp}>+10 EXP earned 🔥</p>
           <button
             className={styles.doneBtn}
             onClick={() => navigate(-1)}
