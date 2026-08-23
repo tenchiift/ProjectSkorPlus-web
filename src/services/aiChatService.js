@@ -1,8 +1,5 @@
 import { supabase } from '../config/supabase';
 
-const PLACEHOLDER_REPLY =
-  "I'm your AI study buddy! 🤖\n\nRight now I'm just a placeholder — the real AI isn't connected yet. Once it's wired up, I'll be able to help you study, explain concepts, and answer your questions here.";
-
 export const createConversation = async (userId) => {
   const { data, error } = await supabase
     .from('ai_conversations')
@@ -51,8 +48,30 @@ export const updateConversationTitle = async (id, title) => {
   if (error) throw error;
 };
 
-// Placeholder — swap with a real DeepSeek/OpenAI call later.
-export const getAiReply = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 700));
-  return PLACEHOLDER_REPLY;
+const MAX_HISTORY = 20;
+
+// Calls the /api/ai-chat serverless function, which holds the AI provider
+// key server-side. `history` is [{ role: 'user' | 'assistant', content }] —
+// the AI needs the conversation so far to keep context.
+export const getAiReply = async (history) => {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+
+  const messages = (Array.isArray(history) ? history : [])
+    .filter((m) => m.role === 'user' || m.role === 'assistant')
+    .slice(-MAX_HISTORY)
+    .map(({ role, content }) => ({ role, content }));
+
+  const res = await fetch('/api/ai-chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ messages }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Failed to get an AI reply.');
+  return data.reply;
 };

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, ImageIcon, ChevronDown, Sparkles, X } from 'lucide-react';
 import { supabase } from '../config/supabase';
-import { solveWithDeepSeek } from '../services/aiService';
+import { solveQuestion } from '../services/aiService';
 import styles from './ScanSolveScreen.module.css';
 
 function resizeImage(file, maxWidth = 1024) {
@@ -84,7 +84,7 @@ export default function ScanSolveScreen() {
       const paperContext = selectedPaper
         ? `${selectedPaper.title}${selectedPaper.subject ? ` - ${selectedPaper.subject}` : ''}${selectedPaper.semester ? ` (${selectedPaper.semester})` : ''}`
         : '';
-      const aiResponse = await solveWithDeepSeek(image, paperContext || undefined);
+      const aiResponse = await solveQuestion(image, paperContext || undefined);
       setResult(aiResponse);
     } catch (err) {
       setResult('Error: ' + (err.message || 'Failed to solve. Please try again.'));

@@ -1,5 +1,4 @@
-const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY';
-const API_URL = 'https://api.openai.com/v1/chat/completions';
+import { supabase } from '../config/supabase';
 
 async function imageUriToBase64(imageUri) {
   if (imageUri instanceof File || imageUri instanceof Blob) {
@@ -19,52 +18,29 @@ async function imageUriToBase64(imageUri) {
   return imageUriToBase64(blob);
 }
 
-export async function solveWithDeepSeek(imageUri, paperContext) {
+// Calls the /api/ai-solve serverless function (vision model), which holds
+// the AI provider key server-side. `paperContext` is the selected exam
+// paper's "title - subject (semester)" — when present the AI grades the
+// student's answer strictly instead of just solving.
+export async function solveQuestion(imageUri, paperContext) {
   const base64 = await imageUriToBase64(imageUri);
 
-  let prompt;
-  if (paperContext) {
-    prompt = `Exam Paper: ${paperContext}
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
 
-You are a strict math tutor grading a student's answer. The image contains a question from this exam paper and possibly the student's handwritten answer.
-
-1. Read the question from the image
-2. Solve it step-by-step with clear explanations
-3. If the image contains a handwritten answer, label it as "Student's Answer:" and check if it is correct
-4. At the end, clearly say "✅ CORRECT" or "❌ INCORRECT" with reasoning
-5. If incorrect, show the correct solution
-
-Format your response nicely with line breaks between steps.`;
-  } else {
-    prompt = `You are a helpful math tutor.
-
-1. Read the question from the image
-2. Solve it step-by-step with clear explanations
-3. Give the final answer clearly
-
-Format your response nicely with line breaks between steps.`;
-  }
-
-  const res = await fetch(API_URL, {
+  const res = await fetch('/api/ai-solve', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'text', text: prompt },
-          { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } }
-        ]
-      }],
-      max_tokens: 2000,
-    })
+      image: base64,
+      ...(paperContext ? { paperContext } : {}),
+    }),
   });
 
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message || 'OpenAI API error');
-  return data?.choices?.[0]?.message?.content || 'No response from AI. Please try again.';
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Failed to solve. Please try again.');
+  return data.solution;
 }

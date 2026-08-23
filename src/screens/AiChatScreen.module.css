@@ -227,6 +227,34 @@
   40% { opacity: 1; }
 }
 
+.errorBar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) var(--spacing-lg) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: rgba(240, 68, 68, 0.12);
+  flex-shrink: 0;
+}
+
+.errorText {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-error);
+}
+
+.errorClose {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
 .inputBar {
   display: flex;
   align-items: center;

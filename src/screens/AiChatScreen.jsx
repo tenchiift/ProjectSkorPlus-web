@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Send, Sparkles, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   createConversation,
@@ -22,6 +22,7 @@ export default function AiChatScreen() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [waiting, setWaiting] = useState(false);
+  const [error, setError] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function AiChatScreen() {
   const handleSend = async () => {
     const text = input.trim();
     if (!text || waiting) return;
+    setError(null);
 
     let convId = activeId;
     if (!convId) {
@@ -79,11 +81,17 @@ export default function AiChatScreen() {
 
     setWaiting(true);
     try {
-      const reply = await getAiReply();
+      // `messages` here is the state before this send, so append the new
+      // user message to give the AI the full conversation context.
+      const history = [...messages, { role: 'user', content: text }].map(
+        ({ role, content }) => ({ role, content })
+      );
+      const reply = await getAiReply(history);
       await addMessage(convId, 'assistant', reply);
       setMessages((prev) => [...prev, { id: `a-${Date.now()}`, role: 'assistant', content: reply }]);
     } catch (err) {
       console.error('AI reply error:', err);
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setWaiting(false);
     }
@@ -156,6 +164,15 @@ export default function AiChatScreen() {
           )}
         </div>
       </div>
+
+      {error && (
+        <div className={styles.errorBar}>
+          <span className={styles.errorText}>{error}</span>
+          <button className={styles.errorClose} onClick={() => setError(null)} aria-label="Dismiss error">
+            <X size={16} color="var(--color-error)" />
+          </button>
+        </div>
+      )}
 
       <div className={styles.inputBar}>
         <input

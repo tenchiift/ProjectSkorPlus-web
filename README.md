@@ -56,6 +56,16 @@ const supabaseUrl = 'https://YOUR-PROJECT.supabase.co';
 const supabaseAnonKey = 'YOUR-ANON-KEY';
 ```
 
+### Configure AI (OpenRouter)
+
+The AI features (**AI Study Buddy** chat and **Scan & Solve**) run through Vercel serverless functions in [`api/`](api/) that proxy [OpenRouter](https://openrouter.ai). The API key lives only on the server — it is never shipped in the client bundle, and every request must carry a valid Supabase session.
+
+1. Create a key at [openrouter.ai/keys](https://openrouter.ai/keys)
+2. Add it to your Vercel project: **Settings → Environment Variables → `OPENROUTER_API_KEY`**
+3. Optional — override the AI models with `OPENROUTER_CHAT_MODEL` / `OPENROUTER_VISION_MODEL` (any [OpenRouter model id](https://openrouter.ai/models); default is `z-ai/glm-5.2:free` for both)
+
+See [`.env.example`](.env.example) for the full list of variables.
+
 ### Database
 
 Run the SQL migrations inside the **Supabase SQL editor**, one at a time (found in [`supabase/`](supabase/)):
@@ -73,6 +83,8 @@ Run the SQL migrations inside the **Supabase SQL editor**, one at a time (found 
 ```bash
 npm run dev
 ```
+
+> AI features work locally too — put your `OPENROUTER_API_KEY` in a `.env` file (see [`.env.example`](.env.example)) and the dev server runs the `api/` functions for you.
 
 ### Production build
 
@@ -119,5 +131,6 @@ src/
 ├── styles/         # theme.css (tokens), variables.css, global.css
 ├── config/         # Supabase client config
 └── context/        # React context (auth, theme)
+api/                # Vercel serverless functions (AI proxies)
 supabase/           # SQL migrations
 ```
