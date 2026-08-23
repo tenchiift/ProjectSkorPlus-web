@@ -1,5 +1,6 @@
 .desktopLayout {
   display: flex;
+  align-items: flex-start;
   min-height: 100vh;
   background: var(--color-background);
 }
