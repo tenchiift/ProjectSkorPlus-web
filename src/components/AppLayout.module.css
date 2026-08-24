@@ -1,7 +1,9 @@
 .desktopLayout {
   display: flex;
-  align-items: flex-start;
-  min-height: 100vh;
+  /* Fixed-height app shell: sidebar stays locked, content scrolls internally.
+     Gives every child screen a definite parent height so height:100% chains
+     (PDF viewer, chat, etc.) resolve correctly on desktop/iPad. */
+  height: 100vh;
   background: var(--color-background);
 }
 
