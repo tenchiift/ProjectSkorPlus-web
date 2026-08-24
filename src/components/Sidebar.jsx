@@ -53,6 +53,9 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         </div>
       )}
       <p className={styles.profileName}>{userData?.name ?? 'Student'}</p>
+      <span className={`${styles.rolePill} ${styles[`role_${userData?.role ?? 'student'}`] ?? ''}`}>
+        {(userData?.role ?? 'student').charAt(0).toUpperCase() + (userData?.role ?? 'student').slice(1)}
+      </span>
       <p className={styles.profileSem}>{userData?.semester ?? 'Semester'}</p>
       {!isLecturer && (
         <>

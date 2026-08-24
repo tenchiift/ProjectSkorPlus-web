@@ -131,6 +131,21 @@
   text-align: center;
 }
 
+.rolePill {
+  font-family: var(--font-body-bold);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-full);
+  padding: 3px 12px;
+}
+
+.role_admin {
+  background: linear-gradient(135deg, #F59E0B, #EA580C);
+}
+
 .profileSem {
   font-family: var(--font-body);
   font-size: 13px;

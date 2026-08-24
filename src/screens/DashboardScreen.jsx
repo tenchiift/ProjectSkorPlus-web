@@ -11,16 +11,6 @@ import styles from './DashboardScreen.module.css';
 export default function DashboardScreen() {
   const navigate = useNavigate();
   const carouselRef = useRef(null);
-  const fabDrag = useRef(null);
-  const fabMoved = useRef(false);
-  const [fabPos, setFabPos] = useState(() => {
-    try {
-      const raw = localStorage.getItem('skorplus-fab-pos');
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  });
-
-  const FAB_SIZE = 60;
 
   const [userData, setUserData] = useState(null);
   const [modules, setModules] = useState([]);
@@ -211,45 +201,6 @@ export default function DashboardScreen() {
   };
 
   const semester = computeSemester();
-
-  const handleFabPointerDown = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    fabDrag.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      baseLeft: rect.left,
-      baseTop: rect.top,
-    };
-    fabMoved.current = false;
-    setFabPos({ left: rect.left, top: rect.top });
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
-
-  const handleFabPointerMove = (e) => {
-    const d = fabDrag.current;
-    if (!d) return;
-    const dx = e.clientX - d.startX;
-    const dy = e.clientY - d.startY;
-    if (!fabMoved.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) fabMoved.current = true;
-    const left = Math.max(0, Math.min(window.innerWidth - FAB_SIZE, d.baseLeft + dx));
-    const top = Math.max(0, Math.min(window.innerHeight - FAB_SIZE, d.baseTop + dy));
-    setFabPos({ left, top });
-  };
-
-  const handleFabPointerUp = () => {
-    if (fabMoved.current) {
-      setFabPos((prev) => {
-        try { localStorage.setItem('skorplus-fab-pos', JSON.stringify(prev)); } catch { /* ignore */ }
-        return prev;
-      });
-    }
-    fabDrag.current = null;
-  };
-
-  const handleFabClick = () => {
-    if (fabMoved.current) return;
-    navigate('/ai-chat');
-  };
 
   if (loading) {
     return (
@@ -518,18 +469,6 @@ export default function DashboardScreen() {
           <div className={styles.emptyCard}><p className={styles.emptyText}>No modules available</p></div>
         )}
       </div>
-
-      <button
-        className={styles.aiFab}
-        style={fabPos ? { left: fabPos.left, top: fabPos.top, bottom: 'auto', right: 'auto' } : undefined}
-        onPointerDown={handleFabPointerDown}
-        onPointerMove={handleFabPointerMove}
-        onPointerUp={handleFabPointerUp}
-        onClick={handleFabClick}
-        aria-label="AI Study Buddy"
-      >
-        <Sparkles size={26} color="var(--color-primary)" />
-      </button>
     </div>
   );
 }

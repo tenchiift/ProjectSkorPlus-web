@@ -1,11 +1,31 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Zap, Flame, CheckCircle2, User } from 'lucide-react';
+import { supabase } from '../config/supabase';
 import styles from './FriendProfileScreen.module.css';
 
 export default function FriendProfileScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const friend = location.state?.friend;
+  const { id: friendId } = useParams();
+  // Instant paint from navigation state, then refresh with the full row
+  // (bio and other fields may be missing from the passed object).
+  const [friend, setFriend] = useState(location.state?.friend ?? null);
+
+  useEffect(() => {
+    if (!friendId) return;
+    let cancelled = false;
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', friendId)
+      .single()
+      .then(({ data }) => {
+        if (!cancelled && data) setFriend(data);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [friendId]);
 
   if (!friend) {
     return (

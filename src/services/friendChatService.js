@@ -48,11 +48,20 @@ export const getMessages = async (conversationId) => {
 export const getProfile = async (userId) => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, username, photo_url')
+    .select('id, name, username, photo_url, bio')
     .eq('id', userId)
     .single();
   if (error) return null;
   return data;
+};
+
+// Remove a conversation for both participants. Messages cascade via FK.
+export const deleteConversation = async (conversationId) => {
+  const { error } = await supabase
+    .from('friend_conversations')
+    .delete()
+    .eq('id', conversationId);
+  if (error) throw error;
 };
 
 export const sendMessage = async (conversationId, senderId, body, imageUrl) => {
@@ -80,10 +89,11 @@ export const markRead = async (conversationId, userId) => {
   if (error) throw error;
 
   const column = data.user1_id === userId ? 'last_read_at_user1' : 'last_read_at_user2';
-  await supabase
+  const { error: updErr } = await supabase
     .from('friend_conversations')
     .update({ [column]: new Date().toISOString() })
     .eq('id', conversationId);
+  if (updErr) console.error('markRead failed:', updErr);
 };
 
 export const getUnreadCounts = async (userId, conversations) => {
@@ -100,6 +110,21 @@ export const getUnreadCounts = async (userId, conversations) => {
     counts[c.id] = count ?? 0;
   }
   return counts;
+};
+
+// Latest message per conversation, for the Messages list preview.
+export const getLastMessages = async (conversationIds) => {
+  const previews = {};
+  for (const id of conversationIds) {
+    const { data } = await supabase
+      .from('friend_messages')
+      .select('body, image_url, sender_id')
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) previews[id] = data[0];
+  }
+  return previews;
 };
 
 export const uploadChatImage = async (userId, file) => {
