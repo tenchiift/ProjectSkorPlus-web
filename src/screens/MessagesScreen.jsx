@@ -104,16 +104,18 @@ export default function MessagesScreen() {
         <button className={styles.backButton} onClick={() => navigate(-1)} aria-label="Back">
           <ArrowLeft size={24} color="var(--color-text-primary)" />
         </button>
-        <button
-          className={`${styles.editBtn} ${editMode ? styles.editBtnActive : ''}`}
-          onClick={() => (editMode ? exitEditMode() : setEditMode(true))}
-        >
-          {editMode ? 'Done' : 'Edit'}
-        </button>
       </div>
 
       <div className={styles.scroll}>
-        <h1 className={styles.pageTitle}>Messages</h1>
+        <div className={styles.titleRow}>
+          <h1 className={styles.pageTitle}>Messages</h1>
+          <button
+            className={`${styles.editBtn} ${editMode ? styles.editBtnActive : ''}`}
+            onClick={() => (editMode ? exitEditMode() : setEditMode(true))}
+          >
+            {editMode ? 'Done' : 'Edit'}
+          </button>
+        </div>
 
         {editMode && selected.length > 0 && (
           <button className={styles.deleteBar} onClick={handleDelete} disabled={deleting}>

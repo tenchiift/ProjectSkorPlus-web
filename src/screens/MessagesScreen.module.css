@@ -58,6 +58,14 @@
   font-family: var(--font-heading-bold);
   font-size: 26px;
   color: var(--color-text-primary);
+  padding: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: var(--spacing-sm) var(--spacing-sm) 0;
   margin-bottom: var(--spacing-md);
 }
