@@ -131,7 +131,11 @@
   text-align: center;
 }
 
-.rolePill {
+.roleTag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
   font-family: var(--font-body-bold);
   font-size: 10px;
   letter-spacing: 1px;
@@ -139,11 +143,12 @@
   color: #FFFFFF;
   background: rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-full);
-  padding: 3px 12px;
+  padding: 4px 12px;
 }
 
-.role_admin {
-  background: linear-gradient(135deg, #F59E0B, #EA580C);
+.roleTagAdmin {
+  background: color-mix(in srgb, var(--color-primary) 80%, #FFFFFF 20%);
+  border: none;
 }
 
 .profileSem {

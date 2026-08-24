@@ -48,7 +48,7 @@ export default function MySubmissionsScreen() {
           <div className={styles.center}><p className={styles.emptyText}>No submissions yet.</p></div>
         ) : (
           groups.map((group) => (
-            <div key={group.lecturer?.id ?? 'unknown'} className={styles.groupWrap}>
+            <div key={group.lecturer?.id ?? 'unknown'} className={styles.lecturerGroup}>
               <div className={styles.groupHeader}>
                 {group.lecturer?.photo_url ? (
                   <img src={group.lecturer.photo_url} alt="" className={styles.groupAvatar} />
@@ -73,7 +73,7 @@ export default function MySubmissionsScreen() {
                 return (
                   <button
                     key={sub.id}
-                    className={styles.card}
+                    className={styles.subRow}
                     onClick={() => navigate(`/submission/${sub.id}`)}
                   >
                     <div className={styles.cardHeader}>

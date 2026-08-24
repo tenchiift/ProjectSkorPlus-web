@@ -26,8 +26,8 @@ const AI_LANG_OPTIONS = [
 ];
 
 const AI_PERSONA_OPTIONS = [
-  { value: 'chill', label: 'Chill Bro 😎', hint: 'Casual like a friend, light emojis, Manglish welcome' },
-  { value: 'formal', label: 'Formal Tutor 🎓', hint: 'Professional, straight to the point' },
+  { value: 'chill', label: 'Chill Bro', hint: 'Casual like a friend, light emojis, Manglish welcome' },
+  { value: 'formal', label: 'Formal Tutor', hint: 'Professional, straight to the point' },
 ];
 
 const NOTIF_PREFS = [

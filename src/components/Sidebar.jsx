@@ -43,6 +43,12 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
 
   const isLecturer = userData?.role === 'lecturer';
 
+  const roleTag = userData?.role ? (
+    <span className={`${styles.roleTag} ${userData.role === 'admin' ? styles.roleTagAdmin : ''}`}>
+      {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
+    </span>
+  ) : null;
+
   const profileBlock = (
     <div className={styles.profileCenter}>
       {userData?.photo_url ? (
@@ -53,9 +59,6 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         </div>
       )}
       <p className={styles.profileName}>{userData?.name ?? 'Student'}</p>
-      <span className={`${styles.rolePill} ${styles[`role_${userData?.role ?? 'student'}`] ?? ''}`}>
-        {(userData?.role ?? 'student').charAt(0).toUpperCase() + (userData?.role ?? 'student').slice(1)}
-      </span>
       <p className={styles.profileSem}>{userData?.semester ?? 'Semester'}</p>
       {!isLecturer && (
         <>
@@ -81,6 +84,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
           <div className={`${styles.header} bg-graph-purple`}>
             {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
             <div className={styles.headerOverlay} />
+            {roleTag}
             {profileBlock}
           </div>
           <div className={styles.menu}>
@@ -122,6 +126,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
             <button className={styles.closeBtn} onClick={onClose}>
               <X size={22} color="#FFFFFF" />
             </button>
+            {roleTag}
             {profileBlock}
           </div>
 
