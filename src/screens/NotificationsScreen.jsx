@@ -101,34 +101,36 @@ export default function NotificationsScreen() {
           <ChevronLeft size={22} color="var(--color-text-primary)" />
         </button>
 
-        <h1 className={styles.title}>Notifications</h1>
+        <div className={styles.headerActions}>
+          {selectMode ? (
+            <button
+              className={styles.pillBtn}
+              onClick={() => {
+                setSelectMode(false);
+                setSelected([]);
+              }}
+            >
+              Cancel
+            </button>
+          ) : (
+            <button className={styles.pillBtn} onClick={handleReadAll}>
+              <CheckCircle2 size={16} color="var(--color-primary)" />
+              <span className={styles.readAllText}>Read all</span>
+            </button>
+          )}
 
-        {selectMode ? (
           <button
-            className={styles.pillBtn}
-            onClick={() => {
-              setSelectMode(false);
-              setSelected([]);
-            }}
+            className={`${styles.pillBtn} ${selectMode ? styles.pillBtnActive : ''}`}
+            onClick={() => setSelectMode((v) => !v)}
           >
-            Cancel
+            Select
           </button>
-        ) : (
-          <button className={styles.pillBtn} onClick={handleReadAll}>
-            <CheckCircle2 size={16} color="var(--color-primary)" />
-            <span className={styles.readAllText}>Read all</span>
-          </button>
-        )}
-
-        <button
-          className={`${styles.pillBtn} ${selectMode ? styles.pillBtnActive : ''}`}
-          onClick={() => setSelectMode((v) => !v)}
-        >
-          Select
-        </button>
+        </div>
       </div>
 
       <div className={styles.scroll}>
+        <h1 className={styles.pageTitle}>Notifications</h1>
+
         {loading ? (
           <div className={styles.center}><div className={styles.spinner} /></div>
         ) : notifications.length === 0 ? (

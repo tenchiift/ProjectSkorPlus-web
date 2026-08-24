@@ -29,6 +29,7 @@ export default function FriendChatScreen() {
   const [uploading, setUploading] = useState(false);
   const [online, setOnline] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [myName, setMyName] = useState('');
 
   const cameraRef = useRef(null);
   const galleryRef = useRef(null);
@@ -43,6 +44,7 @@ export default function FriendChatScreen() {
           const profile = await getProfile(friendId);
           if (!cancelled && profile) setFriendProfile(profile);
         }
+        getProfile(user.id).then((me) => { if (!cancelled && me) setMyName(me.name ?? ''); });
         let convId = conversationId;
         if (!convId) {
           const conv = await getOrCreateConversation(user.id, friendId);
@@ -66,13 +68,22 @@ export default function FriendChatScreen() {
     const sub = subscribeToMessages(conversationId, (msg) => {
       setMessages((prev) => {
         if (prev.some((m) => m.id === msg.id)) return prev;
+        // Own insert echoed back by Realtime: swap the optimistic tmp copy
+        // for the saved row instead of appending a second bubble.
+        if (msg.sender_id === user?.id) {
+          const idx = prev.findIndex(
+            (m) => String(m.id).startsWith('tmp-') && m.body === msg.body && m.image_url === msg.image_url
+          );
+          if (idx !== -1) {
+            const next = [...prev];
+            next[idx] = msg;
+            return next;
+          }
+        }
         return [...prev, msg];
       });
-      if (user) {
+      if (user && msg.sender_id !== user.id) {
         markRead(conversationId, user.id);
-        if (msg.sender_id !== user.id) {
-          notifyEvent(user.id, 'message', 'New message 💬', (friendProfile?.name ?? 'Someone') + ' hantar mesej kat kau.');
-        }
       }
     });
     return () => { sub.unsubscribe(); };
@@ -89,6 +100,17 @@ export default function FriendChatScreen() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Notify the recipient (works even when their chat is closed).
+  const notifyRecipient = (preview) => {
+    if (!friendId) return;
+    notifyEvent(
+      friendId,
+      'message',
+      `${myName || 'New message'} hantar mesej 💬`,
+      preview
+    ).catch((err) => console.error('Notify error:', err));
+  };
+
   const handleSend = async () => {
     const text = input.trim();
     if (!user || ((!text && uploading) || !conversationId)) return;
@@ -100,6 +122,7 @@ export default function FriendChatScreen() {
     setInput('');
     try {
       await sendMessage(conversationId, user.id, text, null);
+      notifyRecipient(text.slice(0, 100));
     } catch (err) {
       console.error('Send error:', err);
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
@@ -115,6 +138,7 @@ export default function FriendChatScreen() {
     try {
       const url = await uploadChatImage(user.id, file);
       await sendMessage(conversationId, user.id, null, url);
+      notifyRecipient('📷 Photo');
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload image. Please try again.');
@@ -129,10 +153,21 @@ export default function FriendChatScreen() {
         <button className={styles.headerBtn} onClick={() => navigate(-1)} aria-label="Back">
           <ArrowLeft size={22} color="var(--color-text-primary)" />
         </button>
+        {friendProfile?.photo_url ? (
+          <img src={friendProfile.photo_url} alt="" className={styles.headerAvatar} />
+        ) : (
+          <div className={styles.headerAvatarPlaceholder}>
+            <span>{(friendProfile?.name?.[0] || 'C').toUpperCase()}</span>
+          </div>
+        )}
         <div className={styles.headerInfo}>
           <h1 className={styles.headerTitle}>{friendProfile?.name ?? friend?.name ?? 'Chat'}</h1>
+          {friendProfile?.username && (
+            <span className={styles.headerUsername}>@{friendProfile.username}</span>
+          )}
           <span className={`${styles.status} ${online ? styles.statusOnline : ''}`}>
-            {online ? 'online' : 'offline'}
+            <span className={`${styles.statusDot} ${online ? styles.statusDotOnline : ''}`} />
+            {online ? 'Online' : 'Offline'}
           </span>
         </div>
         <div className={styles.headerSpacer} />

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, Trash2 } from 'lucide-react';
 import { supabase } from '../config/supabase';
@@ -19,9 +19,6 @@ export default function SetExamScreen() {
   const [examDate, setExamDate] = useState(getInitialDate);
   const [examTime, setExamTime] = useState(getInitialTime);
   const [saving, setSaving] = useState(false);
-
-  const dateInputRef = useRef(null);
-  const timeInputRef = useRef(null);
 
   const formatDateValue = (d) => {
     const y = d.getFullYear();
@@ -110,42 +107,38 @@ export default function SetExamScreen() {
 
         <label className={styles.label}>DATE &amp; TIME</label>
 
-        <button
-          className={styles.pickerBtn}
-          onClick={() => dateInputRef.current?.showPicker()}
-          type="button"
-        >
-          <Calendar size={18} color="var(--color-primary)" />
-          <span className={styles.pickerBtnText}>
-            {examDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
-        </button>
-        <input
-          ref={dateInputRef}
-          type="date"
-          className={styles.hiddenInput}
-          value={formatDateValue(examDate)}
-          onChange={handleDateChange}
-          min={formatDateValue(defaultDate())}
-        />
+        <div className={styles.pickerWrap}>
+          <div className={styles.pickerBtn}>
+            <Calendar size={18} color="var(--color-primary)" />
+            <span className={styles.pickerBtnText}>
+              {examDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
+          <input
+            type="date"
+            className={styles.pickerInput}
+            value={formatDateValue(examDate)}
+            onChange={handleDateChange}
+            min={formatDateValue(defaultDate())}
+            aria-label="Exam date"
+          />
+        </div>
 
-        <button
-          className={styles.pickerBtn}
-          onClick={() => timeInputRef.current?.showPicker()}
-          type="button"
-        >
-          <Clock size={18} color="var(--color-primary)" />
-          <span className={styles.pickerBtnText}>
-            {examTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-        </button>
-        <input
-          ref={timeInputRef}
-          type="time"
-          className={styles.hiddenInput}
-          value={formatTimeValue(examTime)}
-          onChange={handleTimeChange}
-        />
+        <div className={styles.pickerWrap}>
+          <div className={styles.pickerBtn}>
+            <Clock size={18} color="var(--color-primary)" />
+            <span className={styles.pickerBtnText}>
+              {examTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+          <input
+            type="time"
+            className={styles.pickerInput}
+            value={formatTimeValue(examTime)}
+            onChange={handleTimeChange}
+            aria-label="Exam time"
+          />
+        </div>
 
         {existing && (
           <button

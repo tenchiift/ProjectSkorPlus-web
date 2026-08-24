@@ -56,13 +56,14 @@ export default function FinalExamScreen() {
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <ArrowLeft size={24} color="var(--color-text-primary)" />
         </button>
-        <h1 className={styles.headerTitle}>Past Papers</h1>
         <button className={styles.backButton} onClick={() => fetchExams(true)} disabled={refreshing} aria-label="Refresh">
           <RefreshCw size={20} color="var(--color-text-primary)" className={refreshing ? styles.spinIcon : ''} />
         </button>
       </div>
 
       <div className={styles.scrollContent}>
+        <h1 className={styles.pageTitle}>Past Papers</h1>
+
         {error ? (
           <div className={styles.errorState}>
             <AlertTriangle size={48} color="var(--color-error)" />
