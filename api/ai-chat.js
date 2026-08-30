@@ -62,6 +62,8 @@ export default async function handler(req, res) {
     return;
   }
 
+  console.log('Using API Key prefix:', apiKey ? apiKey.substring(0, 15) : 'none');
+
   const history = Array.isArray(req.body?.messages) ? req.body.messages : [];
   const messages = history
     .filter(
