@@ -1,6 +1,6 @@
 // Vercel serverless function — Scan & Solve vision proxy.
-// Primary: OpenRouter. Fallback: Cloudflare Workers AI (free 10k req/day).
-// API key is kept server-side; only authenticated Supabase users can call it.
+// Keeps the OpenRouter API key server-side; only authenticated
+// Supabase users can call it.
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ujcgwezmroashxemfyqc.supabase.co';
 const SUPABASE_ANON_KEY =
@@ -10,8 +10,6 @@ const SUPABASE_ANON_KEY =
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const VISION_MODEL = process.env.OPENROUTER_VISION_MODEL || 'google/gemma-4-31b-it:free';
 const VISION_FALLBACK_MODELS = ['google/gemini-2.5-flash', 'openai/gpt-4o-mini'];
-
-const CF_VISION_MODEL = '@cf/meta/llama-3.2-3b-instruct';
 
 // Vercel rejects request bodies over 4.5MB; the client resizes images
 // to 1024px JPEG so this cap should never trip in practice.
@@ -62,11 +60,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  const openrouterKey = process.env.OPENROUTER_API_KEY;
-  const cfAccountId = process.env.CLOUDFLARE_AI_ACCOUNT_ID;
-  const cfApiToken = process.env.CLOUDFLARE_AI_API_TOKEN;
-  if (!openrouterKey && !(cfApiToken && cfAccountId)) {
-    res.status(500).json({ error: 'AI is not configured (missing OPENROUTER_API_KEY or CLOUDFLARE_AI credentials).' });
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    res.status(500).json({ error: 'AI is not configured (missing OPENROUTER_API_KEY).' });
     return;
   }
 
@@ -91,12 +87,12 @@ export default async function handler(req, res) {
     },
   ];
 
-  async function callOpenRouter() {
+  try {
     const aiRes = await fetch(OPENROUTER_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${openrouterKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'HTTP-Referer': process.env.VERCEL_URL
           ? `https://${process.env.VERCEL_URL}`
           : 'http://localhost:5173',
@@ -108,50 +104,10 @@ export default async function handler(req, res) {
         max_tokens: 2000,
       }),
     });
-    return { aiRes, data: await aiRes.json() };
-  }
 
-  async function callCloudflare() {
-    const cfUrl = `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/v1/chat/completions`;
-    const aiRes = await fetch(cfUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${cfApiToken}`,
-      },
-      body: JSON.stringify({
-        model: CF_VISION_MODEL,
-        messages: [{ role: 'user', content: prompt + '\n\n[Image attached]' }],
-        max_tokens: 2000,
-      }),
-    });
-    return { aiRes, data: await aiRes.json() };
-  }
-
-  try {
-    let data;
-    let aiRes;
-
-    // Primary: OpenRouter
-    if (openrouterKey) {
-      try {
-        ({ aiRes, data } = await callOpenRouter());
-        if (!aiRes.ok) throw new Error(data?.error?.message || 'openrouter error');
-      } catch (orErr) {
-        console.warn('ai-solve: OpenRouter failed, falling back to Cloudflare AI:', orErr.message);
-        // Fallback: Cloudflare Workers AI
-        if (cfApiToken && cfAccountId) {
-          ({ aiRes, data } = await callCloudflare());
-        } else {
-          throw orErr;
-        }
-      }
-    } else {
-      ({ aiRes, data } = await callCloudflare());
-    }
-
+    const data = await aiRes.json();
     if (!aiRes.ok) {
-      const detail = data?.error?.metadata?.raw || data?.error?.message || data?.errors?.[0]?.message;
+      const detail = data?.error?.metadata?.raw || data?.error?.message;
       res.status(502).json({
         error: detail
           ? `AI provider failed (${detail}). Please try again.`
@@ -168,6 +124,6 @@ export default async function handler(req, res) {
     res.status(200).json({ solution });
   } catch (err) {
     console.error('ai-solve error:', err);
-    res.status(500).json({ error: `Failed to solve (${err.message}). Please try again.` });
+    res.status(500).json({ error: 'Failed to solve. Please try again.' });
   }
 }
