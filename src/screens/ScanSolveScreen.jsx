@@ -29,6 +29,7 @@ export default function ScanSolveScreen() {
   const [papers, setPapers] = useState([]);
   const [selectedPaper, setSelectedPaper] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [problemDesc, setProblemDesc] = useState('');
   const cameraRef = useRef(null);
   const galleryRef = useRef(null);
 
@@ -84,7 +85,8 @@ export default function ScanSolveScreen() {
       const paperContext = selectedPaper
         ? `${selectedPaper.title}${selectedPaper.subject ? ` - ${selectedPaper.subject}` : ''}${selectedPaper.semester ? ` (${selectedPaper.semester})` : ''}`
         : '';
-      const aiResponse = await solveQuestion(image, paperContext || undefined);
+      const context = [paperContext, problemDesc.trim()].filter(Boolean).join('\n\n');
+      const aiResponse = await solveQuestion(image, context || undefined);
       setResult(aiResponse);
     } catch (err) {
       setResult('Error: ' + (err.message || 'Failed to solve. Please try again.'));
@@ -165,6 +167,17 @@ export default function ScanSolveScreen() {
               <span className={styles.imagePlaceholderHint}>or choose from gallery</span>
             </div>
           )}
+        </div>
+
+        <div className={styles.problemBox}>
+          <span className={styles.problemLabel}>Describe your problem</span>
+          <textarea
+            className={styles.problemInput}
+            value={problemDesc}
+            onChange={(e) => setProblemDesc(e.target.value)}
+            placeholder="What are you trying to solve? Add context so the AI can help better..."
+            rows={3}
+          />
         </div>
 
         <input

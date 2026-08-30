@@ -55,7 +55,7 @@ const MAX_HISTORY = 20;
 // the AI needs the conversation so far to keep context. Language/persona
 // come from the Settings screen (localStorage) and are applied to the
 // system prompt server-side.
-export const getAiReply = async (history) => {
+export const getAiReply = async (history, imageBase64) => {
   const { data: sessionData } = await supabase.auth.getSession();
   const token = sessionData?.session?.access_token;
 
@@ -71,13 +71,16 @@ export const getAiReply = async (history) => {
     .slice(-MAX_HISTORY)
     .map(({ role, content }) => ({ role, content }));
 
+  const body = { messages, language, persona };
+  if (imageBase64) body.image = imageBase64;
+
   const res = await fetch('/api/ai-chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ messages, language, persona }),
+    body: JSON.stringify(body),
   });
 
   const data = await res.json().catch(() => ({}));

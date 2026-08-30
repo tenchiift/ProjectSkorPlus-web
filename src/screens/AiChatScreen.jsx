@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X } from 'lucide-react';
+import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X, Menu, Zap, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   createConversation,
@@ -23,7 +23,32 @@ export default function AiChatScreen() {
   const [loading, setLoading] = useState(true);
   const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState(null);
+  const [chatDropdown, setChatDropdown] = useState(false);
+  const [modeDropdown, setModeDropdown] = useState(false);
+  const [tipsDropdown, setTipsDropdown] = useState(false);
+  const [persona, setPersona] = useState('chill');
   const bottomRef = useRef(null);
+
+  const AI_MODES = [
+    { id: 'chill', label: 'Chill', desc: 'Casual, friendly, light slang' },
+    { id: 'formal', label: 'Formal', desc: 'Professional & structured' },
+    { id: 'exam', label: 'Exam Prep', desc: 'Focused, exam-style answers' },
+  ];
+
+  const QUICK_TIPS = [
+    'Explain this topic simply',
+    'Give me study tips',
+    'Quiz me on this',
+    'Summarize key points',
+    'Help me plan my study schedule',
+  ];
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('skorplus-ai-persona') || 'chill';
+      setPersona(saved);
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -57,7 +82,21 @@ export default function AiChatScreen() {
     const conv = await createConversation(user.id);
     setConversations((prev) => [conv, ...prev]);
     setActiveId(conv.id);
+    setChatDropdown(false);
   };
+
+  const handleModeChange = (modeId) => {
+    setPersona(modeId);
+    try { localStorage.setItem('skorplus-ai-persona', modeId); } catch { /* ignore */ }
+    setModeDropdown(false);
+  };
+
+  const handleQuickTip = (tip) => {
+    setInput(tip);
+    setTipsDropdown(false);
+  };
+
+  const getModeLabel = () => AI_MODES.find((m) => m.id === persona)?.label || 'Chill';
 
   const handleSend = async () => {
     const text = input.trim();
@@ -72,7 +111,7 @@ export default function AiChatScreen() {
       setActiveId(conv.id);
       await updateConversationTitle(conv.id, text.slice(0, 40));
     } else if (messages.length === 0) {
-      await updateConversationTitle(convId, text.slice(0,40));
+      await updateConversationTitle(convId, text.slice(0, 40));
     }
 
     await addMessage(convId, 'user', text);
@@ -81,8 +120,6 @@ export default function AiChatScreen() {
 
     setWaiting(true);
     try {
-      // `messages` here is the state before this send, so append the new
-      // user message to give the AI the full conversation context.
       const history = [...messages, { role: 'user', content: text }].map(
         ({ role, content }) => ({ role, content })
       );
@@ -171,6 +208,106 @@ export default function AiChatScreen() {
           <button className={styles.errorClose} onClick={() => setError(null)} aria-label="Dismiss error">
             <X size={16} color="var(--color-error)" />
           </button>
+        </div>
+      )}
+
+      <div className={styles.mobileToolbar}>
+        <button
+          className={styles.toolbarPill}
+          onClick={() => { setChatDropdown((v) => !v); setModeDropdown(false); setTipsDropdown(false); }}
+          aria-label="Chat sessions"
+        >
+          <Menu size={18} color="var(--color-text-secondary)" />
+          <span className={styles.toolbarPillText}>Chats</span>
+        </button>
+
+        <button
+          className={styles.toolbarPill}
+          onClick={() => { setModeDropdown((v) => !v); setChatDropdown(false); setTipsDropdown(false); }}
+          aria-label="AI mode"
+        >
+          <Sparkles size={16} color="var(--color-primary)" />
+          <span className={styles.toolbarPillText}>{getModeLabel()}</span>
+          <ChevronDown size={14} color="var(--color-text-secondary)" />
+        </button>
+
+        <button
+          className={styles.toolbarPill}
+          onClick={() => { setTipsDropdown((v) => !v); setChatDropdown(false); setModeDropdown(false); }}
+          aria-label="Quick tips"
+        >
+          <Zap size={16} color="var(--color-primary)" />
+          <span className={styles.toolbarPillText}>Tips</span>
+        </button>
+      </div>
+
+      {chatDropdown && (
+        <div className={styles.chatDropdownOverlay} onClick={() => setChatDropdown(false)}>
+          <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.chatDropdownHeader}>
+              <span className={styles.chatDropdownTitle}>Chat Sessions</span>
+              <button className={styles.chatDropdownNew} onClick={handleNewChat}>
+                <Plus size={16} color="var(--color-primary)" />
+                <span>New</span>
+              </button>
+            </div>
+            {conversations.length === 0 ? (
+              <p className={styles.chatDropdownEmpty}>No chats yet</p>
+            ) : (
+              conversations.map((c) => (
+                <button
+                  key={c.id}
+                  className={`${styles.chatDropdownItem} ${c.id === activeId ? styles.chatDropdownItemActive : ''}`}
+                  onClick={() => { setActiveId(c.id); setChatDropdown(false); }}
+                >
+                  <MessageCircle size={14} color="var(--color-text-secondary)" />
+                  <span className={styles.chatDropdownItemText}>{c.title}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {modeDropdown && (
+        <div className={styles.chatDropdownOverlay} onClick={() => setModeDropdown(false)}>
+          <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.chatDropdownHeader}>
+              <span className={styles.chatDropdownTitle}>AI Mode</span>
+            </div>
+            {AI_MODES.map((m) => (
+              <button
+                key={m.id}
+                className={`${styles.chatDropdownItem} ${m.id === persona ? styles.chatDropdownItemActive : ''}`}
+                onClick={() => handleModeChange(m.id)}
+              >
+                <div className={styles.modeItemContent}>
+                  <span className={styles.modeItemLabel}>{m.label}</span>
+                  <span className={styles.modeItemDesc}>{m.desc}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tipsDropdown && (
+        <div className={styles.chatDropdownOverlay} onClick={() => setTipsDropdown(false)}>
+          <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.chatDropdownHeader}>
+              <span className={styles.chatDropdownTitle}>Quick Tips</span>
+            </div>
+            {QUICK_TIPS.map((tip) => (
+              <button
+                key={tip}
+                className={styles.chatDropdownItem}
+                onClick={() => handleQuickTip(tip)}
+              >
+                <Zap size={14} color="var(--color-text-secondary)" />
+                <span className={styles.chatDropdownItemText}>{tip}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
