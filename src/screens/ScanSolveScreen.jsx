@@ -30,7 +30,6 @@ export default function ScanSolveScreen() {
   const [selectedPaper, setSelectedPaper] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [problemDesc, setProblemDesc] = useState('');
-  const cameraRef = useRef(null);
   const galleryRef = useRef(null);
 
   useEffect(() => {
@@ -47,17 +46,6 @@ export default function ScanSolveScreen() {
     } catch (err) {
       console.error('Fetch papers error:', err);
     }
-  };
-
-  const handleCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((t) => t.stop());
-    } catch {
-      alert('Camera permission is required. Please allow camera access in your browser settings.');
-      return;
-    }
-    cameraRef.current?.click();
   };
 
   const handleGallery = () => {
@@ -181,14 +169,6 @@ export default function ScanSolveScreen() {
         </div>
 
         <input
-          ref={cameraRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          style={{ display: 'none' }}
-          onChange={handleFilePicked}
-        />
-        <input
           ref={galleryRef}
           type="file"
           accept="image/*"
@@ -196,16 +176,10 @@ export default function ScanSolveScreen() {
           onChange={handleFilePicked}
         />
 
-        <div className={styles.actionRow}>
-          <button className={styles.actionBtn} onClick={handleCamera}>
-            <Camera size={20} color="var(--color-primary)" />
-            <span className={styles.actionBtnText}>Camera</span>
-          </button>
-          <button className={styles.actionBtn} onClick={handleGallery}>
-            <ImageIcon size={20} color="var(--color-primary)" />
-            <span className={styles.actionBtnText}>Gallery</span>
-          </button>
-        </div>
+        <button className={styles.actionBtnFull} onClick={handleGallery}>
+          <ImageIcon size={20} color="var(--color-primary)" />
+          <span className={styles.actionBtnText}>Gallery</span>
+        </button>
 
         <button
           className={`${styles.solveBtn} ${!image ? styles.solveBtnDisabled : ''}`}

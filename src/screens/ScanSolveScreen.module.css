@@ -225,14 +225,8 @@
   justify-content: center;
 }
 
-.actionRow {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-}
-
-.actionBtn {
-  flex: 1;
+.actionBtnFull {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -245,6 +239,7 @@
   font-family: var(--font-heading-bold);
   font-size: 14px;
   color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
 }
 
 .actionBtnText {
