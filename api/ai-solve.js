@@ -11,10 +11,7 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const VISION_MODEL = process.env.OPENROUTER_VISION_MODEL || 'google/gemma-4-31b-it:free';
 const VISION_FALLBACK_MODELS = ['google/gemini-2.5-flash', 'openai/gpt-4o-mini'];
 
-const CF_ACCOUNT_ID = process.env.CLOUDFLARE_AI_ACCOUNT_ID;
-const CF_API_TOKEN = process.env.CLOUDFLARE_AI_API_TOKEN;
 const CF_VISION_MODEL = '@cf/meta/llama-3.2-3b-instruct';
-const CF_URL = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/v1/chat/completions`;
 
 // Vercel rejects request bodies over 4.5MB; the client resizes images
 // to 1024px JPEG so this cap should never trip in practice.
@@ -66,7 +63,9 @@ export default async function handler(req, res) {
   }
 
   const openrouterKey = process.env.OPENROUTER_API_KEY;
-  if (!openrouterKey && !(CF_API_TOKEN && CF_ACCOUNT_ID)) {
+  const cfAccountId = process.env.CLOUDFLARE_AI_ACCOUNT_ID;
+  const cfApiToken = process.env.CLOUDFLARE_AI_API_TOKEN;
+  if (!openrouterKey && !(cfApiToken && cfAccountId)) {
     res.status(500).json({ error: 'AI is not configured (missing OPENROUTER_API_KEY or CLOUDFLARE_AI credentials).' });
     return;
   }
@@ -113,11 +112,12 @@ export default async function handler(req, res) {
   }
 
   async function callCloudflare() {
-    const aiRes = await fetch(CF_URL, {
+    const cfUrl = `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/v1/chat/completions`;
+    const aiRes = await fetch(cfUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${CF_API_TOKEN}`,
+        Authorization: `Bearer ${cfApiToken}`,
       },
       body: JSON.stringify({
         model: CF_VISION_MODEL,
@@ -140,7 +140,7 @@ export default async function handler(req, res) {
       } catch (orErr) {
         console.warn('ai-solve: OpenRouter failed, falling back to Cloudflare AI:', orErr.message);
         // Fallback: Cloudflare Workers AI
-        if (CF_API_TOKEN && CF_ACCOUNT_ID) {
+        if (cfApiToken && cfAccountId) {
           ({ aiRes, data } = await callCloudflare());
         } else {
           throw orErr;
@@ -168,6 +168,6 @@ export default async function handler(req, res) {
     res.status(200).json({ solution });
   } catch (err) {
     console.error('ai-solve error:', err);
-    res.status(500).json({ error: 'Failed to solve. Please try again.' });
+    res.status(500).json({ error: `Failed to solve (${err.message}). Please try again.` });
   }
 }
