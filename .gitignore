@@ -48,3 +48,5 @@ final exams/
 
 # local course material PDFs
 VECTOR MODULES/
+.vercel
+.env*

@@ -1,19 +1,20 @@
 // Vercel serverless function — AI Study Buddy chat proxy.
-// Routes through 9router (local proxy) when available, falls back to
-// OpenRouter. API key is kept server-side; only authenticated Supabase
-// users can call it.
+// Primary: OpenRouter. Fallback: Cloudflare Workers AI (free 10k req/day).
+// API key is kept server-side; only authenticated Supabase users can call it.
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ujcgwezmroashxemfyqc.supabase.co';
 const SUPABASE_ANON_KEY =
   process.env.SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqY2d3ZXptcm9hc2h4ZW1meXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMTE3NzIsImV4cCI6MjA5OTU4Nzc3Mn0.xDyX6NLfcA-3dbPZWD_z_ZMsKfU5OY5QCueRGDBlbTM';
 
-const NINEROUTER_BASE_URL = process.env.NINEROUTER_BASE_URL || 'http://localhost:20128/v1';
-const NINEROUTER_URL = `${NINEROUTER_BASE_URL}/chat/completions`;
-
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || 'z-ai/glm-5.2:free';
-const CHAT_FALLBACK_MODELS = ['google/gemma-4-31b-it:free', 'google/gemini-2.5-flash'];
+const CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || 'google/gemini-2.5-flash';
+const CHAT_FALLBACK_MODELS = ['google/gemma-4-31b-it:free', 'openai/gpt-4o-mini'];
+
+const CF_ACCOUNT_ID = process.env.CLOUDFLARE_AI_ACCOUNT_ID;
+const CF_API_TOKEN = process.env.CLOUDFLARE_AI_API_TOKEN;
+const CF_CHAT_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+const CF_URL = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/v1/chat/completions`;
 
 const MAX_HISTORY = 20;
 const MAX_CONTENT_CHARS = 8000;
@@ -27,7 +28,6 @@ Rules:
 - Encourage good study habits and suggest practice when relevant.
 - If you're not sure about something, say so instead of guessing.`;
 
-// Settings-driven prompt extras (from the app's Settings screen).
 const PERSONA_PROMPTS = {
   chill:
     '- Persona: talk like a supportive friend — casual tone, a few emojis where natural, light Manglish/slang is welcome.',
@@ -61,10 +61,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  const ninerouterKey = process.env.NINEROUTER_API_KEY;
   const openrouterKey = process.env.OPENROUTER_API_KEY;
-  if (!ninerouterKey && !openrouterKey) {
-    res.status(500).json({ error: 'AI is not configured (missing NINEROUTER_API_KEY or OPENROUTER_API_KEY).' });
+  if (!openrouterKey && !(CF_API_TOKEN && CF_ACCOUNT_ID)) {
+    res.status(500).json({ error: 'AI is not configured (missing OPENROUTER_API_KEY or CLOUDFLARE_AI credentials).' });
     return;
   }
 
@@ -101,23 +100,6 @@ export default async function handler(req, res) {
 
   const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
 
-  async function callNinerouter() {
-    const aiRes = await fetch(NINEROUTER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${ninerouterKey}`,
-      },
-      body: JSON.stringify({
-        model: 'projectskorplus',
-        messages: fullMessages,
-        max_tokens: 1000,
-        stream: false,
-      }),
-    });
-    return { aiRes, data: await aiRes.json() };
-  }
-
   async function callOpenRouter() {
     const aiRes = await fetch(OPENROUTER_URL, {
       method: 'POST',
@@ -138,31 +120,50 @@ export default async function handler(req, res) {
     return { aiRes, data: await aiRes.json() };
   }
 
+  async function callCloudflare() {
+    const aiRes = await fetch(CF_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CF_API_TOKEN}`,
+      },
+      body: JSON.stringify({
+        model: CF_CHAT_MODEL,
+        messages: fullMessages,
+        max_tokens: 1000,
+      }),
+    });
+    return { aiRes, data: await aiRes.json() };
+  }
+
   try {
     let data;
     let aiRes;
-    let provider = 'ninerouter';
+    let provider = 'openrouter';
 
-    if (ninerouterKey) {
+    // Primary: OpenRouter
+    if (openrouterKey) {
       try {
-        ({ aiRes, data } = await callNinerouter());
-        if (!aiRes.ok) throw new Error(data?.error?.message || 'ninerouter error');
-      } catch (nrErr) {
-        console.warn('ai-chat: 9router failed, falling back to OpenRouter:', nrErr.message);
-        if (openrouterKey) {
-          ({ aiRes, data } = await callOpenRouter());
-          provider = 'openrouter';
+        ({ aiRes, data } = await callOpenRouter());
+        if (!aiRes.ok) throw new Error(data?.error?.message || 'openrouter error');
+      } catch (orErr) {
+        console.warn('ai-chat: OpenRouter failed, falling back to Cloudflare AI:', orErr.message);
+        // Fallback: Cloudflare Workers AI
+        if (CF_API_TOKEN && CF_ACCOUNT_ID) {
+          ({ aiRes, data } = await callCloudflare());
+          provider = 'cloudflare';
         } else {
-          throw nrErr;
+          throw orErr;
         }
       }
     } else {
-      ({ aiRes, data } = await callOpenRouter());
-      provider = 'openrouter';
+      // No OpenRouter key, use Cloudflare directly
+      ({ aiRes, data } = await callCloudflare());
+      provider = 'cloudflare';
     }
 
     if (!aiRes.ok) {
-      const detail = data?.error?.metadata?.raw || data?.error?.message;
+      const detail = data?.error?.metadata?.raw || data?.error?.message || data?.errors?.[0]?.message;
       res.status(502).json({
         error: detail
           ? `AI provider failed (${detail}). Please try again.`
