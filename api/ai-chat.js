@@ -62,10 +62,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Temporary debug
-  const debugKey = apiKey ? `${apiKey.substring(0, 15)}...${apiKey.substring(apiKey.length - 8)}` : 'none';
-  const debugLen = apiKey ? apiKey.length : 0;
-
   const history = Array.isArray(req.body?.messages) ? req.body.messages : [];
   const messages = history
     .filter(
@@ -122,8 +118,8 @@ export default async function handler(req, res) {
       const detail = data?.error?.metadata?.raw || data?.error?.message;
       res.status(502).json({
         error: detail
-          ? `AI provider failed (${detail}). Key used: ${debugKey} (len: ${debugLen}). Please try again.`
-          : `AI provider error. Key used: ${debugKey} (len: ${debugLen}). Please try again.`,
+          ? `AI provider failed (${detail}). Please try again.`
+          : 'AI provider error. Please try again.',
       });
       return;
     }
