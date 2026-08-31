@@ -48,6 +48,14 @@ export const updateConversationTitle = async (id, title) => {
   if (error) throw error;
 };
 
+export const deleteConversation = async (id) => {
+  const { error } = await supabase
+    .from('ai_conversations')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+};
+
 const MAX_HISTORY = 20;
 
 // Calls the /api/ai-chat serverless function, which holds the AI provider

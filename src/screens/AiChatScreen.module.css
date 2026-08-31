@@ -351,7 +351,6 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 var(--spacing-lg) var(--spacing-xxl);
 }
 
 .chatDropdown {
@@ -359,9 +358,10 @@
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   width: 100%;
   max-width: 480px;
-  max-height: 50vh;
+  max-height: 70vh;
   overflow-y: auto;
   padding: var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom));
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
 }
 
@@ -376,6 +376,30 @@
   font-family: var(--font-heading-bold);
   font-size: 16px;
   color: var(--color-text-primary);
+}
+
+.chatDropdownActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.chatDropdownEdit {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+}
+
+.chatDropdownEdit:active {
+  opacity: 0.7;
 }
 
 .chatDropdownNew {
@@ -396,6 +420,112 @@
   opacity: 0.7;
 }
 
+.chatDropdownRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.chatDropdownRow:last-child {
+  margin-bottom: 0;
+}
+
+.chatDropdownRowActive {
+  background: var(--color-soft-blue-bg);
+}
+
+.chatDropdownRow .chatDropdownItem {
+  flex: 1;
+}
+
+.chatDropdownItemActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-right: var(--spacing-xs);
+}
+
+.chatDropdownPillBtn {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chatDropdownPillBtn:active {
+  opacity: 0.7;
+}
+
+.chatDropdownPillBtnDanger {
+  border: 1px solid var(--color-error);
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-error);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chatDropdownPillBtnDanger:active {
+  opacity: 0.7;
+}
+
+.chatDropdownEditRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  padding: var(--spacing-xs) 0;
+}
+
+.chatDropdownInput {
+  flex: 1;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-input-bg);
+  outline: none;
+}
+
+.chatDropdownSave {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chatDropdownCancel {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .chatDropdownEmpty {
   font-family: var(--font-body);
   font-size: 14px;
@@ -407,7 +537,6 @@
 .chatDropdownItem {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
   border-radius: var(--radius-md);

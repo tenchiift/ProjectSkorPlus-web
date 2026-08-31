@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X, Menu, Zap, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X, Menu, Zap, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   createConversation,
@@ -8,6 +8,7 @@ import {
   getMessages,
   addMessage,
   updateConversationTitle,
+  deleteConversation,
   getAiReply,
 } from '../services/aiChatService';
 import styles from './AiChatScreen.module.css';
@@ -27,6 +28,9 @@ export default function AiChatScreen() {
   const [modeDropdown, setModeDropdown] = useState(false);
   const [tipsDropdown, setTipsDropdown] = useState(false);
   const [persona, setPersona] = useState('chill');
+  const [editMode, setEditMode] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState('');
   const bottomRef = useRef(null);
 
   const AI_MODES = [
@@ -94,6 +98,23 @@ export default function AiChatScreen() {
   const handleQuickTip = (tip) => {
     setInput(tip);
     setTipsDropdown(false);
+  };
+
+  const handleDelete = async (id) => {
+    await deleteConversation(id);
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    if (activeId === id) {
+      const remaining = conversations.filter((c) => c.id !== id);
+      setActiveId(remaining.length > 0 ? remaining[0].id : null);
+    }
+  };
+
+  const handleRename = async (id) => {
+    const newTitle = editValue.trim();
+    if (!newTitle) return;
+    await updateConversationTitle(id, newTitle);
+    setConversations((prev) => prev.map((c) => c.id === id ? { ...c, title: newTitle } : c));
+    setEditingId(null);
   };
 
   const getModeLabel = () => AI_MODES.find((m) => m.id === persona)?.label || 'Chill';
@@ -246,23 +267,65 @@ export default function AiChatScreen() {
           <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
             <div className={styles.chatDropdownHeader}>
               <span className={styles.chatDropdownTitle}>Chat Sessions</span>
-              <button className={styles.chatDropdownNew} onClick={handleNewChat}>
-                <Plus size={16} color="var(--color-primary)" />
-                <span>New</span>
-              </button>
+              <div className={styles.chatDropdownActions}>
+                <button className={styles.chatDropdownEdit} onClick={() => setEditMode((v) => !v)}>
+                  {editMode ? <Check size={16} color="var(--color-primary)" /> : <Pencil size={16} color="var(--color-text-secondary)" />}
+                  <span>{editMode ? 'Done' : 'Edit'}</span>
+                </button>
+                <button className={styles.chatDropdownNew} onClick={handleNewChat}>
+                  <Plus size={16} color="var(--color-primary)" />
+                  <span>New</span>
+                </button>
+              </div>
             </div>
             {conversations.length === 0 ? (
               <p className={styles.chatDropdownEmpty}>No chats yet</p>
             ) : (
               conversations.map((c) => (
-                <button
-                  key={c.id}
-                  className={`${styles.chatDropdownItem} ${c.id === activeId ? styles.chatDropdownItemActive : ''}`}
-                  onClick={() => { setActiveId(c.id); setChatDropdown(false); }}
-                >
-                  <MessageCircle size={14} color="var(--color-text-secondary)" />
-                  <span className={styles.chatDropdownItemText}>{c.title}</span>
-                </button>
+                <div key={c.id} className={`${styles.chatDropdownRow} ${c.id === activeId ? styles.chatDropdownRowActive : ''}`}>
+                  {editingId === c.id ? (
+                    <div className={styles.chatDropdownEditRow}>
+                      <input
+                        className={styles.chatDropdownInput}
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleRename(c.id)}
+                        autoFocus
+                      />
+                      <button className={styles.chatDropdownSave} onClick={() => handleRename(c.id)}>
+                        <Check size={16} color="#FFFFFF" />
+                      </button>
+                      <button className={styles.chatDropdownCancel} onClick={() => setEditingId(null)}>
+                        <X size={16} color="var(--color-text-secondary)" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        className={styles.chatDropdownItem}
+                        onClick={() => { setActiveId(c.id); setChatDropdown(false); }}
+                      >
+                        <span className={styles.chatDropdownItemText}>{c.title}</span>
+                      </button>
+                      {editMode && (
+                        <div className={styles.chatDropdownItemActions}>
+                          <button
+                            className={styles.chatDropdownPillBtn}
+                            onClick={() => { setEditingId(c.id); setEditValue(c.title); }}
+                          >
+                            Rename
+                          </button>
+                          <button
+                            className={styles.chatDropdownPillBtnDanger}
+                            onClick={() => handleDelete(c.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               ))
             )}
           </div>
