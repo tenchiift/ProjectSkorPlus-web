@@ -1,6 +1,25 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
 import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers } from 'lucide-react';
 import styles from './Sidebar.module.css';
+
+// Animated number: counts up from 0 when `value` lands (profile fetch).
+function CountUp({ value }) {
+  const reduced = useReducedMotion();
+  const mv = useMotionValue(0);
+  const rounded = useTransform(mv, (v) => Math.round(v));
+
+  useEffect(() => {
+    if (reduced) {
+      mv.set(value);
+      return;
+    }
+    const controls = animate(mv, value, { duration: 0.8, ease: 'easeOut' });
+    return () => controls.stop();
+  }, [value, reduced, mv]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
 
 // Level naik setiap 100 EXP; `into` ialah progress dalam level semasa.
 const xpInfo = (exp) => {
@@ -29,6 +48,7 @@ const LECTURER_MENU = [
 // Admin access lives in Settings, not the sidebar.
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
+  const reducedMotion = useReducedMotion();
   const handleNav = useCallback((route) => {
     onClose();
     setTimeout(() => onNavigate(route), 200);
@@ -67,14 +87,23 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
       {profileLoaded && !isLecturer && (
         <>
           <span className={styles.streakPill}>
-            {streak > 0 ? `🔥 ${streak} Day Streak` : '🔥 Start Streak!'}
+            {streak > 0 ? (
+              <>🔥 <CountUp value={streak} /> Day Streak</>
+            ) : (
+              '🔥 Start Streak!'
+            )}
           </span>
           <div className={styles.xpRow}>
             <span className={styles.xpLevel}>LVL {xp.level}</span>
             <div className={styles.xpBar}>
-              <div className={styles.xpFill} style={{ width: `${xp.into}%` }} />
+              <motion.div
+                className={styles.xpFill}
+                initial={reducedMotion ? false : { width: 0 }}
+                animate={{ width: `${xp.into}%` }}
+                transition={reducedMotion ? { duration: 0 } : { duration: 0.8, ease: 'easeOut', delay: 0.15 }}
+              />
             </div>
-            <span className={styles.xpCount}>{xp.total} XP</span>
+            <span className={styles.xpCount}><CountUp value={xp.total} /> XP</span>
           </div>
         </>
       )}

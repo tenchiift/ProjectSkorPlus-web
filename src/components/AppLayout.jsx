@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, useReducedMotion } from 'motion/react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { notifyEvent } from '../services/notificationService';
+import { startPresenceTracking, stopPresenceTracking } from '../services/friendChatService';
 import Sidebar from './Sidebar';
 import LoadingScreen from './LoadingScreen';
 import styles from './AppLayout.module.css';
@@ -11,9 +13,17 @@ export default function AppLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const reducedMotion = useReducedMotion();
   const [userData, setUserData] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  // Entrance animation on every route change (Outlet remounts per path).
+  const pageMotion = {
+    initial: reducedMotion ? false : { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.22, ease: 'easeOut' },
+  };
 
   // Pre-app routes (profile setup, intro pages) render chrome-free — the
   // sidebar only exists once the introduction flow is finished.
@@ -84,16 +94,10 @@ export default function AppLayout({ children }) {
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase.channel('online-users');
-    channel.subscribe(async (status) => {
-      if (status === 'SUBSCRIBED') {
-        await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
-      }
-    });
-    return () => {
-      channel.untrack();
-      channel.unsubscribe();
-    };
+    // Single shared presence channel (owned by friendChatService) — screens
+    // like Messages/FriendChat subscribe to the same channel's sync events.
+    startPresenceTracking(user.id);
+    return () => { stopPresenceTracking(); };
   }, [user]);
 
   const handleLogout = useCallback(async () => {
@@ -125,7 +129,9 @@ export default function AppLayout({ children }) {
         />
         <main className={styles.desktopContent}>
           <Suspense fallback={<LoadingScreen />}>
-            {children}
+            <motion.div key={location.pathname} {...pageMotion} style={{ height: '100%' }}>
+              {children}
+            </motion.div>
           </Suspense>
         </main>
       </div>
@@ -135,7 +141,10 @@ export default function AppLayout({ children }) {
   return (
     <>
       <Suspense fallback={<LoadingScreen />}>
-        {children}
+        {/* definite height so pages' min-height:100% backgrounds resolve */}
+        <motion.div key={location.pathname} {...pageMotion} style={{ height: '100%' }}>
+          {children}
+        </motion.div>
       </Suspense>
       <Sidebar
         visible={sidebarVisible}

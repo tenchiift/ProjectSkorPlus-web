@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Search, UserPlus, Users, Trophy, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -26,6 +27,16 @@ const TABS = [
 export default function FriendsScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const reducedMotion = useReducedMotion();
+
+  const cardProps = (i) =>
+    reducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 8 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.25, ease: 'easeOut', delay: Math.min(i * 0.05, 0.4) },
+        };
 
   const [tab, setTab] = useState('friends');
   const [friends, setFriends] = useState([]);
@@ -225,8 +236,8 @@ export default function FriendsScreen() {
           friends.length === 0 ? (
             <div className={styles.center}><p className={styles.emptyText}>No friends yet. Search above to add one.</p></div>
           ) : (
-            friends.map(({ friendshipId, friend }) => (
-              <div key={friendshipId} className={styles.friendCard}>
+            friends.map(({ friendshipId, friend }, i) => (
+              <motion.div key={friendshipId} className={styles.friendCard} {...cardProps(i)}>
                 <button
                   className={styles.friendCardMain}
                   onClick={() => navigate(`/friend/${friend.id}`, { state: { friend } })}
@@ -247,14 +258,14 @@ export default function FriendsScreen() {
                 >
                   <MessageCircle size={20} color="var(--color-primary)" />
                 </button>
-              </div>
+              </motion.div>
             ))
           )
         ) : tab === 'requests' ? (
           <div>
             {incoming.length > 0 && <h3 className={styles.sectionLabel}>Incoming</h3>}
-            {incoming.map(({ friendshipId, friend }) => (
-              <div key={friendshipId} className={styles.friendCard}>
+            {incoming.map(({ friendshipId, friend }, i) => (
+              <motion.div key={friendshipId} className={styles.friendCard} {...cardProps(i)}>
                 {renderAvatar(friend)}
                 <div className={styles.friendInfo}>
                   <span className={styles.friendName}>{friend.name}</span>
@@ -264,18 +275,18 @@ export default function FriendsScreen() {
                   <button className={styles.acceptBtn} onClick={() => handleAccept(friendshipId)}>Accept</button>
                   <button className={styles.declineBtn} onClick={() => handleDecline(friendshipId)}>Decline</button>
                 </div>
-              </div>
+              </motion.div>
             ))}
             {outgoing.length > 0 && <h3 className={styles.sectionLabel}>Sent</h3>}
-            {outgoing.map(({ friendshipId, friend }) => (
-              <div key={friendshipId} className={styles.friendCard}>
+            {outgoing.map(({ friendshipId, friend }, i) => (
+              <motion.div key={friendshipId} className={styles.friendCard} {...cardProps(incoming.length + i)}>
                 {renderAvatar(friend)}
                 <div className={styles.friendInfo}>
                   <span className={styles.friendName}>{friend.name}</span>
                   <span className={styles.friendUsername}>@{friend.username ?? 'unknown'}</span>
                 </div>
                 <span className={styles.pendingLabel}>Pending</span>
-              </div>
+              </motion.div>
             ))}
             {incoming.length === 0 && outgoing.length === 0 && (
               <div className={styles.center}><p className={styles.emptyText}>No friend requests.</p></div>
@@ -286,7 +297,7 @@ export default function FriendsScreen() {
             <div className={styles.center}><p className={styles.emptyText}>Add friends to see the leaderboard.</p></div>
           ) : (
             leaderboard.map((friend, i) => (
-              <div key={friend.id} className={styles.leaderCard}>
+              <motion.div key={friend.id} className={styles.leaderCard} {...cardProps(i)}>
                 <span className={styles.rank}>{i + 1}</span>
                 {renderAvatar(friend)}
                 <div className={styles.friendInfo}>
@@ -294,7 +305,7 @@ export default function FriendsScreen() {
                   <span className={styles.friendUsername}>{friend.total_exp ?? 0} EXP</span>
                 </div>
                 <Trophy size={18} color={i === 0 ? 'var(--color-streak-orange)' : 'var(--color-text-secondary)'} />
-              </div>
+              </motion.div>
             ))
           )
         )}

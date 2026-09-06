@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getUserModuleProgress } from '../services/moduleService';
@@ -11,6 +12,26 @@ import styles from './DashboardScreen.module.css';
 export default function DashboardScreen() {
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+  const reducedMotion = useReducedMotion();
+
+  // Entrance-only motion for dashboard cards (module cards stay static).
+  const riseProps = (delay = 0) =>
+    reducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 12 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.3, ease: 'easeOut', delay },
+        };
+
+  // Spring expand/collapse for the week picker.
+  const pickerSpring = {
+    initial: { height: 0, opacity: 0 },
+    animate: { height: 'auto', opacity: 1 },
+    exit: { height: 0, opacity: 0 },
+    transition: reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 26 },
+    style: { overflow: 'hidden' },
+  };
 
   const [userData, setUserData] = useState(null);
   const [modules, setModules] = useState([]);
@@ -338,54 +359,58 @@ export default function DashboardScreen() {
           )}
 
           {pickerOpen && (
-            <div className={styles.pickerWrap}>
-              {pickerStep === 'week' ? (
-                <>
-                  <span className={styles.semesterHint}>What week are you on?</span>
-                  <div className={styles.semesterWeekPicker}>
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const week = i + 1;
-                      return (
-                        <button
-                          key={week}
-                          type="button"
-                          className={styles.semesterWeekDot}
-                          onClick={() => handlePickWeek(week)}
-                        >
-                          {week}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className={styles.semesterHint}>Which day?</span>
-                  <div className={styles.semesterWeekPicker}>
-                    {Array.from({ length: 7 }, (_, i) => {
-                      const day = i + 1;
-                      return (
-                        <button
-                          key={day}
-                          type="button"
-                          className={styles.semesterWeekDot}
-                          onClick={() => handlePickDay(day)}
-                          disabled={saving}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    className={styles.semesterActionBtnSecondary}
-                    onClick={() => { setPickerStep('week'); setPendingWeek(null); }}
-                  >
-                    Back
-                  </button>
-                </>
-              )}
-            </div>
+            <AnimatePresence initial={false}>
+              <motion.div key="picker" {...pickerSpring}>
+                <div className={styles.pickerWrap}>
+                  {pickerStep === 'week' ? (
+                    <>
+                      <span className={styles.semesterHint}>What week are you on?</span>
+                      <div className={styles.semesterWeekPicker}>
+                        {Array.from({ length: 12 }, (_, i) => {
+                          const week = i + 1;
+                          return (
+                            <button
+                              key={week}
+                              type="button"
+                              className={styles.semesterWeekDot}
+                              onClick={() => handlePickWeek(week)}
+                            >
+                              {week}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.semesterHint}>Which day?</span>
+                      <div className={styles.semesterWeekPicker}>
+                        {Array.from({ length: 7 }, (_, i) => {
+                          const day = i + 1;
+                          return (
+                            <button
+                              key={day}
+                              type="button"
+                              className={styles.semesterWeekDot}
+                              onClick={() => handlePickDay(day)}
+                              disabled={saving}
+                            >
+                              {day}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <button
+                        className={styles.semesterActionBtnSecondary}
+                        onClick={() => { setPickerStep('week'); setPendingWeek(null); }}
+                      >
+                        Back
+                      </button>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           )}
         </div>
 
@@ -393,19 +418,20 @@ export default function DashboardScreen() {
           {actionCards.map((item, i) => {
             const Icon = item.icon;
             return (
-              <button
+              <motion.button
                 key={i}
                 className={styles.statCard}
                 onClick={() => navigate(item.path)}
+                {...riseProps(i * 0.08 + 0.05)}
               >
                 <Icon size={28} color="var(--color-primary)" />
                 <span className={styles.statLabel}>{item.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
-        <div className={styles.countdownCompact}>
+        <motion.div className={styles.countdownCompact} {...riseProps(0.2)}>
           {countdown ? (
             <div>
               <div className={styles.countdownDaysRow}>
@@ -432,10 +458,10 @@ export default function DashboardScreen() {
               <button className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</button>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {modules.length > 0 && (
-          <button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
+          <motion.button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')} {...riseProps(0.28)}>
             <div className={styles.zepCardContent}>
               <div className={styles.zepIconWrap}><Brain size={26} color="#FFFFFF" /></div>
               <div className={styles.zepTextWrap}>
@@ -445,7 +471,7 @@ export default function DashboardScreen() {
               </div>
             </div>
             <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
-          </button>
+          </motion.button>
         )}
 
         <div className={styles.sectionRow}>

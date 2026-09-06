@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Plus, Check, Trash2 } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import styles from './TaskScreen.module.css';
@@ -14,10 +15,20 @@ const priorityRank = (p) => PRIORITIES.find((x) => x.value === p)?.rank ?? 1;
 
 export default function TaskScreen() {
   const navigate = useNavigate();
+  const reducedMotion = useReducedMotion();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState('');
   const [newPriority, setNewPriority] = useState('medium');
+
+  const rowProps = (i) =>
+    reducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 8 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.25, ease: 'easeOut', delay: Math.min(i * 0.04, 0.4) },
+        };
 
   useEffect(() => {
     fetchTasks();
@@ -132,15 +143,15 @@ export default function TaskScreen() {
             {incomplete.length > 0 && (
               <div className={styles.section}>
                 <span className={styles.sectionLabel}>PENDING ({incomplete.length})</span>
-                {incomplete.map((task) => (
-                  <div key={task.id} className={styles.taskRow}>
+                {incomplete.map((task, i) => (
+                  <motion.div key={task.id} className={styles.taskRow} {...rowProps(i)}>
                     <button className={styles.checkbox} onClick={() => toggleTask(task)} />
                     <span className={`${styles.priorityDot} ${priorityDotClass(task.priority)}`} />
                     <span className={styles.taskText}>{task.title}</span>
                     <button className={styles.deleteBtn} onClick={() => deleteTask(task.id)}>
                       <Trash2 size={16} color="var(--color-error)" />
                     </button>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
@@ -148,8 +159,8 @@ export default function TaskScreen() {
             {complete.length > 0 && (
               <div className={styles.section}>
                 <span className={styles.sectionLabel}>COMPLETED ({complete.length})</span>
-                {complete.map((task) => (
-                  <div key={task.id} className={styles.taskRow}>
+                {complete.map((task, i) => (
+                  <motion.div key={task.id} className={styles.taskRow} {...rowProps(incomplete.length + i)}>
                     <button className={`${styles.checkbox} ${styles.checkboxChecked}`} onClick={() => toggleTask(task)}>
                       <Check size={12} color="#FFFFFF" />
                     </button>
@@ -157,7 +168,7 @@ export default function TaskScreen() {
                     <button className={styles.deleteBtn} onClick={() => deleteTask(task.id)}>
                       <Trash2 size={16} color="var(--color-error)" />
                     </button>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

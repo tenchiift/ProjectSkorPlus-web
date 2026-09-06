@@ -154,14 +154,53 @@ export const subscribeToMessages = (conversationId, callback) => {
     });
 };
 
-export const subscribeToPresence = (callback) => {
-  const channel = supabase.channel('online-users');
-  channel
+// Shared presence channel. Only ONE 'online-users' channel may exist —
+// supabase.channel() returns the same instance per topic, and adding
+// presence callbacks after subscribe() throws. The service owns the channel;
+// consumers only register/unregister callbacks.
+const presenceListeners = new Set();
+let presenceChannel = null;
+let presenceUserId = null;
+
+const ensurePresenceChannel = () => {
+  if (presenceChannel) return presenceChannel;
+
+  presenceChannel = supabase.channel('online-users');
+  presenceChannel
     .on('presence', { event: 'sync' }, () => {
-      const state = channel.presenceState();
+      const state = presenceChannel.presenceState();
       const onlineIds = Object.values(state).map((presences) => presences[0]?.user_id).filter(Boolean);
-      callback(onlineIds);
+      presenceListeners.forEach((cb) => cb(onlineIds));
     })
-    .subscribe();
-  return channel;
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED' && presenceUserId) {
+        await presenceChannel.track({ user_id: presenceUserId, online_at: new Date().toISOString() });
+      }
+    });
+  return presenceChannel;
+};
+
+// AppLayout calls this once per signed-in user so others see us online.
+export const startPresenceTracking = (userId) => {
+  presenceUserId = userId;
+  const channel = ensurePresenceChannel();
+  // If the channel is already joined (e.g. StrictMode stop→start cycle),
+  // the SUBSCRIBED callback won't fire again — track immediately.
+  if (channel.state === 'joined') {
+    channel.track({ user_id: userId, online_at: new Date().toISOString() });
+  }
+};
+
+export const stopPresenceTracking = () => {
+  presenceUserId = null;
+  presenceChannel?.untrack?.();
+};
+
+// Returns { unsubscribe } — safe to call repeatedly (StrictMode remounts).
+export const subscribeToPresence = (callback) => {
+  presenceListeners.add(callback);
+  ensurePresenceChannel();
+  return {
+    unsubscribe: () => { presenceListeners.delete(callback); },
+  };
 };
