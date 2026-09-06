@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import AuthSplitLayout from '../components/AuthSplitLayout';
 import logo from '../assets/images/logo.png';
 import styles from './HomeScreen.module.css';
 
@@ -15,7 +16,8 @@ export default function HomeScreen() {
   }, [user, navigate]);
 
   return (
-    <div className={styles.container}>
+    <AuthSplitLayout>
+      <div className={styles.container}>
       <div className={styles.welcomeContainer}>
         <p className={styles.welcomeTitle}>Welcome to</p>
       </div>
@@ -40,6 +42,7 @@ export default function HomeScreen() {
           I already have an account
         </button>
       </div>
-    </div>
+      </div>
+    </AuthSplitLayout>
   );
 }

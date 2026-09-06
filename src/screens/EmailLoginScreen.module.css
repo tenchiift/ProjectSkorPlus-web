@@ -84,6 +84,15 @@
 
 .input:focus {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.input:focus-visible,
+.btn:focus-visible,
+.backButton:focus-visible,
+.resend:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .input::placeholder {
@@ -189,4 +198,46 @@
 
 .resend:hover {
   text-decoration: underline;
+}
+
+/* Desktop split view: rescale for comfortable reading distance. */
+@media (min-width: 768px) {
+  .header {
+    display: none;
+  }
+
+  .content {
+    padding-top: 0;
+  }
+
+  .title {
+    font-size: 32px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+
+  .inputGroup {
+    margin-bottom: 22px;
+  }
+
+  .input {
+    padding: 15px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+  }
+
+  .btn {
+    min-height: 52px;
+    font-size: 16px;
+    margin-top: 24px;
+  }
+
+  .sentTitle {
+    font-size: 30px;
+  }
 }

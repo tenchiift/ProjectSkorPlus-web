@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { verifyLecturerCode } from '../services/adminService';
-import registerImage from '../assets/images/get-started.png';
+import AuthSplitLayout from '../components/AuthSplitLayout';
+import logo from '../assets/images/logo.png';
 import styles from './RegisterScreen.module.css';
 
 export default function RegisterScreen() {
@@ -13,6 +14,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [lecturerCode, setLecturerCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -77,16 +80,17 @@ export default function RegisterScreen() {
   };
 
   return (
-    <div className={styles.container}>
+    <AuthSplitLayout>
+      <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/')} aria-label="Go back">
+        <button className={`${styles.backButton} auth-back-btn`} onClick={() => navigate('/')} aria-label="Go back">
           <ArrowLeft size={24} />
         </button>
         <h2 className={styles.headerTitle}>Create account</h2>
       </div>
 
       <div className={styles.content}>
-        <img src={registerImage} alt="Get started" className={styles.logoImage} />
+        <img src={logo} alt="ProjectSkor+" className={styles.logoImage} />
         <h1 className={styles.title}>Get started with ProjectSkor+</h1>
 
         <div className={styles.roleRow}>
@@ -133,34 +137,57 @@ export default function RegisterScreen() {
               placeholder="you@example.com"
               autoCapitalize="off"
               autoCorrect="off"
+              autoComplete="email"
             />
           </div>
 
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="register-password">Password</label>
-            <input
-              id="register-password"
-              className={styles.input}
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 6 characters"
-            />
+            <div className={styles.inputWrapper}>
+              <input
+                id="register-password"
+                className={styles.input}
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min. 6 characters"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className={styles.eyeBtn}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="register-confirm-password">Confirm Password</label>
-            <input
-              id="register-confirm-password"
-              className={styles.input}
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your password"
-            />
+            <div className={styles.inputWrapper}>
+              <input
+                id="register-confirm-password"
+                className={styles.input}
+                type={showConfirm ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter your password"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className={styles.eyeBtn}
+                onClick={() => setShowConfirm((v) => !v)}
+                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              >
+                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className={styles.error} role="alert">{error}</p>}
 
           <button className={styles.btn} type="submit" disabled={loading}>
             {loading ? <div className={styles.spinner} /> : 'Create Account'}
@@ -176,6 +203,7 @@ export default function RegisterScreen() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+    </AuthSplitLayout>
   );
 }

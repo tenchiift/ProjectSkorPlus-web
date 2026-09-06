@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import AuthSplitLayout from '../components/AuthSplitLayout';
 import styles from './EmailLoginScreen.module.css';
 
 export default function EmailLoginScreen() {
@@ -43,9 +44,10 @@ export default function EmailLoginScreen() {
   };
 
   return (
-    <div className={styles.container}>
+    <AuthSplitLayout>
+      <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/login')} aria-label="Go back">
+        <button className={`${styles.backButton} auth-back-btn`} onClick={() => navigate('/login')} aria-label="Go back">
           <ArrowLeft size={24} />
         </button>
         <h2 className={styles.headerTitle}>Continue with Email</h2>
@@ -71,10 +73,11 @@ export default function EmailLoginScreen() {
                   placeholder="you@example.com"
                   autoCapitalize="off"
                   autoCorrect="off"
+                  autoComplete="email"
                 />
               </div>
 
-              {error && <p className={styles.error}>{error}</p>}
+              {error && <p className={styles.error} role="alert">{error}</p>}
 
               <button className={styles.btn} type="submit" disabled={loading}>
                 {loading ? <div className={styles.spinner} /> : 'Send Magic Link'}
@@ -103,6 +106,7 @@ export default function EmailLoginScreen() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </AuthSplitLayout>
   );
 }

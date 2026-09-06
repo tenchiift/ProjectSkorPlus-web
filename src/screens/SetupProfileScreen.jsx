@@ -179,7 +179,7 @@ export default function SetupProfileScreen() {
             </div>
           )}
 
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className={styles.error} role="alert">{error}</p>}
 
           <button className={styles.btn} type="submit" disabled={loading}>
             {loading ? <div className={styles.spinner} /> : 'Next'}

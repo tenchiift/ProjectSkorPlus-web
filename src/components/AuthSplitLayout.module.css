@@ -1,0 +1,86 @@
+.backdrop {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.card {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-surface, #FFFFFF);
+}
+
+/* Brand panel: calm gradient with wordmark top and copy block bottom. */
+.brandPanel {
+  position: relative;
+  flex: 0 0 44%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 56px 56px;
+  overflow: hidden;
+  background:
+    radial-gradient(80% 60% at 85% 8%, rgba(180, 154, 240, 0.28), transparent 60%),
+    linear-gradient(160deg, #2A2158 0%, #45309B 55%, #6D4FC4 100%);
+  color: #FFFFFF;
+}
+
+.brandTop {
+  display: flex;
+  align-items: center;
+}
+
+.brandWordmark {
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  color: #F5F6F8;
+}
+
+.brandCopy {
+  max-width: 420px;
+}
+
+.brandHeadline {
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 44px;
+  line-height: 1.12;
+  letter-spacing: -0.8px;
+  margin-bottom: 16px;
+  color: #FFFFFF;
+}
+
+.brandTagline {
+  font-family: var(--font-body, sans-serif);
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.contentPanel {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* The screens keep their phone-width column; center it in the panel.
+   Their min-height:100vh is for standalone mobile — neutralize it here so
+   the panel scrolls by itself. */
+.contentPanel > * {
+  width: 100%;
+  max-width: var(--phone-width, 480px);
+  margin: 0 auto;
+  min-height: 0 !important;
+  padding-top: var(--spacing-xl, 24px);
+  padding-bottom: var(--spacing-xl, 24px);
+}
+
+/* Mobile-only chrome (back arrows) has no place in the desktop split view. */
+.contentPanel :global(.auth-back-btn) {
+  display: none;
+}

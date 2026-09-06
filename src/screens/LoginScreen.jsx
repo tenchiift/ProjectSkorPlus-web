@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../config/supabase';
+import AuthSplitLayout from '../components/AuthSplitLayout';
 import styles from './LoginScreen.module.css';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -53,9 +55,10 @@ export default function LoginScreen() {
   };
 
   return (
-    <div className={styles.container}>
+    <AuthSplitLayout>
+      <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/')} aria-label="Go back">
+        <button className={`${styles.backButton} auth-back-btn`} onClick={() => navigate('/')} aria-label="Go back">
           <ArrowLeft size={24} />
         </button>
         <h2 className={styles.headerTitle}>Welcome back</h2>
@@ -76,22 +79,34 @@ export default function LoginScreen() {
               placeholder="you@example.com"
               autoCapitalize="off"
               autoCorrect="off"
+              autoComplete="email"
             />
           </div>
 
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="login-password">Password</label>
-            <input
-              id="login-password"
-              className={styles.input}
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
+            <div className={styles.inputWrapper}>
+              <input
+                id="login-password"
+                className={styles.input}
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className={styles.eyeBtn}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className={styles.error} role="alert">{error}</p>}
 
           <button className={styles.btn} type="submit" disabled={loading}>
             {loading ? <div className={styles.spinner} /> : 'Sign In'}
@@ -107,6 +122,7 @@ export default function LoginScreen() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+    </AuthSplitLayout>
   );
 }
