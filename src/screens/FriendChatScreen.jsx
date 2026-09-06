@@ -34,6 +34,8 @@ export default function FriendChatScreen() {
   const cameraRef = useRef(null);
   const galleryRef = useRef(null);
   const bottomRef = useRef(null);
+  // Locks handleSend against double-taps and Enter+click racing on stale input state.
+  const sendingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,8 +115,9 @@ export default function FriendChatScreen() {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!user || ((!text && uploading) || !conversationId)) return;
-    if (!text) return;
+    if (!user || !text || !conversationId) return;
+    if (sendingRef.current) return;
+    sendingRef.current = true;
 
     // Optimistic append so the sender sees the message immediately.
     const tempId = `tmp-${Date.now()}`;
@@ -127,6 +130,8 @@ export default function FriendChatScreen() {
       console.error('Send error:', err);
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setInput(text);
+    } finally {
+      sendingRef.current = false;
     }
   };
 
@@ -134,6 +139,14 @@ export default function FriendChatScreen() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file || !conversationId) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please choose an image file.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image is too large. Please choose one under 10MB.');
+      return;
+    }
     setUploading(true);
     try {
       const url = await uploadChatImage(user.id, file);
@@ -141,7 +154,7 @@ export default function FriendChatScreen() {
       notifyRecipient('📷 Photo');
     } catch (err) {
       console.error('Upload error:', err);
-      alert('Failed to upload image. Please try again.');
+      alert(`Failed to upload image: ${err.message ?? 'Please try again.'}`);
     } finally {
       setUploading(false);
     }

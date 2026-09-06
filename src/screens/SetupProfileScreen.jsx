@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import styles from './SetupProfileScreen.module.css';
@@ -6,11 +6,14 @@ import styles from './SetupProfileScreen.module.css';
 export default function SetupProfileScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [name, setName] = useState(location.state?.username ?? '');
-  const [username, setUsername] = useState(location.state?.username ?? '');
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [semester, setSemester] = useState('');
+  const [photoURL, setPhotoURL] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   const userId = location.state?.userId;
   const email = location.state?.email ?? '';
@@ -24,6 +27,42 @@ export default function SetupProfileScreen() {
       setRole(user?.user_metadata?.role ?? 'student');
     });
   }, [role]);
+
+  const handlePickImage = () => fileInputRef.current?.click();
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !userId) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Please choose an image file.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image is too large. Please choose one under 10MB.');
+      return;
+    }
+    setUploading(true);
+    setError('');
+    try {
+      const extension = file.name.split('.').pop() || 'jpg';
+      const fileName = `${Date.now()}.${extension}`;
+      const path = `${userId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      setPhotoURL(publicUrl);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError('Photo upload failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -59,8 +98,10 @@ export default function SetupProfileScreen() {
           name: trimmedName,
           username: trimmedUsername,
           role,
-          semester: semester.trim(),
+          // Lecturers aren't tied to a semester/year.
+          semester: role === 'lecturer' ? null : semester.trim(),
           email,
+          ...(photoURL ? { photo_url: photoURL } : {}),
           total_exp: 0,
           days_streak: 0,
           completed: 0,
@@ -85,11 +126,23 @@ export default function SetupProfileScreen() {
           <p className={styles.subtitle}>Let us know who you are before we begin!</p>
         </div>
 
-        <div className={styles.avatarContainer}>
+        <div className={styles.avatarContainer} onClick={handlePickImage} role="button" aria-label="Add photo">
           <div className={styles.avatar}>
-            <span className={styles.avatarText}>+</span>
+            {photoURL ? (
+              <img src={photoURL} alt="" className={styles.avatarImage} />
+            ) : (
+              <span className={styles.avatarText}>{uploading ? '' : '+'}</span>
+            )}
+            {uploading && <div className={styles.avatarSpinner} />}
           </div>
           <span className={styles.avatarLabel}>Add photo (optional)</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
         </div>
 
         <form className={styles.form} onSubmit={handleSave}>
@@ -114,15 +167,17 @@ export default function SetupProfileScreen() {
             />
           </div>
 
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Semester / Year</label>
-            <input
-              className={styles.input}
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
-              placeholder="e.g. Semester 2, 2025"
-            />
-          </div>
+          {role !== 'lecturer' && (
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Semester / Year</label>
+              <input
+                className={styles.input}
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                placeholder="e.g. Semester 2, 2025"
+              />
+            </div>
+          )}
 
           {error && <p className={styles.error}>{error}</p>}
 

@@ -40,24 +40,25 @@ export const ensureDailyNotifications = async (userId, profile, countdown) => {
   const key = `skorplus-daily-${userId}`;
   try {
     if (localStorage.getItem(key) === todayStr) return;
+    // Reserve the day before any await — StrictMode double-mounts two runs
+    // concurrently and both would otherwise pass this check and insert twice.
+    localStorage.setItem(key, todayStr);
   } catch { /* ignore */ }
 
-  // Skip if already seeded today (check DB to avoid duplicates on multi-device).
-  const { data: existing } = await supabase
-    .from('notifications')
-    .select('id')
-    .eq('user_id', userId)
-    .gte('created_at', todayStr)
-    .limit(1);
+  try {
+    // Skip if already seeded today (check DB to avoid duplicates on multi-device).
+    const { data: existing } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', todayStr)
+      .limit(1);
 
-  if (existing && existing.length > 0) {
-    try { localStorage.setItem(key, todayStr); } catch { /* ignore */ }
-    return;
-  }
+    if (existing && existing.length > 0) return;
 
-  const { quote, tip } = pickDaily(todayStr);
+    const { quote, tip } = pickDaily(todayStr);
 
-  const rows = [];
+    const rows = [];
   if (notifPrefOn('quote')) {
     rows.push({ user_id: userId, type: 'quote', title: quote.title, body: quote.body });
   }
@@ -92,15 +93,29 @@ export const ensureDailyNotifications = async (userId, profile, countdown) => {
 
   if (rows.length > 0) {
     const { error } = await supabase.from('notifications').insert(rows);
-    if (error) throw error;
+    if (error) {
+      // Free the day so a later attempt can retry.
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      throw error;
+    }
   }
-
-  try { localStorage.setItem(key, todayStr); } catch { /* ignore */ }
+  } catch (err) {
+    // Any other failure (e.g. the DB duplicate check) also frees the day.
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    throw err;
+  }
 };
 
 export const subscribeToNotifications = (userId, callback) => {
+  const topic = `notifications-${userId}`;
+  // supabase.channel() returns the same instance for a repeated topic; adding
+  // postgres_changes to an already-subscribed channel throws, so drop any
+  // stale channel first (StrictMode double-mount, fast remounts).
+  const stale = supabase.getChannels().find((c) => c.topic === topic);
+  if (stale) supabase.removeChannel(stale);
+
   return supabase
-    .channel(`notifications-${userId}`)
+    .channel(topic)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },

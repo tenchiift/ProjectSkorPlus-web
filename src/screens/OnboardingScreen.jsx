@@ -49,12 +49,6 @@ export default function OnboardingScreen() {
 
   return (
     <div className={styles.container}>
-      <img
-        src="/assets/images/reference pages/gradient.png"
-        alt=""
-        className={styles.gradientBg}
-      />
-
       <div className={styles.inner}>
         <div className={styles.skipRow}>
           <div style={{ flex: 1 }} />

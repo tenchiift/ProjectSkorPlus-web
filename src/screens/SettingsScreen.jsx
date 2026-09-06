@@ -175,53 +175,59 @@ export default function SettingsScreen() {
           </button>
         </div>
 
-        <div className={styles.card}>
-          {NOTIF_PREFS.map((pref, i) => (
-            <div key={pref.key}>
-              <button className={styles.row} onClick={() => toggleNotif(pref.key)}>
-                <Bell size={20} color="var(--color-text-secondary)" />
-                <div className={styles.rowInfo}>
-                  <span className={styles.rowLabel}>{pref.label}</span>
-                  <span className={styles.rowHint}>{pref.hint}</span>
-                </div>
-                <div className={`${styles.switch} ${notifPrefs[pref.key] ? styles.switchOn : ''}`}>
-                  <div className={styles.switchKnob} />
-                </div>
-              </button>
-            </div>
-          ))}
-        </div>
+        {/* Lecturers skip the student-oriented cards: notification prefs
+            (quotes/tips) and the AI Buddy language/personality/history card. */}
+        {role !== 'lecturer' && (
+          <div className={styles.card}>
+            {NOTIF_PREFS.map((pref, i) => (
+              <div key={pref.key}>
+                <button className={styles.row} onClick={() => toggleNotif(pref.key)}>
+                  <Bell size={20} color="var(--color-text-secondary)" />
+                  <div className={styles.rowInfo}>
+                    <span className={styles.rowLabel}>{pref.label}</span>
+                    <span className={styles.rowHint}>{pref.hint}</span>
+                  </div>
+                  <div className={`${styles.switch} ${notifPrefs[pref.key] ? styles.switchOn : ''}`}>
+                    <div className={styles.switchKnob} />
+                  </div>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        <div className={styles.card}>
-          <button className={styles.row} onClick={() => setLangModal(true)}>
-            <Languages size={20} color="var(--color-text-secondary)" />
-            <div className={styles.rowInfo}>
-              <span className={styles.rowLabel}>Language</span>
-              <span className={styles.rowHint}>{labelFor(AI_LANG_OPTIONS, aiLang)}</span>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-secondary)" />
-          </button>
-
-
-          <button className={styles.row} onClick={() => setPersonaModal(true)}>
-            <Smile size={20} color="var(--color-text-secondary)" />
-            <div className={styles.rowInfo}>
-              <span className={styles.rowLabel}>Personality</span>
-              <span className={styles.rowHint}>{labelFor(AI_PERSONA_OPTIONS, aiPersona)}</span>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-secondary)" />
-          </button>
+        {role !== 'lecturer' && (
+          <div className={styles.card}>
+            <button className={styles.row} onClick={() => setLangModal(true)}>
+              <Languages size={20} color="var(--color-text-secondary)" />
+              <div className={styles.rowInfo}>
+                <span className={styles.rowLabel}>Language</span>
+                <span className={styles.rowHint}>{labelFor(AI_LANG_OPTIONS, aiLang)}</span>
+              </div>
+              <ChevronRight size={18} color="var(--color-text-secondary)" />
+            </button>
 
 
-          <button className={styles.row} onClick={() => { setClearError(null); setClearModal(true); }}>
-            <Trash2 size={20} color="var(--color-text-secondary)" />
-            <div className={styles.rowInfo}>
-              <span className={styles.rowLabel}>Clear Chat History</span>
-              <span className={styles.rowHint}>Delete all AI conversations</span>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-secondary)" />
-          </button>
-        </div>
+            <button className={styles.row} onClick={() => setPersonaModal(true)}>
+              <Smile size={20} color="var(--color-text-secondary)" />
+              <div className={styles.rowInfo}>
+                <span className={styles.rowLabel}>Personality</span>
+                <span className={styles.rowHint}>{labelFor(AI_PERSONA_OPTIONS, aiPersona)}</span>
+              </div>
+              <ChevronRight size={18} color="var(--color-text-secondary)" />
+            </button>
+
+
+            <button className={styles.row} onClick={() => { setClearError(null); setClearModal(true); }}>
+              <Trash2 size={20} color="var(--color-text-secondary)" />
+              <div className={styles.rowInfo}>
+                <span className={styles.rowLabel}>Clear Chat History</span>
+                <span className={styles.rowHint}>Delete all AI conversations</span>
+              </div>
+              <ChevronRight size={18} color="var(--color-text-secondary)" />
+            </button>
+          </div>
+        )}
 
         <div className={styles.card}>
           <button className={styles.row} onClick={() => navigate('/profile')}>

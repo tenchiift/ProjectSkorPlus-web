@@ -8,7 +8,6 @@ import styles from './RegisterScreen.module.css';
 
 export default function RegisterScreen() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
   const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +20,7 @@ export default function RegisterScreen() {
     e.preventDefault();
     setError('');
 
-    if (!username.trim() || !email.trim() || !password || !confirmPassword) {
+    if (!email.trim() || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
@@ -45,7 +44,7 @@ export default function RegisterScreen() {
         password,
         options: {
           // Role in metadata too — survives the email-redirect setup path.
-          data: { username: username.trim(), role },
+          data: { role },
           emailRedirectTo: window.location.origin + '/setup-profile',
         },
       });
@@ -62,7 +61,7 @@ export default function RegisterScreen() {
             return;
           }
         }
-        navigate('/setup-profile', { state: { userId: data.user.id, email: data.user.email, username: username.trim(), role }, replace: true });
+        navigate('/setup-profile', { state: { userId: data.user.id, email: data.user.email, role }, replace: true });
       }
     } catch (err) {
       if (err.message?.includes('already registered')) {
@@ -122,19 +121,6 @@ export default function RegisterScreen() {
               <p className={styles.hint}>Required — verify you're a real lecturer.</p>
             </div>
           )}
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="register-username">Username</label>
-            <input
-              id="register-username"
-              className={styles.input}
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Choose a username"
-              autoCapitalize="off"
-            />
-          </div>
 
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="register-email">Email</label>

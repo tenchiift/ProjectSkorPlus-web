@@ -102,14 +102,18 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     let sub;
+    let cancelled = false;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || cancelled) return;
       sub = subscribeToNotifications(user.id, (n) => {
         if (!n.read) setUnreadNotif((c) => c + 1);
       });
     })();
-    return () => { sub?.unsubscribe(); };
+    return () => {
+      cancelled = true;
+      sub?.unsubscribe();
+    };
   }, []);
 
   const handleCarouselScroll = () => {
@@ -287,7 +291,7 @@ export default function DashboardScreen() {
                 ? 'On break'
                 : semester
                   ? semester.phase === 'teaching'
-                    ? `Week ${semester.week} of 14`
+                    ? `Week ${semester.week} of 12`
                     : semester.phase === 'study'
                       ? 'Study week'
                       : 'Exam week'
@@ -299,7 +303,7 @@ export default function DashboardScreen() {
 
           <div className={styles.semesterLabelRow}>
             <span className={styles.semesterLabel}>PROGRESS</span>
-            <span className={styles.semesterLabelRight}>W14 FINAL</span>
+            <span className={styles.semesterLabelRight}>W12 FINAL</span>
           </div>
 
           <div className={styles.semesterBar}>
@@ -339,7 +343,7 @@ export default function DashboardScreen() {
                 <>
                   <span className={styles.semesterHint}>What week are you on?</span>
                   <div className={styles.semesterWeekPicker}>
-                    {Array.from({ length: 14 }, (_, i) => {
+                    {Array.from({ length: 12 }, (_, i) => {
                       const week = i + 1;
                       return (
                         <button

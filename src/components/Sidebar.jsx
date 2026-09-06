@@ -27,7 +27,6 @@ const LECTURER_MENU = [
 ];
 
 // Admin access lives in Settings, not the sidebar.
-const MENU = STUDENT_MENU;
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const handleNav = useCallback((route) => {
@@ -35,9 +34,14 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
     setTimeout(() => onNavigate(route), 200);
   }, [onClose, onNavigate]);
 
+  // Profile still loading — render nothing role-specific so the lecturer
+  // never sees the student menu / streak flash before the fetch lands.
+  const profileLoaded = !!userData?.role;
+
   const MENU =
     userData?.role === 'lecturer' ? LECTURER_MENU
-    : STUDENT_MENU;
+    : userData?.role ? STUDENT_MENU
+    : [];
   const xp = xpInfo(userData?.total_exp);
   const streak = userData?.days_streak ?? 0;
 
@@ -58,9 +62,9 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
           <User size={32} color="#FFFFFF" />
         </div>
       )}
-      <p className={styles.profileName}>{userData?.name ?? 'Student'}</p>
-      <p className={styles.profileSem}>{userData?.semester ?? 'Semester'}</p>
-      {!isLecturer && (
+      <p className={styles.profileName}>{userData?.name ?? ''}</p>
+      <p className={styles.profileSem}>{profileLoaded ? (userData?.semester ?? 'Semester') : ''}</p>
+      {profileLoaded && !isLecturer && (
         <>
           <span className={styles.streakPill}>
             {streak > 0 ? `🔥 ${streak} Day Streak` : '🔥 Start Streak!'}

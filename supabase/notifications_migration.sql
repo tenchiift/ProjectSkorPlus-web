@@ -21,6 +21,11 @@ create policy "read own notifications"
   on public.notifications for select
   using (auth.uid() = user_id);
 
+drop policy if exists "insert own notifications" on public.notifications;
+create policy "insert own notifications"
+  on public.notifications for insert
+  with check (auth.uid() = user_id);
+
 drop policy if exists "update own notifications" on public.notifications;
 create policy "update own notifications"
   on public.notifications for update

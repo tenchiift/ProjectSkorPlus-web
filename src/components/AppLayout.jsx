@@ -1,17 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { notifyEvent } from '../services/notificationService';
 import Sidebar from './Sidebar';
+import LoadingScreen from './LoadingScreen';
 import styles from './AppLayout.module.css';
 
 export default function AppLayout({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [userData, setUserData] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  // Pre-app routes (profile setup, intro pages) render chrome-free — the
+  // sidebar only exists once the introduction flow is finished.
+  const isPreAppRoute = ['/setup-profile', '/onboarding'].includes(location.pathname);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
@@ -105,7 +111,9 @@ export default function AppLayout({ children }) {
     }
   }, [navigate, handleLogout]);
 
-  if (isDesktop) {
+  // Inner Suspense boundary: lazy screen chunks load inside the content area
+  // only, so the sidebar/chrome never flashes a full-page loading screen.
+  if (isDesktop && !isPreAppRoute) {
     return (
       <div className={styles.desktopLayout}>
         <Sidebar
@@ -116,7 +124,9 @@ export default function AppLayout({ children }) {
           userData={userData}
         />
         <main className={styles.desktopContent}>
-          {children}
+          <Suspense fallback={<LoadingScreen />}>
+            {children}
+          </Suspense>
         </main>
       </div>
     );
@@ -124,7 +134,9 @@ export default function AppLayout({ children }) {
 
   return (
     <>
-      {children}
+      <Suspense fallback={<LoadingScreen />}>
+        {children}
+      </Suspense>
       <Sidebar
         visible={sidebarVisible}
         onClose={() => setSidebarVisible(false)}
