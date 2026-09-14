@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, X, Pencil, Trash2, Layers, ListChecks } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
-import { getModules, createModule, updateModule, deleteModule } from '../services/moduleService';
+import { getModules, createModule, updateModule, deleteModule, getLecturerModules, assignLecturerModule, unassignLecturerModule } from '../services/moduleService';
 import styles from './ManageModulesScreen.module.css';
 
 const BLANK = { title: '', description: '', color: 'purple', order: 1 };
@@ -14,6 +14,7 @@ export default function ManageModulesScreen() {
   const [checking, setChecking] = useState(true);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [teachingIds, setTeachingIds] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState(BLANK);
@@ -40,6 +41,7 @@ export default function ManageModulesScreen() {
   const load = async () => {
     try {
       setModules(await getModules());
+      if (user) setTeachingIds(await getLecturerModules(user.id));
     } catch (err) {
       console.error(err);
     } finally {
@@ -107,6 +109,22 @@ export default function ManageModulesScreen() {
     }
   };
 
+  const toggleTeaching = async (mod) => {
+    const teaching = teachingIds.includes(mod.id);
+    try {
+      if (teaching) {
+        await unassignLecturerModule(user.id, mod.id);
+        setTeachingIds((prev) => prev.filter((id) => id !== mod.id));
+      } else {
+        await assignLecturerModule(user.id, mod.id);
+        setTeachingIds((prev) => [...prev, mod.id]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update teaching scope.');
+    }
+  };
+
   if (checking) {
     return <div className={styles.container}><div className={styles.center}><div className={styles.spinner} /></div></div>;
   }
@@ -160,6 +178,13 @@ export default function ManageModulesScreen() {
                   </button>
                 </div>
               </div>
+              <button
+                className={`${styles.teachToggle} ${teachingIds.includes(mod.id) ? styles.teachToggleOn : ''}`}
+                onClick={() => toggleTeaching(mod)}
+                type="button"
+              >
+                {teachingIds.includes(mod.id) ? 'I teach this ✓' : 'Add to my teaching'}
+              </button>
             </div>
           ))
         )}

@@ -68,7 +68,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
   const isLecturer = userData?.role === 'lecturer';
 
   const roleTag = userData?.role ? (
-    <span className={`${styles.roleTag} ${userData.role === 'admin' ? styles.roleTagAdmin : ''}`}>
+    <span className={styles.roleTag}>
       {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
     </span>
   ) : null;

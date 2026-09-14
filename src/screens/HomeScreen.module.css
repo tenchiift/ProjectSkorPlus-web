@@ -105,3 +105,43 @@
 .btnOutline:hover {
   opacity: 0.9;
 }
+
+/* Desktop split view: relaxed scale — roomy, not crowded. */
+@media (min-width: 768px) {
+  .container {
+    min-height: 0;
+  }
+
+  .welcomeContainer {
+    margin-top: 0;
+  }
+
+  .logoContainer {
+    flex: 0 0 auto;
+    margin: 24px 0 36px;
+  }
+
+  .logoImage {
+    width: 200px;
+    height: 200px;
+    margin: 8px 0;
+  }
+
+  .heroContainer {
+    margin-bottom: 40px;
+  }
+
+  .title {
+    font-size: 40px;
+  }
+
+  .tagline {
+    font-size: 17px;
+    margin-top: var(--spacing-sm);
+  }
+
+  .buttonContainer {
+    max-width: 360px;
+    margin-bottom: 0;
+  }
+}

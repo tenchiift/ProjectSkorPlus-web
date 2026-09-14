@@ -14,7 +14,7 @@ create policy "Chat images are publicly accessible"
 
 drop policy if exists "Users can upload their own chat images" on storage.objects;
 create policy "Users can upload their own chat images"
-  on storage.objects for insert
+  on storage.objects for insert–
   with check (
     bucket_id = 'chat'
     and auth.uid() = (storage.foldername(name))[1]::uuid

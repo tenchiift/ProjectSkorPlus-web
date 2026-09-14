@@ -22,9 +22,14 @@ export const getUnreadCount = async (userId) => {
 };
 
 export const notifyEvent = async (userId, type, title, body) => {
-  const { error } = await supabase
-    .from('notifications')
-    .insert({ user_id: userId, type, title, body: body || null });
+  // Cross-user inserts are blocked by RLS (insert-own only); app-driven
+  // notifications go through the guarded security definer RPC instead.
+  const { error } = await supabase.rpc('send_notification', {
+    target_user: userId,
+    p_type: type,
+    p_title: title,
+    p_body: body || null,
+  });
   if (error) throw error;
 };
 

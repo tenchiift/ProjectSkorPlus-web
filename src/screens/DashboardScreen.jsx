@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
 import { supabase } from '../config/supabase';
-import { getModules, getUserModuleProgress } from '../services/moduleService';
+import { getModules, getModulesForStudent, getUserModuleProgress } from '../services/moduleService';
 import { setWeekAnchor, setSemesterPaused, claimDailyStreak } from '../services/userService';
 import { ensureDailyNotifications, subscribeToNotifications, getUnreadCount } from '../services/notificationService';
 import LecturerDashboardScreen from './LecturerDashboardScreen';
+import examImage from '../assets/images/exam.jpeg';
+import zepImage from '../assets/images/zep.avif';
 import styles from './DashboardScreen.module.css';
 
 export default function DashboardScreen() {
@@ -81,8 +83,10 @@ export default function DashboardScreen() {
         if (result?.claimed) window.dispatchEvent(new CustomEvent('skorplus-profile-refresh'));
       } catch { /* ignore */ }
 
+      const isStudent = (profile?.role ?? 'student') === 'student';
+
       const [modulesData, progress, countdownData] = await Promise.all([
-        getModules(),
+        isStudent ? getModulesForStudent(user.id) : getModules(),
         getUserModuleProgress(user.id),
         supabase.from('exam_countdowns').select('*').eq('user_id', user.id).order('exam_date', { ascending: true }).limit(1),
       ]);
@@ -250,15 +254,12 @@ export default function DashboardScreen() {
     <>
       {modules.map((mod) => {
         const progress = moduleProgress[mod.id]?.progress ?? 0;
-        // All module cards share the same purple gradient (theme-aware).
-        const gradientClass = 'bg-graph-purple';
         return (
           <button
             key={mod.id}
-            className={`${styles.moduleCardWrapper} ${gradientClass}`}
+            className={styles.moduleCardWrapper}
             onClick={() => navigate('/module/' + mod.id, { state: { module: mod } })}
           >
-            <div className={styles.moduleTopPill} />
             <h3 className={styles.moduleTitle}>{mod.title}</h3>
             <p className={styles.moduleDesc}>{mod.description}</p>
             <div className={styles.moduleProgressBarBg}>
@@ -320,7 +321,12 @@ export default function DashboardScreen() {
             </span>
           </div>
 
-          <span className={styles.semesterPulse}>SEMESTER PULSE</span>
+          <div className={styles.semesterMetaRow}>
+            <span className={styles.semesterPulse}>SEMESTER PULSE</span>
+            {userData?.semester && (
+              <span className={styles.semesterYouOn}>You're on {userData.semester}</span>
+            )}
+          </div>
 
           <div className={styles.semesterLabelRow}>
             <span className={styles.semesterLabel}>PROGRESS</span>
@@ -337,7 +343,7 @@ export default function DashboardScreen() {
           {paused && semester && (
             <div className={styles.semesterControls}>
               <span className={styles.semesterHint}>Break active — progress is paused.</span>
-              <button className={styles.semesterActionBtn} onClick={handleEndBreak} disabled={saving}>
+              <button className={`${styles.semesterActionBtn} ${styles.semesterActionBtnSmall}`} onClick={handleEndBreak} disabled={saving}>
                 End mid-sem break
               </button>
             </div>
@@ -414,6 +420,39 @@ export default function DashboardScreen() {
           )}
         </div>
 
+        <motion.div className={styles.countdownCompact} {...riseProps(0.2)}>
+          {countdown ? (
+            <>
+              <img src={examImage} className={styles.countdownBg} alt="" />
+              <div className={styles.countdownOverlay} />
+              <div className={styles.countdownContent}>
+                <div className={styles.countdownDaysRow}>
+                  <span className={styles.countdownDays}>{daysLeft !== null ? daysLeft : '0'}</span>
+                  <span className={styles.countdownDaysLabel}>days left</span>
+                </div>
+                <p className={styles.countdownCompactTitle}>{countdown.title}</p>
+                <div className={styles.countdownBottomRow}>
+                  <div className={styles.countdownDateRow}>
+                    <Calendar size={13} color="rgba(255, 255, 255, 0.85)" />
+                    <span className={styles.countdownDate}>
+                      {new Date(countdown.exam_date).toLocaleDateString('en-GB', {
+                        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <button className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className={styles.countdownEmpty}>
+              <Calendar size={28} color="var(--color-text-secondary)" />
+              <p className={styles.countdownEmptyText}>Set your final exam</p>
+              <button className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</button>
+            </div>
+          )}
+        </motion.div>
+
         <div className={styles.statsRow}>
           {actionCards.map((item, i) => {
             const Icon = item.icon;
@@ -431,46 +470,21 @@ export default function DashboardScreen() {
           })}
         </div>
 
-        <motion.div className={styles.countdownCompact} {...riseProps(0.2)}>
-          {countdown ? (
-            <div>
-              <div className={styles.countdownDaysRow}>
-                <span className={styles.countdownDays}>{daysLeft !== null ? daysLeft : '0'}</span>
-                <span className={styles.countdownDaysLabel}>days left</span>
-              </div>
-              <p className={styles.countdownCompactTitle}>{countdown.title}</p>
-              <div className={styles.countdownBottomRow}>
-                <div className={styles.countdownDateRow}>
-                  <Calendar size={13} color="var(--color-text-secondary)" />
-                  <span className={styles.countdownDate}>
-                    {new Date(countdown.exam_date).toLocaleDateString('en-GB', {
-                      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-                <button className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</button>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.countdownEmpty}>
-              <Calendar size={28} color="var(--color-text-secondary)" />
-              <p className={styles.countdownEmptyText}>Set your final exam</p>
-              <button className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</button>
-            </div>
-          )}
-        </motion.div>
-
         {modules.length > 0 && (
           <motion.button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')} {...riseProps(0.28)}>
-            <div className={styles.zepCardContent}>
-              <div className={styles.zepIconWrap}><Brain size={26} color="#FFFFFF" /></div>
-              <div className={styles.zepTextWrap}>
-                <span className={styles.zepKicker}>QUICK PRACTICE</span>
-                <span className={styles.zepTitle}>Zep Quiz</span>
-                <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
+            <img src={zepImage} className={styles.zepBg} alt="" />
+            <div className={styles.zepOverlay} />
+            <div className={styles.zepContent}>
+              <div className={styles.zepCardContent}>
+                <div className={styles.zepIconWrap}><Brain size={26} color="#FFFFFF" /></div>
+                <div className={styles.zepTextWrap}>
+                  <span className={styles.zepKicker}>QUICK PRACTICE</span>
+                  <span className={styles.zepTitle}>Zep Quiz</span>
+                  <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
+                </div>
               </div>
+              <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
             </div>
-            <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
           </motion.button>
         )}
 
@@ -496,7 +510,18 @@ export default function DashboardScreen() {
             </div>
           </>
         ) : (
-          <div className={styles.emptyCard}><p className={styles.emptyText}>No modules available</p></div>
+          <div className={styles.emptyCard}>
+            <p className={styles.emptyText}>
+              {role === 'student'
+                ? 'No modules yet. Select your lecturers to see your subjects.'
+                : 'No modules available'}
+            </p>
+            {role === 'student' && (
+              <button className={styles.emptyCta} onClick={() => navigate('/select-lecturers')}>
+                Choose Lecturers
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

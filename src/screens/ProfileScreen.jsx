@@ -132,7 +132,7 @@ export default function ProfileScreen() {
       const updateData = {
         id: userId,
         name: name.trim(),
-        email,
+        // Email belongs to auth.users — not stored in profiles (public read).
         gender,
         semester,
         bio: bio.trim(),

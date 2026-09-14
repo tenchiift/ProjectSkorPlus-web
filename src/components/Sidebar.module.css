@@ -85,11 +85,10 @@
   font-family: var(--font-body-bold);
   font-size: 12px;
   color: #FFFFFF;
-  background: linear-gradient(135deg, #F59E0B, #EA580C);
+  background: #F59E0B;
   border-radius: var(--radius-full);
   padding: 5px 14px;
   margin-top: 4px;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
 }
 
 .profileCenter {
@@ -141,14 +140,9 @@
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--color-primary);
   border-radius: var(--radius-full);
   padding: 4px 12px;
-}
-
-.roleTagAdmin {
-  background: color-mix(in srgb, var(--color-primary) 80%, #FFFFFF 20%);
-  border: none;
 }
 
 .profileSem {

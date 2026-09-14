@@ -159,7 +159,7 @@
   font-size: 13px;
   color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 15%, transparent);
-  padding: 10px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -171,6 +171,24 @@
   letter-spacing: 2px;
   color: var(--color-text-secondary);
   text-transform: uppercase;
+}
+
+.semesterMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.semesterYouOn {
+  font-family: var(--font-semester);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 .semesterLabelRow {
@@ -248,7 +266,12 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--spacing-sm);
+}
+
+.semesterControls .semesterHint {
+  flex-basis: 100%;
 }
 
 .semesterActionBtn {
@@ -266,6 +289,11 @@
 .semesterActionBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.semesterActionBtnSmall {
+  padding: 4px 10px;
+  font-size: 12px;
 }
 
 .semesterActionBtnSecondary {
@@ -370,47 +398,58 @@
 
 /* Countdown */
 .countdownCompact {
-  background: var(--color-surface);
+  position: relative;
+  overflow: hidden;
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-@media (min-width: 768px) {
-  .countdownCompact {
-    padding: var(--spacing-xl);
-  }
+.countdownBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
 }
 
-.countdownDaysRow {
-  display: flex;
-  align-items: baseline;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
+.countdownOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0) 60%), linear-gradient(160deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));
+}
+
+.countdownContent {
+  position: relative;
+  z-index: 1;
 }
 
 .countdownDays {
   font-family: var(--font-heading-bold);
   font-size: 34px;
   line-height: 38px;
-  color: var(--color-primary);
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
 
 .countdownDaysLabel {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .countdownCompactTitle {
   font-family: var(--font-heading-bold);
   font-size: 14px;
-  color: var(--color-text-primary);
+  color: #ffffff;
   margin-bottom: var(--spacing-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .countdownBottomRow {
@@ -428,22 +467,36 @@
 .countdownDate {
   font-family: var(--font-body);
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .countdownCompact {
+    padding: var(--spacing-xl);
+  }
+}
+
+.countdownDaysRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
 .countdownEditBtn {
   padding: 4px 14px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-primary);
-  background: none;
+  border: none;
+  background: var(--color-primary);
   font-family: var(--font-body-bold);
   font-size: 12px;
-  color: var(--color-primary);
+  color: #ffffff;
   cursor: pointer;
 }
 
 .countdownEditBtn:hover {
-  background: rgba(124, 123, 240, 0.1);
+  opacity: 0.9;
 }
 
 .countdownEmpty {
@@ -474,10 +527,11 @@
 
 /* Zep Quiz card */
 .zepCard {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, var(--color-gradient-vector-start), var(--color-gradient-vector-end));
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
@@ -490,6 +544,30 @@
 
 .zepCard:hover {
   opacity: 0.92;
+}
+
+.zepBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
+}
+
+.zepOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0) 60%), linear-gradient(160deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));
+}
+
+.zepContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .zepCardContent {
@@ -521,18 +599,21 @@
   font-size: 11px;
   letter-spacing: 1.5px;
   color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .zepTitle {
   font-family: var(--font-heading-bold);
   font-size: 20px;
   color: #FFFFFF;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .zepDesc {
   font-family: var(--font-body);
   font-size: 12px;
   color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .zepArrow {
@@ -594,26 +675,17 @@
   flex: 0 0 100%;
   scroll-snap-align: start;
   padding-right: var(--spacing-md);
-  border: none;
   cursor: pointer;
   text-align: left;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
   min-height: 200px;
   display: flex;
   flex-direction: column;
+  border: none;
+  background: var(--color-primary);
+  color: #ffffff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-/* Module card background lives in global.css (.bg-graph-purple). */
-
-.moduleTopPill {
-  width: 60px;
-  height: 24px;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.25);
-  align-self: flex-end;
-  margin-bottom: var(--spacing-lg);
 }
 
 .moduleTitle {
@@ -663,7 +735,7 @@
 .modulePercent {
   font-family: var(--font-body);
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .continueBtn {
@@ -702,13 +774,31 @@
   background: var(--color-surface);
   padding: var(--spacing-xxl);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--spacing-md);
 }
 
 .emptyText {
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.emptyCta {
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.emptyCta:hover {
+  opacity: 0.92;
 }
 

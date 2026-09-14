@@ -1,0 +1,197 @@
+.loadingContainer {
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-background);
+}
+
+.container {
+  min-height: 100%;
+  max-width: var(--phone-width);
+  margin: 0 auto;
+  background: var(--color-background);
+  padding-top: env(safe-area-inset-top);
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: none;
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.backButton {
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+}
+
+.headerTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.scroll {
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-xxl);
+}
+
+.title {
+  font-family: var(--font-heading-bold);
+  font-size: 24px;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.chipList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.chipActive {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.chipAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.chipAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chipInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chipName {
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.chipUsername {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.chipCheck {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.chipCheckOn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.empty {
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  margin-top: var(--spacing-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-error);
+}
+
+.saveBtn {
+  margin-top: var(--spacing-lg);
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

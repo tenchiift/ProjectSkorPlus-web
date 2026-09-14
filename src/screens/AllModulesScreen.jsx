@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getModules, getUserModuleProgress } from '../services/moduleService';
+import { supabase } from '../config/supabase';
+import { getModules, getModulesForStudent, getUserModuleProgress } from '../services/moduleService';
 import styles from './AllModulesScreen.module.css';
 
 export default function AllModulesScreen() {
@@ -18,13 +19,17 @@ export default function AllModulesScreen() {
 
   const fetchModules = async () => {
     try {
-      const modulesData = await getModules();
+      const { data: profile } = await supabase
+        .from('profiles').select('role').eq('id', user.id).single();
+      const isStudent = (profile?.role ?? 'student') === 'student';
+
+      const modulesData = isStudent
+        ? await getModulesForStudent(user.id)
+        : await getModules();
       setModules(modulesData);
 
-      if (user) {
-        const progress = await getUserModuleProgress(user.id);
-        setModuleProgress(progress);
-      }
+      const progress = await getUserModuleProgress(user.id);
+      setModuleProgress(progress);
     } catch (err) {
       console.error(err);
     } finally {
@@ -58,21 +63,21 @@ export default function AllModulesScreen() {
         ) : (
           modules.map((mod) => {
             const progress = moduleProgress[mod.id]?.progress ?? 0;
+            const percent = Math.round(progress * 100);
             return (
               <div
                 key={mod.id}
-                className={`${styles.moduleCard} bg-graph-purple`}
+                className={styles.moduleCard}
               >
-                <div className={styles.moduleTopPill} />
                 <h2 className={styles.moduleTitle}>{mod.title}</h2>
                 <p className={styles.moduleDesc}>{mod.description}</p>
                 <div className={styles.moduleProgressBarBg}>
                   <div
                     className={styles.moduleProgressBarFill}
-                    style={{ width: `${Math.round(progress * 100)}%` }}
+                    style={{ width: `${percent}%` }}
                   />
                 </div>
-                <p className={styles.modulePercent}>{Math.round(progress * 100)}% Complete</p>
+                <p className={styles.modulePercent}>{percent}% Complete</p>
                 <div className={styles.moduleFooter}>
                   <span className={styles.continueText}>Continue Learning</span>
                   <button

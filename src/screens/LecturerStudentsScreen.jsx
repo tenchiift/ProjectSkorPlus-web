@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getAllStudents } from '../services/userService';
+import { getStudentsForLecturer } from '../services/moduleService';
 import { getSubmissionCounts } from '../services/submissionService';
 import listStyles from './SubmissionListScreen.module.css';
 import styles from './LecturerStudentsScreen.module.css';
@@ -11,14 +12,16 @@ export default function LecturerStudentsScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [students, setStudents] = useState([]);
+  const [mine, setMine] = useState([]);
   const [counts, setCounts] = useState({ total: 0, pending: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([getAllStudents(), getSubmissionCounts(user.id)])
-      .then(([list, c]) => {
+    Promise.all([getAllStudents(), getStudentsForLecturer(user.id), getSubmissionCounts(user.id)])
+      .then(([list, myStudents, c]) => {
         setStudents(list);
+        setMine(myStudents);
         setCounts(c);
       })
       .catch(console.error)
@@ -56,6 +59,38 @@ export default function LecturerStudentsScreen() {
             <span className={`${styles.statValue} ${styles.statReviewed}`}>{reviewedCount}</span>
             <span className={styles.statLabel}>Reviewed</span>
           </div>
+        </div>
+
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>My Students</h2>
+          <span className={styles.sectionCount}>{mine.length}</span>
+        </div>
+        {loading ? null : mine.length === 0 ? (
+          <p className={listStyles.emptyText} style={{ padding: '16px 0' }}>No students have selected you yet.</p>
+        ) : (
+          <div className={listStyles.studentList} style={{ marginBottom: '24px' }}>
+            {mine.map((student) => (
+              <div key={student.id} className={styles.studentRow}>
+                {student.photo_url ? (
+                  <img src={student.photo_url} alt="" className={listStyles.rowAvatar} />
+                ) : (
+                  <div className={listStyles.rowAvatarPlaceholder}>
+                    <span>{(student.name?.[0] || 'S').toUpperCase()}</span>
+                  </div>
+                )}
+                <div className={listStyles.rowMain}>
+                  <span className={listStyles.rowName}>{student.name ?? 'Student'}</span>
+                  {student.username && (
+                    <span className={listStyles.rowSub}>@{student.username}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>All Students</h2>
         </div>
 
         {loading ? (

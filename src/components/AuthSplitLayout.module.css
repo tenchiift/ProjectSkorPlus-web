@@ -76,8 +76,8 @@
   max-width: var(--phone-width, 480px);
   margin: 0 auto;
   min-height: 0 !important;
-  padding-top: var(--spacing-xl, 24px);
-  padding-bottom: var(--spacing-xl, 24px);
+  padding-top: 48px;
+  padding-bottom: 48px;
 }
 
 /* Mobile-only chrome (back arrows) has no place in the desktop split view. */

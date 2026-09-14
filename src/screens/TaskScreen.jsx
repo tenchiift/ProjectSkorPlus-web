@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
-import { ArrowLeft, Plus, Check, Trash2 } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { ArrowLeft, Plus, Check, Trash2, Calendar } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import styles from './TaskScreen.module.css';
 
@@ -18,8 +18,17 @@ export default function TaskScreen() {
   const reducedMotion = useReducedMotion();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newTask, setNewTask] = useState('');
-  const [newPriority, setNewPriority] = useState('medium');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [formTitle, setFormTitle] = useState('');
+  const [formPriority, setFormPriority] = useState('medium');
+  const [saving, setSaving] = useState(false);
+
+  const today = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
 
   const rowProps = (i) =>
     reducedMotion
@@ -29,6 +38,13 @@ export default function TaskScreen() {
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.25, ease: 'easeOut', delay: Math.min(i * 0.04, 0.4) },
         };
+
+  const sheetSpring = {
+    initial: { y: '100%' },
+    animate: { y: 0 },
+    exit: { y: '100%' },
+    transition: reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 34 },
+  };
 
   useEffect(() => {
     fetchTasks();
@@ -51,24 +67,51 @@ export default function TaskScreen() {
     }
   };
 
-  const handleAdd = async () => {
-    const title = newTask.trim();
-    if (!title) return;
+  const openAdd = () => {
+    setEditId(null);
+    setFormTitle('');
+    setFormPriority('medium');
+    setSheetOpen(true);
+  };
+
+  const openEdit = (task) => {
+    setEditId(task.id);
+    setFormTitle(task.title ?? '');
+    setFormPriority(task.priority ?? 'medium');
+    setSheetOpen(true);
+  };
+
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setEditId(null);
+    setFormTitle('');
+  };
+
+  const handleSave = async () => {
+    const title = formTitle.trim();
+    if (!title || saving) return;
+    setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert({ user_id: user.id, title, priority: newPriority })
-        .select()
-        .single();
-      if (error) throw error;
-      if (data) {
-        setTasks((prev) => [data, ...prev]);
-        setNewTask('');
+
+      if (editId) {
+        setTasks((prev) => prev.map((t) => t.id === editId ? { ...t, title, priority: formPriority } : t));
+        await supabase.from('tasks').update({ title, priority: formPriority }).eq('id', editId);
+      } else {
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert({ user_id: user.id, title, priority: formPriority })
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) setTasks((prev) => [data, ...prev]);
       }
+      closeSheet();
     } catch (err) {
       console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -83,13 +126,13 @@ export default function TaskScreen() {
     await supabase.from('tasks').delete().eq('id', id);
   };
 
-  const incomplete = tasks
-    .filter((t) => !t.completed)
-    .sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
-  const complete = tasks.filter((t) => t.completed);
+  const ordered = [...tasks].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    return priorityRank(a.priority) - priorityRank(b.priority);
+  });
 
-  const priorityDotClass = (p) =>
-    p === 'high' ? styles.dotHigh : p === 'low' ? styles.dotLow : styles.dotMedium;
+  const priorityBarClass = (p) =>
+    p === 'high' ? styles.barHigh : p === 'low' ? styles.barLow : styles.barMedium;
 
   if (loading) {
     return (
@@ -101,80 +144,115 @@ export default function TaskScreen() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <div className={styles.hero}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ArrowLeft size={24} color="var(--color-text-primary)" />
+          <ArrowLeft size={24} color="#FFFFFF" />
         </button>
-        <h1 className={styles.headerTitle}>Tasks</h1>
-        <div style={{ width: 36 }} />
-      </div>
-
-      <div className={styles.inputRow}>
-        <input
-          className={styles.input}
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="Add a new task..."
-          onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
-        />
-        <div className={styles.priorityPicker}>
-          {PRIORITIES.map((p) => (
-            <button
-              key={p.value}
-              className={`${styles.priorityBtn} ${newPriority === p.value ? styles.priorityBtnActive : ''}`}
-              onClick={() => setNewPriority(p.value)}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-        <button className={styles.addBtn} onClick={handleAdd}>
-          <Plus size={20} color="#FFFFFF" />
-        </button>
+        <h1 className={styles.heroTitle}>Today</h1>
+        <p className={styles.heroDate}>{today}</p>
+        <span className={styles.heroCount}>
+          {tasks.filter((t) => !t.completed).length} task
+          {tasks.filter((t) => !t.completed).length === 1 ? '' : 's'} left
+        </span>
       </div>
 
       <div className={styles.scroll}>
         {tasks.length === 0 ? (
           <div className={styles.empty}>
-            <span className={styles.emptyText}>No tasks yet. Add one above!</span>
+            <div className={styles.emptyIcon}>
+              <Calendar size={34} color="var(--color-primary)" />
+            </div>
+            <h2 className={styles.emptyTitle}>No Tasks Scheduled</h2>
+            <p className={styles.emptyText}>Create a new task to get started.</p>
+            <button className={styles.emptyCta} onClick={openAdd}>
+              <Plus size={18} color="#FFFFFF" />
+              <span>Add your first task</span>
+            </button>
           </div>
         ) : (
-          <>
-            {incomplete.length > 0 && (
-              <div className={styles.section}>
-                <span className={styles.sectionLabel}>PENDING ({incomplete.length})</span>
-                {incomplete.map((task, i) => (
-                  <motion.div key={task.id} className={styles.taskRow} {...rowProps(i)}>
-                    <button className={styles.checkbox} onClick={() => toggleTask(task)} />
-                    <span className={`${styles.priorityDot} ${priorityDotClass(task.priority)}`} />
-                    <span className={styles.taskText}>{task.title}</span>
-                    <button className={styles.deleteBtn} onClick={() => deleteTask(task.id)}>
-                      <Trash2 size={16} color="var(--color-error)" />
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-
-            {complete.length > 0 && (
-              <div className={styles.section}>
-                <span className={styles.sectionLabel}>COMPLETED ({complete.length})</span>
-                {complete.map((task, i) => (
-                  <motion.div key={task.id} className={styles.taskRow} {...rowProps(incomplete.length + i)}>
-                    <button className={`${styles.checkbox} ${styles.checkboxChecked}`} onClick={() => toggleTask(task)}>
-                      <Check size={12} color="#FFFFFF" />
-                    </button>
-                    <span className={`${styles.taskText} ${styles.taskDone}`}>{task.title}</span>
-                    <button className={styles.deleteBtn} onClick={() => deleteTask(task.id)}>
-                      <Trash2 size={16} color="var(--color-error)" />
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </>
+          <div className={styles.list}>
+            {ordered.map((task, i) => (
+              <motion.div
+                key={task.id}
+                className={styles.taskCard}
+                {...rowProps(i)}
+              >
+                <span className={`${styles.priorityBar} ${priorityBarClass(task.priority)}`} />
+                <button
+                  className={`${styles.radio} ${task.completed ? styles.radioChecked : ''}`}
+                  onClick={() => toggleTask(task)}
+                  aria-label={task.completed ? 'Mark as pending' : 'Mark as done'}
+                >
+                  {task.completed && <Check size={12} color="#FFFFFF" />}
+                </button>
+                <button className={styles.taskBody} onClick={() => openEdit(task)}>
+                  <span className={`${styles.taskText} ${task.completed ? styles.taskDone : ''}`}>
+                    {task.title}
+                  </span>
+                  <span className={styles.taskMeta}>
+                    {task.priority === 'high' ? 'High' : task.priority === 'low' ? 'Low' : 'Medium'} priority
+                  </span>
+                </button>
+                <button className={styles.deleteBtn} onClick={() => deleteTask(task.id)} aria-label="Delete task">
+                  <Trash2 size={16} color="var(--color-error)" />
+                </button>
+              </motion.div>
+            ))}
+          </div>
         )}
       </div>
+
+      <button className={styles.fab} onClick={openAdd} aria-label="Add task">
+        <Plus size={26} color="#FFFFFF" />
+      </button>
+
+      <AnimatePresence>
+        {sheetOpen && (
+          <>
+            <motion.div
+              className={styles.sheetBackdrop}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeSheet}
+            />
+            <motion.div className={styles.sheet} {...sheetSpring}>
+              <div className={styles.sheetHandle} />
+              <div className={styles.sheetHeader}>
+                <button className={styles.sheetClose} onClick={closeSheet} aria-label="Close">
+                  ✕
+                </button>
+                <span className={styles.sheetTitle}>{editId ? 'Edit Task' : 'New Task'}</span>
+                <button className={styles.sheetSave} onClick={handleSave} disabled={saving || !formTitle.trim()}>
+                  {editId ? 'Save' : 'Add'}
+                </button>
+              </div>
+
+              <input
+                className={styles.sheetInput}
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+                placeholder="Task title..."
+                autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
+              />
+
+              <span className={styles.sheetLabel}>PRIORITY</span>
+              <div className={styles.priorityPicker}>
+                {PRIORITIES.map((p) => (
+                  <button
+                    key={p.value}
+                    className={`${styles.priorityBtn} ${formPriority === p.value ? styles.priorityBtnActive : ''}`}
+                    onClick={() => setFormPriority(p.value)}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

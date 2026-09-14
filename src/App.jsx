@@ -21,6 +21,7 @@ const LoginScreen = lazy(() => import('./screens/LoginScreen'));
 const RegisterScreen = lazy(() => import('./screens/RegisterScreen'));
 const EmailLoginScreen = lazy(() => import('./screens/EmailLoginScreen'));
 const SetupProfileScreen = lazy(() => import('./screens/SetupProfileScreen'));
+const SelectLecturersScreen = lazy(() => import('./screens/SelectLecturersScreen'));
 const OnboardingScreen = lazy(() => import('./screens/OnboardingScreen'));
 const DashboardScreen = lazy(() => import('./screens/DashboardScreen'));
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="/email-login" element={<EmailLoginScreen />} />
           <Route element={<ProtectedLayout />}>
             <Route path="/setup-profile" element={<SetupProfileScreen />} />
+            <Route path="/select-lecturers" element={<SelectLecturersScreen />} />
             <Route path="/onboarding" element={<OnboardingScreen />} />
             <Route path="/dashboard" element={<DashboardScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />

@@ -16,7 +16,6 @@ export default function SetupProfileScreen() {
   const fileInputRef = useRef(null);
 
   const userId = location.state?.userId;
-  const email = location.state?.email ?? '';
   // Role comes via router state normally; falls back to signup metadata
   // when the user lands here through the email redirect.
   const [role, setRole] = useState(location.state?.role ?? null);
@@ -100,7 +99,8 @@ export default function SetupProfileScreen() {
           role,
           // Lecturers aren't tied to a semester/year.
           semester: role === 'lecturer' ? null : semester.trim(),
-          email,
+          // Email lives in auth.users; storing it in profiles exposed every
+          // user's address to "read all profiles" queries. Don't write it here.
           ...(photoURL ? { photo_url: photoURL } : {}),
           total_exp: 0,
           days_streak: 0,
@@ -109,7 +109,11 @@ export default function SetupProfileScreen() {
           profile_setup: true,
         });
       if (upsertError) throw upsertError;
-      navigate('/onboarding');
+      if (role === 'student') {
+        navigate('/select-lecturers', { replace: true });
+      } else {
+        navigate('/onboarding');
+      }
     } catch (err) {
       console.error(err);
       setError('Something went wrong. Please try again.');
