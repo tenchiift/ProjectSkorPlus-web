@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Plus, Check, Trash2, Calendar } from 'lucide-react';
 import { supabase } from '../config/supabase';
+import taskHeroImage from '../assets/images/task-hero.jpg';
 import styles from './TaskScreen.module.css';
 
 const PRIORITIES = [
@@ -145,15 +146,19 @@ export default function TaskScreen() {
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ArrowLeft size={24} color="#FFFFFF" />
-        </button>
-        <h1 className={styles.heroTitle}>Today</h1>
-        <p className={styles.heroDate}>{today}</p>
-        <span className={styles.heroCount}>
-          {tasks.filter((t) => !t.completed).length} task
-          {tasks.filter((t) => !t.completed).length === 1 ? '' : 's'} left
-        </span>
+        <img src={taskHeroImage} className={styles.heroBg} alt="" />
+        <div className={styles.heroOverlay} />
+        <div className={styles.heroContent}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ArrowLeft size={24} color="#FFFFFF" />
+          </button>
+          <h1 className={styles.heroTitle}>Today</h1>
+          <p className={styles.heroDate}>{today}</p>
+          <span className={styles.heroCount}>
+            {tasks.filter((t) => !t.completed).length} task
+            {tasks.filter((t) => !t.completed).length === 1 ? '' : 's'} left
+          </span>
+        </div>
       </div>
 
       <div className={styles.scroll}>

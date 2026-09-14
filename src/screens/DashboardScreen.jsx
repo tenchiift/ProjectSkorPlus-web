@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, Sparkles } from 'lucide-react';
+import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, Sparkles, NotebookPen } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { getModules, getModulesForStudent, getUserModuleProgress } from '../services/moduleService';
 import { setWeekAnchor, setSemesterPaused, claimDailyStreak } from '../services/userService';
@@ -443,21 +443,26 @@ export default function DashboardScreen() {
               <img src={examImage} className={styles.countdownBg} alt="" />
               <div className={styles.countdownOverlay} />
               <div className={styles.countdownContent}>
-                <div className={styles.countdownDaysRow}>
-                  <span className={styles.countdownDays}>{daysLeft !== null ? daysLeft : '0'}</span>
-                  <span className={styles.countdownDaysLabel}>days left</span>
+                <div className={styles.countdownIconWrap}>
+                  <NotebookPen size={26} color="#FFFFFF" />
                 </div>
-                <p className={styles.countdownCompactTitle}>{countdown.title}</p>
-                <div className={styles.countdownBottomRow}>
-                  <div className={styles.countdownDateRow}>
-                    <Calendar size={13} color="rgba(255, 255, 255, 0.85)" />
-                    <span className={styles.countdownDate}>
-                      {new Date(countdown.exam_date).toLocaleDateString('en-GB', {
-                        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                      })}
-                    </span>
+                <div className={styles.countdownTextCol}>
+                  <div className={styles.countdownDaysRow}>
+                    <span className={styles.countdownDays}>{daysLeft !== null ? daysLeft : '0'}</span>
+                    <span className={styles.countdownDaysLabel}>days left</span>
                   </div>
-                  <button className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</button>
+                  <p className={styles.countdownCompactTitle}>{countdown.title}</p>
+                  <div className={styles.countdownBottomRow}>
+                    <div className={styles.countdownDateRow}>
+                      <Calendar size={13} color="rgba(255, 255, 255, 0.85)" />
+                      <span className={styles.countdownDate}>
+                        {new Date(countdown.exam_date).toLocaleDateString('en-GB', {
+                          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <button className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</button>
+                  </div>
                 </div>
               </div>
             </>

@@ -424,6 +424,25 @@
 .countdownContent {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.countdownIconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.countdownTextCol {
+  flex: 1;
+  min-width: 0;
 }
 
 .countdownDays {
