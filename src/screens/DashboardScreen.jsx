@@ -420,6 +420,23 @@ export default function DashboardScreen() {
           )}
         </div>
 
+        <div className={styles.statsRow}>
+          {actionCards.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <motion.button
+                key={i}
+                className={styles.statCard}
+                onClick={() => navigate(item.path)}
+                {...riseProps(i * 0.08 + 0.05)}
+              >
+                <Icon size={28} color="var(--color-primary)" />
+                <span className={styles.statLabel}>{item.label}</span>
+              </motion.button>
+            );
+          })}
+        </div>
+
         <motion.div className={styles.countdownCompact} {...riseProps(0.2)}>
           {countdown ? (
             <>
@@ -452,23 +469,6 @@ export default function DashboardScreen() {
             </div>
           )}
         </motion.div>
-
-        <div className={styles.statsRow}>
-          {actionCards.map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <motion.button
-                key={i}
-                className={styles.statCard}
-                onClick={() => navigate(item.path)}
-                {...riseProps(i * 0.08 + 0.05)}
-              >
-                <Icon size={28} color="var(--color-primary)" />
-                <span className={styles.statLabel}>{item.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
 
         {modules.length > 0 && (
           <motion.button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')} {...riseProps(0.28)}>
