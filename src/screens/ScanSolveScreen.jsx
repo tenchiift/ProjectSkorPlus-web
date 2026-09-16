@@ -313,7 +313,7 @@ export default function ScanSolveScreen() {
 
         {/* Dark-only beam wrapper so the beam pops in any theme */}
         <BorderBeam
-          size="pulse-inner"
+          size="pulse-outside"
           colorVariant="colorful"
           theme="dark"
           duration={2.0}
