@@ -4,8 +4,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X, Menu, Zap, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
 import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
-import ShaderBackground from '../components/ShaderBackground';
-import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import {
   createConversation,
@@ -50,19 +48,6 @@ function Sheet({ onClose, children }) {
 export default function AiChatScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { themeMode } = useTheme();
-
-  // Grain backdrop: neutral pastel on light themes, deep neutral on dark.
-  const grainDark = themeMode === 'dark' || themeMode === 'midnight';
-  const grainProps = grainDark
-    ? {
-        colorBack: '#0E0E12',
-        colors: ['#2E2E38', '#383844', '#252A33', '#332E3A'],
-      }
-    : {
-        colorBack: '#E9E4D8',
-        colors: ['#D3C8AF', '#B9CFCF', '#E0C4B2', '#BFC0D4', '#B4C4B0'],
-      };
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -204,17 +189,6 @@ export default function AiChatScreen() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.grainBg} aria-hidden="true">
-        <ShaderBackground
-          colors={grainProps.colors}
-          colorBack={grainProps.colorBack}
-          shape="wave"
-          softness={0.7}
-          intensity={0.85}
-          noise={0.6}
-          speed={0.5}
-        />
-      </div>
       <div className={styles.header}>
         <button className={styles.headerBtn} onClick={() => navigate(-1)} aria-label="Back">
           <ArrowLeft size={22} color="var(--color-text-primary)" />
@@ -288,7 +262,7 @@ export default function AiChatScreen() {
         </div>
       )}
 
-      <div className={styles.bottomZone}>
+      <div className={`${styles.bottomZone} ${conversations.length > 0 ? styles.bottomZoneIndented : ''}`}>
       <div className={styles.mobileToolbar}>
         <button
           className={styles.toolbarPill}

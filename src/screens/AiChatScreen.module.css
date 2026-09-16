@@ -7,19 +7,6 @@
   flex-direction: column;
   height: 100vh;
   padding-top: env(safe-area-inset-top);
-  position: relative;
-}
-
-/* Grain backdrop behind the whole screen. */
-.grainBg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.container > *:not(.grainBg) {
-  position: relative;
-  z-index: 1;
 }
 
 @media (min-width: 768px) {
@@ -176,7 +163,7 @@
   max-width: 75%;
   border-radius: var(--radius-lg);
   padding: var(--spacing-sm) var(--spacing-md);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
 }
 
 .bubbleTheirs {
@@ -246,15 +233,14 @@
   flex-shrink: 0;
 }
 
-/* BorderBeam wrapper around the input bar — forced dark pill in every
-   theme so the beam glow stays visible. */
+/* BorderBeam wrapper around the input bar — dark pill so the beam pops. */
 .inputBeam {
   margin: 0 var(--spacing-lg);
   border-radius: var(--radius-full);
   flex-shrink: 0;
   background: #232329;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   padding: var(--spacing-sm);
-  padding-bottom: 2%;
 }
 
 .inputBeam .inputBar {
@@ -318,14 +304,29 @@
   object-fit: contain;
 }
 
-/* Whole bottom dark zone: toolbar pills + input pill sit on one
-   seamless dark sheet so no page background shows through. */
+/* Whole bottom zone: white sheet lifted by a darker shadow. */
 .bottomZone {
-  background: #17171B;
+  background: var(--color-surface);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
-  padding-bottom: var(--spacing-md);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
+  padding-bottom: var(--spacing-sm);
   flex-shrink: 0;
+}
+
+/* Desktop chat page only: drop the white sheet, fit the input pill to
+   the chat column (clear of the Recent chats panel + sidebar). */
+@media (min-width: 768px) {
+  .bottomZone {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding-bottom: 0;
+  }
+
+  .bottomZoneIndented .inputBeam {
+    margin-left: calc(200px + var(--spacing-lg));
+  }
 }
 
 .mobileToolbar {
@@ -349,14 +350,14 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   padding: var(--spacing-xs) var(--spacing-md);
-  ;
   cursor: pointer;
   flex: 1;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .toolbarPill:active {
@@ -366,7 +367,7 @@
 .toolbarPillText {
   font-family: var(--font-body-bold);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--color-text-secondary);
 }
 
 .chatDropdownOverlay {

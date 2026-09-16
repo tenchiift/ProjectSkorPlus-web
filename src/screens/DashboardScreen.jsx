@@ -384,7 +384,7 @@ export default function DashboardScreen() {
             </button>
             </motion.div>
           )}
-          </AnimatePresence>}
+          </AnimatePresence>
 
           {pickerOpen && (
             <AnimatePresence initial={false}>
