@@ -39,7 +39,7 @@
 .dropdown {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--spacing-sm);
   background: var(--color-surface);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
@@ -55,32 +55,6 @@
   font-size: 15px;
   color: var(--color-text-primary);
   text-align: left;
-}
-
-.dropdownPlaceholder {
-  color: var(--color-text-secondary);
-}
-
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  z-index: 200;
-}
-
-.dropdownModal {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  max-height: 70vh;
-  width: 100%;
-  max-width: 480px;
-  padding: var(--spacing-lg);
-  padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom));
-  overflow-y: auto;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
 }
 
 .dropdownHeader {
@@ -104,33 +78,12 @@
   padding: 2px;
 }
 
-.dropdownItem {
-  display: flex;
-  flex-direction: column;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--color-border);
-  border: none;
-  background: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
+.emptyHistory {
   font-family: var(--font-body);
-  font-size: 15px;
-  color: var(--color-text-primary);
-}
-
-.dropdownItem:last-child {
-  border-bottom: none;
-}
-
-.dropdownItemText {
-  color: var(--color-text-primary);
-}
-
-.dropdownItemSub {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-text-secondary);
-  margin-top: 2px;
+  text-align: center;
+  padding: var(--spacing-lg) 0;
 }
 
 .imageArea {
@@ -256,21 +209,53 @@
   background: var(--color-primary);
   border-radius: var(--radius-full);
   padding: 16px;
-  margin-bottom: var(--spacing-lg);
   border: none;
   cursor: pointer;
   width: 100%;
 }
 
-.solveBtnDisabled {
-  opacity: 0.5;
+/* Dark-only beam wrapper so the beam pops in any theme (like AI inputBeam). */
+.solveBeam {
+  border-radius: var(--radius-full);
+  background: #232329;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  padding: 5px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.solveBeam .solveBtn {
+  margin-bottom: 0;
+  background: linear-gradient(180deg, #2E2E36 0%, #17171B 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+}
+
+.solveBeam .solveBtn svg {
+  color: #FFFFFF;
+  stroke: #FFFFFF;
+}
+
+.solveBeam .solveBtnDisabled {
+  opacity: 1;
   cursor: not-allowed;
+  background: linear-gradient(180deg, #1E1E24 0%, #121215 100%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.solveBeam .solveBtnDisabled .solveBtnText {
+  color: rgba(255, 255, 255, 0.6);
+  text-shadow: none;
+}
+
+.solveBeam .solveBtnDisabled svg {
+  stroke: rgba(255, 255, 255, 0.6);
 }
 
 .solveBtnText {
   font-family: var(--font-heading-bold);
   font-size: 17px;
   color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .spinner {
@@ -282,24 +267,315 @@
   animation: spin 0.6s linear infinite;
 }
 
-.resultCard {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.resultTitle {
-  font-family: var(--font-heading-bold);
-  font-size: 18px;
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-md);
-}
-
 .resultText {
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--color-text-primary);
   line-height: 24px;
   white-space: pre-wrap;
+}
+
+/* ---- Bottom sheet (pop-out like AI Chats sheet) ---- */
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* ---- Top solving sheet (drops from top, ~70% screen) ---- */
+.topSheetOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 310;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.topSheet {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 480px;
+  height: 70vh;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+  padding-top: calc(var(--spacing-sm) + env(safe-area-inset-top));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
+}
+
+.topHandle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  margin: 0 auto var(--spacing-sm);
+}
+
+.topThumbWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.topThumb {
+  max-width: 100%;
+  max-height: 140px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
+.solvingLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl) 0;
+}
+
+.solvingText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Shimmer sweep for "Solving…" — theme-aware: base secondary, highlight primary. */
+.shimmer {
+  position: relative;
+  display: inline-block;
+  color: var(--color-text-secondary);
+}
+.shimmer::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 40%,
+    var(--color-text-primary) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 400% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: scan-shimmer 2000ms linear infinite;
+}
+@keyframes scan-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::before { animation: none !important; }
+}
+
+.topResult {
+  padding-bottom: var(--spacing-md);
+}
+
+.topCloseBtn {
+  margin-top: var(--spacing-lg);
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  padding: 13px;
+  cursor: pointer;
+}
+
+.topGhostBtn {
+  margin-top: var(--spacing-sm);
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  padding: 13px;
+  cursor: pointer;
+}
+
+/* ---- Recent history ---- */
+.sectionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.sectionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.clearHistory {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-primary);
+}
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.recentItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
+}
+
+.recentMain {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+}
+
+.recentThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--color-border);
+}
+
+.recentThumbEmpty {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.recentText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.recentLabel {
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recentDesc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recentDate {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.recentDelete {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* ---- img-fx loader + reveal ---- */
+.loaderWrap {
+  width: 100%;
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+/* Text sits above the img-fx shader canvas (canvas is z-1, children z-0). */
+.loaderText {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  pointer-events: none;
+  text-align: center;
+}
+
+.revealWrap {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.loaderFx {
+  width: 100%;
+  display: block;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.loaderCard {
+  width: 100%;
+  min-height: 220px;
 }
