@@ -293,7 +293,17 @@ export default function AiChatScreen() {
         </button>
       </div>
 
-      <BorderBeam size="md" className={styles.inputBeam}>
+      <BorderBeam
+        size="md"
+        colorVariant="colorful"
+        theme="dark"
+        duration={1.1}
+        brightness={2}
+        saturation={1.8}
+        hueRange={90}
+        strength={1}
+        className={styles.inputBeam}
+      >
       <div className={styles.inputBar}>
         <input
           className={styles.input}

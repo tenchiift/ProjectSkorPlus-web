@@ -237,12 +237,36 @@
 
 /* BorderBeam wrapper around the input bar — dark pill so the beam pops. */
 .inputBeam {
+  --beam-strength: 1;
+  --beam-stroke-opacity: 1;
+  --beam-inner-opacity: 1;
   margin: 0 var(--spacing-lg);
   border-radius: var(--radius-full);
   flex-shrink: 0;
   background: #232329;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 0 24px rgba(142, 107, 226, 0.45),
+    0 0 48px rgba(64, 140, 255, 0.25);
   padding: var(--spacing-sm);
+  animation: input-beam-pulse 2.2s ease-in-out infinite;
+}
+@keyframes input-beam-pulse {
+  0%, 100% {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      0 0 18px rgba(142, 107, 226, 0.35),
+      0 0 36px rgba(64, 140, 255, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      0 0 32px rgba(142, 107, 226, 0.6),
+      0 0 64px rgba(64, 140, 255, 0.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inputBeam { animation: none; }
 }
 
 .inputBeam .inputBar {
