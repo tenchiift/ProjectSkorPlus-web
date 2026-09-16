@@ -1,0 +1,88 @@
+/* Hold-to-confirm button — ported from beui hold-action-button,
+   restyled with app theme vars (follows light/dark/pink/ocean/forest/midnight). */
+
+.hold {
+  --hold-radius: var(--radius-full);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--hold-radius);
+  background: #ffffff;
+  color: #ffffff;
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+  margin-top: var(--spacing-lg);
+}
+
+.hold:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
+}
+
+.hold:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Static layer carrying the rounded clip (survives compositing, unlike
+   overflow + border-radius on some browsers). */
+.clip {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 round var(--hold-radius));
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  color: var(--color-primary);
+  will-change: opacity, transform;
+}
+
+.waveH {
+  position: absolute;
+  right: -1.25rem;
+  top: 0;
+  height: 200%;
+  width: 1.5rem;
+}
+
+.waveV {
+  position: absolute;
+  top: -1.25rem;
+  left: 0;
+  height: 1.5rem;
+  width: 200%;
+}
+
+.label {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  transition: color 0.12s ease-out;
+}
+
+.holdActive .label {
+  color: #ffffff;
+}
+
+.labelSwap {
+  grid-column-start: 1;
+  grid-row-start: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}

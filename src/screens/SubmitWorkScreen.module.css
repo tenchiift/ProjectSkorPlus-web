@@ -218,47 +218,18 @@
   border-color: var(--color-primary);
 }
 
-.submitBtn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  background: var(--color-primary);
-  color: #ffffff;
-  border: none;
-  border-radius: var(--radius-full);
-  padding: var(--spacing-md) 0;
-  font-family: var(--font-heading-bold);
-  font-size: 15px;
-  cursor: pointer;
-  margin-top: var(--spacing-lg);
-  min-height: 48px;
-}
-
-.submitBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .lecturerLoading {
   display: flex;
   justify-content: center;
   padding: var(--spacing-lg) 0;
+}
+
+.holdHint {
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: var(--spacing-sm);
 }
 
 .spinnerSmall {

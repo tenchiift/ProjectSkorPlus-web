@@ -294,7 +294,7 @@ export default function AiChatScreen() {
       </div>
 
       <BorderBeam
-        size="md"
+        size="pulse-outside"
         colorVariant="colorful"
         theme="dark"
         duration={2.0}

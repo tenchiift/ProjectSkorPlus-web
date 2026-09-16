@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, ImageIcon, FileText, X, Send, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getAllLecturers, createSubmission } from '../services/submissionService';
+import { HoldActionButton } from '../components/HoldActionButton';
 import styles from './SubmitWorkScreen.module.css';
 
 export default function SubmitWorkScreen() {
@@ -161,20 +162,20 @@ export default function SubmitWorkScreen() {
           rows={4}
         />
 
-        <button
-          className={styles.submitBtn}
-          onClick={handleSubmit}
+        <HoldActionButton
+          onHoldComplete={handleSubmit}
+          type="horizontal"
+          holdDuration={1600}
+          holdingLabel="Keep holding…"
+          completeLabel="Sending…"
           disabled={!selectedLecturer || submitting}
         >
-          {submitting ? (
-            <div className={styles.spinner} />
-          ) : (
-            <>
-              <Send size={18} color="#FFFFFF" />
-              <span>Send Work</span>
-            </>
-          )}
-        </button>
+          <>
+            <Send size={18} color="currentColor" />
+            <span>Send Work</span>
+          </>
+        </HoldActionButton>
+        <p className={styles.holdHint}>Hold to send your work</p>
       </div>
     </div>
   );
