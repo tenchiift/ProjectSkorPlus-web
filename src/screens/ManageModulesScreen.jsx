@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { getModules, createModule, updateModule, deleteModule, getLecturerModules, assignLecturerModule, unassignLecturerModule } from '../services/moduleService';
 import styles from './ManageModulesScreen.module.css';
 
-const BLANK = { title: '', description: '', color: 'purple', order: 1 };
+const BLANK = { title: '', description: '', color: 'purple', category: '', order: 1 };
 
 export default function ManageModulesScreen() {
   const navigate = useNavigate();
@@ -62,6 +62,7 @@ export default function ManageModulesScreen() {
       title: mod.title ?? '',
       description: mod.description ?? '',
       color: mod.color ?? 'purple',
+      category: mod.category ?? '',
       order: mod.order ?? 1,
     });
     setError('');
@@ -81,6 +82,7 @@ export default function ManageModulesScreen() {
         title,
         description: form.description.trim() || null,
         color: form.color === 'amber' ? 'amber' : 'purple',
+        category: form.category.trim() || null,
         order: Number(form.order) || 1,
       };
       if (editId) {
@@ -160,6 +162,7 @@ export default function ManageModulesScreen() {
                 <div className={styles.info}>
                   <span className={styles.title}>{mod.title}</span>
                   <span className={styles.sub}>{mod.description || 'No description'}</span>
+                  {mod.category && <span className={styles.categoryBadge}>{mod.category}</span>}
                 </div>
                 <span className={styles.orderBadge}>#{mod.order}</span>
                 <div className={styles.actions}>
@@ -217,6 +220,15 @@ export default function ManageModulesScreen() {
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="Short description students will see"
                   rows={2}
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Category Label</label>
+                <input
+                  className={styles.input}
+                  value={form.category}
+                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                  placeholder="e.g. Math, Science, English"
                 />
               </div>
               <div className={styles.inputGroup}>

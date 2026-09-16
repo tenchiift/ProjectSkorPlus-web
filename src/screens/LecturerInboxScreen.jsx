@@ -69,7 +69,7 @@ export default function LecturerInboxScreen() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)} aria-label="Back">
+        <button className={styles.backButton} onClick={() => navigate('/dashboard')} aria-label="Back">
           <ArrowLeft size={24} color="var(--color-text-primary)" />
         </button>
         <div className={styles.headerSpacer} />

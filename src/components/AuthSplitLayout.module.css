@@ -11,36 +11,97 @@
   background: var(--color-surface, #FFFFFF);
 }
 
-/* Brand panel: calm gradient with wordmark top and copy block bottom. */
+/* Brand panel: purple gradient with wordmark, pill, headline, feature row
+   and illustration (matches MacBook Air - 1 mockup). */
 .brandPanel {
   position: relative;
-  flex: 0 0 44%;
+  flex: 0 0 55%;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 40px 56px 56px;
+  gap: 40px;
+  padding: 40px 48px 48px;
   overflow: hidden;
   background:
-    radial-gradient(80% 60% at 85% 8%, rgba(180, 154, 240, 0.28), transparent 60%),
-    linear-gradient(160deg, #2A2158 0%, #45309B 55%, #6D4FC4 100%);
+    radial-gradient(200% 200% at 90% 90%, #65519e 20%, #331f79 50%, #000000 100%);
   color: #FFFFFF;
 }
 
+.brandDoodle {
+  position: absolute;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.doodle1 {
+  top: 1%;
+  right: 8%;
+  width: 190px;
+}
+
+.doodle2 {
+  top: 7%;
+  right: 27%;
+  width: 225px;
+}
+
+.doodle3 {
+  top: 20%;
+  right: 10%;
+  width: 150px;
+}
+
+.doodle4 {
+  top: 37%;
+  right: 4%;
+  width: 75px;
+}
+
 .brandTop {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
 }
 
 .brandWordmark {
   font-family: var(--font-heading-bold, sans-serif);
-  font-size: 18px;
+  font-size: 22px;
   letter-spacing: 0.2px;
   color: #F5F6F8;
+  margin-top: auto;
+}
+
+.brandPill {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0.5px solid rgba(255, 255, 255, 0.35);
+  background: #4c3990;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-family: var(--font-body, sans-serif);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  
+  
+}
+
+.brandPillIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .brandCopy {
-  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+  padding-top: 15px;
 }
 
 .brandHeadline {
@@ -57,6 +118,78 @@
   font-size: 15px;
   line-height: 1.65;
   color: rgba(255, 255, 255, 0.78);
+  padding-top: 10px;
+}
+
+.brandFeatures {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  margin-top: auto;
+  max-width: 62%;
+  padding-bottom: 0;
+  
+}
+
+.brandFeatureWrap {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+}
+
+.brandFeature {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 14px;
+  min-width: 0;
+}
+
+.brandFeatureWrap:first-child .brandFeature {
+  padding-left: 0;
+}
+
+.brandDivider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.brandFeatureIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-bottom: 2px;
+}
+
+.brandFeatureTitle {
+  font-family: var(--font-body-bold, sans-serif);
+  font-size: 13px;
+  line-height: 1.35;
+  color: #FFFFFF;
+}
+
+.brandFeatureDesc {
+  font-family: var(--font-body, sans-serif);
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.brandIllustration {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 64%;
+  max-height: 58%;
+  object-fit: contain;
+  object-position: bottom right;
+  pointer-events: none;
+  z-index: 0;
+  padding-bottom: 100px;
 }
 
 .contentPanel {

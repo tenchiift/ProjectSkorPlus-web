@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, Zap } from 'lucide-react';
 import { getTopics } from '../services/moduleService';
+import PdfThumbnail from '../components/PdfThumbnail';
 import styles from './ModuleScreen.module.css';
 
 export default function ModuleScreen() {
@@ -31,7 +32,7 @@ export default function ModuleScreen() {
 
   return (
     <div className={styles.container}>
-      <div className={`${styles.banner} bg-graph-purple`}>
+      <div className={`${styles.banner} ${styles.bannerWithBg}`}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <ArrowLeft size={24} color="#FFFFFF" />
         </button>
@@ -70,22 +71,23 @@ export default function ModuleScreen() {
             <span className={styles.emptyText}>No notes yet — your lecturer will add them.</span>
           </div>
         ) : (
-          <div className={styles.topicList}>
+          <div className={styles.notesList}>
             {topics.map((topic) => (
-              <div key={topic.id} className={styles.topicRow}>
-                <span className={styles.topicTitle}>{topic.title}</span>
-                <button
-                  className={styles.pdfBtn}
-                  onClick={() =>
-                    navigate('/pdf-viewer', {
-                      state: { exam: { title: topic.title, pdf_url: topic.pdf_url } },
-                    })
-                  }
-                >
-                  <FileText size={15} color="var(--color-primary)" />
-                  <span>PDF</span>
-                </button>
-              </div>
+              <button
+                key={topic.id}
+                className={styles.noteCard}
+                onClick={() =>
+                  navigate('/pdf-viewer', {
+                    state: { exam: { title: topic.title, pdf_url: topic.pdf_url } },
+                  })
+                }
+              >
+                <PdfThumbnail url={topic.pdf_url} className={styles.noteThumbnail} />
+                <div className={styles.noteInfo}>
+                  <span className={styles.noteTitle}>{topic.title}</span>
+                  <span className={styles.noteViewBtn}>View PDF &rarr;</span>
+                </div>
+              </button>
             ))}
           </div>
         )}

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Sun, Moon, Heart, Waves, TreePine, Stars, ChevronRight, X,
-  Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette, ShieldCheck,
+  Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette, ShieldCheck, Layers,
 } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { deleteAllConversations } from '../services/aiChatService';
+import { getModules, setModuleVisibility } from '../services/moduleService';
 import styles from './SettingsScreen.module.css';
 
 const THEME_OPTIONS = [
@@ -65,6 +66,9 @@ export default function SettingsScreen() {
   const [passMsg, setPassMsg] = useState(null);
   const [clearBusy, setClearBusy] = useState(false);
   const [clearError, setClearError] = useState(null);
+  const [moduleVisModal, setModuleVisModal] = useState(false);
+  const [allModules, setAllModules] = useState([]);
+  const [modulesBusy, setModulesBusy] = useState({});
 
   useEffect(() => {
     if (!user) return;
@@ -137,6 +141,29 @@ export default function SettingsScreen() {
   };
 
   const labelFor = (opts, value) => opts.find((o) => o.value === value)?.label ?? opts[0].label;
+
+  const openModuleVis = async () => {
+    try {
+      setAllModules(await getModules());
+    } catch (e) {
+      console.error(e);
+    }
+    setModuleVisModal(true);
+  };
+
+  const toggleModuleVis = async (mod) => {
+    const next = !mod.visible_to_all;
+    setAllModules((prev) => prev.map((m) => m.id === mod.id ? { ...m, visible_to_all: next } : m));
+    setModulesBusy((prev) => ({ ...prev, [mod.id]: true }));
+    try {
+      await setModuleVisibility(mod.id, next);
+    } catch (e) {
+      console.error(e);
+      setAllModules((prev) => prev.map((m) => m.id === mod.id ? { ...m, visible_to_all: mod.visible_to_all } : m));
+    } finally {
+      setModulesBusy((prev) => ({ ...prev, [mod.id]: false }));
+    }
+  };
 
   const radioRow = (opts, value, onPick) =>
     opts.map((opt) => {
@@ -257,6 +284,15 @@ export default function SettingsScreen() {
               <div className={styles.rowInfo}>
                 <span className={styles.rowLabel}>Admin</span>
                 <span className={styles.rowHint}>Manage lecturer codes</span>
+              </div>
+              <ChevronRight size={18} color="var(--color-text-secondary)" />
+            </button>
+
+            <button className={styles.row} onClick={openModuleVis}>
+              <Layers size={20} color="var(--color-text-secondary)" />
+              <div className={styles.rowInfo}>
+                <span className={styles.rowLabel}>Module Visibility</span>
+                <span className={styles.rowHint}>Show modules to all students</span>
               </div>
               <ChevronRight size={18} color="var(--color-text-secondary)" />
             </button>
@@ -401,6 +437,39 @@ export default function SettingsScreen() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {moduleVisModal && (
+        <div className={styles.modalOverlay} onClick={() => setModuleVisModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Module Visibility</h3>
+              <button className={styles.modalClose} onClick={() => setModuleVisModal(false)}>
+                <X size={20} color="var(--color-text-primary)" />
+              </button>
+            </div>
+            {allModules.length === 0 ? (
+              <p className={styles.aboutText}>No modules yet.</p>
+            ) : (
+              allModules.map((mod) => (
+                <button
+                  key={mod.id}
+                  className={styles.themeRow}
+                  onClick={() => toggleModuleVis(mod)}
+                  disabled={modulesBusy[mod.id]}
+                >
+                  <div className={styles.themeInfo}>
+                    <span className={styles.themeLabel}>{mod.title}</span>
+                    <span className={styles.themeHint}>{mod.visible_to_all ? 'Visible to all students' : 'Lecturer-linked only'}</span>
+                  </div>
+                  <div className={`${styles.switch} ${mod.visible_to_all ? styles.switchOn : ''}`}>
+                    <div className={styles.switchKnob} />
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
       )}

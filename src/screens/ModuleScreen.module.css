@@ -8,17 +8,65 @@
 @media (min-width: 768px) {
   .container {
     max-width: none;
-    padding: var(--spacing-xl) var(--spacing-xxl);
+    padding: 0 var(--spacing-xxl) var(--spacing-xl);
   }
 }
 
 .banner {
-  padding-top: var(--spacing-xxl);
+  padding-top: var(--spacing-sm);
   padding-left: var(--spacing-lg);
   padding-right: var(--spacing-lg);
   padding-bottom: var(--spacing-xl);
   border-bottom-left-radius: 32px;
   border-bottom-right-radius: 32px;
+}
+
+/* Module header with image background — ModuleScreen only.
+   Default (purple): used by all themes without their own bg.
+   Mobile uses mobile.png, desktop swaps to wider bg. */
+.bannerWithBg {
+  position: relative;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(142, 107, 226, 0.15), rgba(142, 107, 226, 0.3)),
+    url('../assets/images/module-header-bg-mobile.png');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+/* Pink theme: same layout, pink artwork. */
+[data-theme="pink"] .bannerWithBg {
+  background-image:
+    linear-gradient(rgba(222, 95, 135, 0.12), rgba(222, 95, 135, 0.28)),
+    url('../assets/images/module-header-bg-mobile-pink.png');
+}
+
+/* Desktop B: full-bleed flush to top (no gap). */
+@media (min-width: 768px) {
+  .banner {
+    margin: 0 calc(-1 * var(--spacing-xxl));
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-top: var(--spacing-lg);
+    padding-left: var(--spacing-xxl);
+    padding-right: var(--spacing-xxl);
+  }
+
+  .bannerWithBg {
+    background-image:
+      linear-gradient(rgba(142, 107, 226, 0.15), rgba(142, 107, 226, 0.3)),
+      url('../assets/images/module-header-bg.png');
+    background-position: center top;
+  }
+
+  [data-theme="pink"] .bannerWithBg {
+    background-image:
+      linear-gradient(rgba(222, 95, 135, 0.12), rgba(222, 95, 135, 0.28)),
+      url('../assets/images/module-header-bg-pink.png');
+  }
 }
 
 .backButton {
@@ -199,52 +247,54 @@
   text-align: center;
 }
 
-.topicList {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+.notesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
-[data-theme="light"] .topicList {
+.noteCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .noteCard {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.topicRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+.noteThumbnail {
+  width: 80px;
+  height: 110px;
 }
 
-.topicRow + .topicRow {
-  border-top: 1px solid var(--color-border);
-}
-
-
-
-.topicTitle {
+.noteInfo {
   flex: 1;
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-text-primary);
-  line-height: 1.4;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+.noteTitle {
+  font-family: var(--font-heading-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
 
-.pdfBtn {
-  background: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: 6px 12px;
+.noteViewBtn {
+  align-self: flex-start;
   font-family: var(--font-body-bold);
   font-size: 12px;
   color: var(--color-primary);
-  text-decoration: none;
-  flex-shrink: 0;
 }
 
 

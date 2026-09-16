@@ -129,6 +129,17 @@
   color: var(--color-text-secondary);
 }
 
+.categoryBadge {
+  align-self: flex-start;
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  margin-top: 2px;
+}
+
 .pdfBadge {
   align-self: flex-start;
   font-family: var(--font-body-bold);

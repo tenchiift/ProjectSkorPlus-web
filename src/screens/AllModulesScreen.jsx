@@ -45,14 +45,39 @@ export default function AllModulesScreen() {
     );
   }
 
+  const inProgress = modules.filter((m) => {
+    const p = moduleProgress[m.id]?.progress ?? 0;
+    return p > 0 && p < 1;
+  }).length;
+  const completed = modules.filter((m) => (moduleProgress[m.id]?.progress ?? 0) >= 1).length;
+
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <div className={`${styles.banner} bg-graph-purple`}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ArrowLeft size={24} />
+          <ArrowLeft size={24} color="#FFFFFF" />
         </button>
-        <h1 className={styles.headerTitle}>All Modules</h1>
-        <div className={styles.headerSpacer} />
+        <div className={styles.bannerContent}>
+          <div className={styles.bannerPill} />
+          <h1 className={styles.bannerTitle}>All Modules</h1>
+          <p className={styles.bannerDesc}>{modules.length} {modules.length === 1 ? 'module' : 'modules'} available</p>
+          <div className={styles.bannerStats}>
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>{modules.length}</span>
+              <span className={styles.statLabel}>Modules</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>{inProgress}</span>
+              <span className={styles.statLabel}>In Progress</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.statItem}>
+              <span className={styles.statValue}>{completed}</span>
+              <span className={styles.statLabel}>Completed</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className={styles.scroll}>

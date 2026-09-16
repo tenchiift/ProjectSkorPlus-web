@@ -43,10 +43,10 @@
 }
 
 .logoImage {
-  width: 250px;
-  height: 250px;
+  width: 290px;
+  height: 290px;
   display: block;
-  margin: -20px auto 0;
+  margin: -24px auto -8px;
   object-fit: contain;
 }
 
@@ -163,8 +163,8 @@
   }
 
   .logoImage {
-    width: 84px;
-    height: 84px;
+    width: 168px;
+    height: 168px;
     margin: 0 0 20px;
   }
 

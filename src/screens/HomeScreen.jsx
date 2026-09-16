@@ -25,11 +25,7 @@ export default function HomeScreen() {
       <div className={styles.logoContainer}>
         <img src={logo} alt="ProjectSkor+ logo" className={styles.logoImage} />
       </div>
-
-      <div className={styles.heroContainer}>
-        <h1 className={styles.title}>ProjectSkor+</h1>
-        <p className={styles.tagline}>Learn Smarter, Score Better</p>
-      </div>
+      <p className={styles.subtitle}>Sign In and Continue Your Adventure.</p>
 
       <div className={styles.buttonContainer}>
         <button className={styles.btnPrimary} onClick={() => navigate('/register')}>
@@ -42,6 +38,10 @@ export default function HomeScreen() {
           I already have an account
         </button>
       </div>
+
+      <p className={styles.terms}>
+        By using ProjectSkor+, you agree to the Terms and Privacy Policy.
+      </p>
       </div>
     </AuthSplitLayout>
   );
