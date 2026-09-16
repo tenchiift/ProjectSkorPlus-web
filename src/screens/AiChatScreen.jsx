@@ -297,7 +297,7 @@ export default function AiChatScreen() {
         size="md"
         colorVariant="colorful"
         theme="dark"
-        duration={1.1}
+        duration={2.0}
         brightness={2}
         saturation={1.8}
         hueRange={90}
