@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X, Menu, Zap, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
+import { ThinkingOrb } from 'thinking-orbs';
+import { BorderBeam } from 'border-beam';
+import ShaderBackground from '../components/ShaderBackground';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import {
   createConversation,
@@ -13,9 +18,51 @@ import {
 } from '../services/aiChatService';
 import styles from './AiChatScreen.module.css';
 
+// Single-popup bottom-sheet with spring enter/exit. Shared by the
+// Chats / Mode / Tips sheets (only one is open at a time).
+function Sheet({ onClose, children }) {
+  const rm = useReducedMotion();
+  const overlay = rm
+    ? {}
+    : {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.18, ease: 'easeOut' },
+      };
+  const panel = rm
+    ? {}
+    : {
+        initial: { y: 64, opacity: 0, scale: 0.97 },
+        animate: { y: 0, opacity: 1, scale: 1 },
+        exit: { y: 40, opacity: 0, scale: 0.98 },
+        transition: { type: 'spring', stiffness: 320, damping: 30 },
+      };
+  return (
+    <motion.div className={styles.chatDropdownOverlay} onClick={onClose} {...overlay}>
+      <motion.div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()} {...panel}>
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function AiChatScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { themeMode } = useTheme();
+
+  // Grain backdrop: neutral pastel on light themes, deep neutral on dark.
+  const grainDark = themeMode === 'dark' || themeMode === 'midnight';
+  const grainProps = grainDark
+    ? {
+        colorBack: '#0E0E12',
+        colors: ['#2E2E38', '#383844', '#252A33', '#332E3A'],
+      }
+    : {
+        colorBack: '#E9E4D8',
+        colors: ['#D3C8AF', '#B9CFCF', '#E0C4B2', '#BFC0D4', '#B4C4B0'],
+      };
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -157,6 +204,17 @@ export default function AiChatScreen() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.grainBg} aria-hidden="true">
+        <ShaderBackground
+          colors={grainProps.colors}
+          colorBack={grainProps.colorBack}
+          shape="wave"
+          softness={0.7}
+          intensity={0.85}
+          noise={0.6}
+          speed={0.5}
+        />
+      </div>
       <div className={styles.header}>
         <button className={styles.headerBtn} onClick={() => navigate(-1)} aria-label="Back">
           <ArrowLeft size={22} color="var(--color-text-primary)" />
@@ -192,7 +250,7 @@ export default function AiChatScreen() {
             <div className={styles.center}><div className={styles.spinner} /></div>
           ) : messages.length === 0 && !waiting ? (
             <div className={styles.center}>
-              <div className={styles.emptyIcon}><Sparkles size={28} color="var(--color-primary)" /></div>
+              <ThinkingOrb state="composing" size={64} />
               <p className={styles.emptyTitle}>Ask me anything!</p>
               <p className={styles.emptySub}>I'm your AI study buddy — here to help you learn.</p>
             </div>
@@ -210,10 +268,8 @@ export default function AiChatScreen() {
               })}
               {waiting && (
                 <div className={styles.bubbleRow}>
-                  <div className={`${styles.bubble} ${styles.bubbleTheirs}`}>
-                    <div className={styles.typing}>
-                      <span /><span /><span />
-                    </div>
+                  <div className={`${styles.bubble} ${styles.bubbleTheirs} ${styles.thinkingBubble}`}>
+                    <ThinkingOrb state="composing" size={64} />
                   </div>
                 </div>
               )}
@@ -232,6 +288,7 @@ export default function AiChatScreen() {
         </div>
       )}
 
+      <div className={styles.bottomZone}>
       <div className={styles.mobileToolbar}>
         <button
           className={styles.toolbarPill}
@@ -262,11 +319,27 @@ export default function AiChatScreen() {
         </button>
       </div>
 
+      <BorderBeam size="md" className={styles.inputBeam}>
+      <div className={styles.inputBar}>
+        <input
+          className={styles.input}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          placeholder="Ask your study buddy..."
+        />
+        <button className={styles.sendBtn} onClick={handleSend} disabled={waiting || !input.trim()}>
+          <Send size={20} color="#FFFFFF" />
+        </button>
+      </div>
+      </BorderBeam>
+      </div>
+
+      <AnimatePresence>
       {chatDropdown && (
-        <div className={styles.chatDropdownOverlay} onClick={() => setChatDropdown(false)}>
-          <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.chatDropdownHeader}>
-              <span className={styles.chatDropdownTitle}>Chat Sessions</span>
+        <Sheet key="chats" onClose={() => setChatDropdown(false)}>
+          <div className={styles.chatDropdownHeader}>
+            <span className={styles.chatDropdownTitle}>Chat Sessions</span>
               <div className={styles.chatDropdownActions}>
                 <button className={styles.chatDropdownEdit} onClick={() => setEditMode((v) => !v)}>
                   {editMode ? <Check size={16} color="var(--color-primary)" /> : <Pencil size={16} color="var(--color-text-secondary)" />}
@@ -328,16 +401,13 @@ export default function AiChatScreen() {
                 </div>
               ))
             )}
-          </div>
-        </div>
+        </Sheet>
       )}
-
       {modeDropdown && (
-        <div className={styles.chatDropdownOverlay} onClick={() => setModeDropdown(false)}>
-          <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.chatDropdownHeader}>
-              <span className={styles.chatDropdownTitle}>AI Mode</span>
-            </div>
+        <Sheet key="mode" onClose={() => setModeDropdown(false)}>
+          <div className={styles.chatDropdownHeader}>
+            <span className={styles.chatDropdownTitle}>AI Mode</span>
+          </div>
             {AI_MODES.map((m) => (
               <button
                 key={m.id}
@@ -350,16 +420,13 @@ export default function AiChatScreen() {
                 </div>
               </button>
             ))}
-          </div>
-        </div>
+        </Sheet>
       )}
-
       {tipsDropdown && (
-        <div className={styles.chatDropdownOverlay} onClick={() => setTipsDropdown(false)}>
-          <div className={styles.chatDropdown} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.chatDropdownHeader}>
-              <span className={styles.chatDropdownTitle}>Quick Tips</span>
-            </div>
+        <Sheet key="tips" onClose={() => setTipsDropdown(false)}>
+          <div className={styles.chatDropdownHeader}>
+            <span className={styles.chatDropdownTitle}>Quick Tips</span>
+          </div>
             {QUICK_TIPS.map((tip) => (
               <button
                 key={tip}
@@ -370,22 +437,9 @@ export default function AiChatScreen() {
                 <span className={styles.chatDropdownItemText}>{tip}</span>
               </button>
             ))}
-          </div>
-        </div>
+        </Sheet>
       )}
-
-      <div className={styles.inputBar}>
-        <input
-          className={styles.input}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Ask your study buddy..."
-        />
-        <button className={styles.sendBtn} onClick={handleSend} disabled={waiting || !input.trim()}>
-          <Send size={20} color="#FFFFFF" />
-        </button>
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
