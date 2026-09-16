@@ -35,20 +35,6 @@ export default function DashboardScreen() {
     style: { overflow: 'hidden' },
   };
 
-  // Card resize: smooth height tween when the controls/break rows mount,
-  // unmount or swap (update week, start/end mid-sem break). Same
-  // ease + duration as the Transitions.dev resize recipe.
-  const cardRowAnim = {
-    initial: { height: 0, opacity: 0 },
-    animate: { height: 'auto', opacity: 1 },
-    exit: { height: 0, opacity: 0 },
-    transition: reducedMotion ? { duration: 0 } : { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
-    style: { overflow: 'hidden' },
-  };
-  const cardLayoutProps = reducedMotion
-    ? {}
-    : { layout: true, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } };
-
   const [userData, setUserData] = useState(null);
   const [modules, setModules] = useState([]);
   const [moduleProgress, setModuleProgress] = useState({});
@@ -309,7 +295,7 @@ export default function DashboardScreen() {
           </div>
         </div>
 
-        <motion.div className={styles.semesterCard} {...cardLayoutProps}>
+        <div className={styles.semesterCard}>
           <div className={styles.semesterTitleRow}>
             <span className={styles.semesterTitle}>
               {paused && semester
@@ -354,37 +340,29 @@ export default function DashboardScreen() {
             />
           </div>
 
-          <AnimatePresence initial={false}>
           {paused && semester && (
-            <motion.div key="break-controls" {...cardRowAnim}>
             <div className={styles.semesterControls}>
               <span className={styles.semesterHint}>Break active — progress is paused.</span>
               <button className={`${styles.semesterActionBtn} ${styles.semesterActionBtnSmall}`} onClick={handleEndBreak} disabled={saving}>
                 End mid-sem break
               </button>
             </div>
-            </motion.div>
           )}
 
           {!paused && semester && !pickerOpen && (
-            <motion.div key="week-controls" {...cardRowAnim}>
             <div className={styles.semesterControls}>
               <button className={styles.semesterActionBtn} onClick={openUpdate}>Update week</button>
               <button className={styles.semesterActionBtnSecondary} onClick={handleStartBreak} disabled={saving}>
                 Start mid-sem break
               </button>
             </div>
-            </motion.div>
           )}
 
           {!semester && !pickerOpen && (
-            <motion.div key="setup-controls" {...cardRowAnim}>
             <button className={styles.semesterActionBtn} onClick={openUpdate}>
               Set your week
             </button>
-            </motion.div>
           )}
-          </AnimatePresence>
 
           {pickerOpen && (
             <AnimatePresence initial={false}>
@@ -440,7 +418,7 @@ export default function DashboardScreen() {
               </motion.div>
             </AnimatePresence>
           )}
-        </motion.div>
+        </div>
 
         <div className={styles.statsRow}>
           {actionCards.map((item, i) => {
