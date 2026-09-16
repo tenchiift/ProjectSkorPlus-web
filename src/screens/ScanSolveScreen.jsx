@@ -112,8 +112,6 @@ export default function ScanSolveScreen() {
   const [solvingOpen, setSolvingOpen] = useState(false);
   const [problemDesc, setProblemDesc] = useState('');
   const [history, setHistory] = useState([]);
-  const [choiceOpen, setChoiceOpen] = useState(false);
-  const [cameraBlocked, setCameraBlocked] = useState(false);
   const galleryRef = useRef(null);
   const cameraRef = useRef(null);
 
@@ -128,27 +126,11 @@ export default function ScanSolveScreen() {
     } catch { /* quota full — keep in-memory only */ }
   };
 
-  const openChoice = async () => {
-    setChoiceOpen(true);
-    // Pre-check so we can warn when camera permission is already blocked —
-    // the OS/browser itself asks for permission when the camera opens.
-    try {
-      if (navigator.permissions?.query) {
-        const status = await navigator.permissions.query({ name: 'camera' });
-        setCameraBlocked(status.state === 'denied');
-      }
-    } catch {
-      setCameraBlocked(false);
-    }
-  };
-
   const handleGallery = () => {
-    setChoiceOpen(false);
     galleryRef.current?.click();
   };
 
   const handleCamera = () => {
-    setChoiceOpen(false);
     cameraRef.current?.click();
   };
 
@@ -240,9 +222,9 @@ export default function ScanSolveScreen() {
           <ChevronDown size={18} color="var(--color-text-secondary)" />
         </button>
 
-        <div className={styles.imageArea} onClick={openChoice} role="button" tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openChoice(); }}
-          aria-label="Add a photo — take a picture or choose from gallery">
+        <div className={styles.imageArea} onClick={handleCamera} role="button" tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCamera(); }}
+          aria-label="Take a photo with camera">
           {image ? (
             <div className={styles.imagePreview}>
               {reducedMotion ? (
@@ -334,7 +316,7 @@ export default function ScanSolveScreen() {
           size="pulse-inner"
           colorVariant="colorful"
           theme="dark"
-          duration={1.5}
+          duration={2.0}
           brightness={2}
           saturation={1.8}
           hueRange={90}
@@ -412,33 +394,6 @@ export default function ScanSolveScreen() {
             ) : (
               <p className={styles.emptyHistory}>No scans yet — snap a question to get started.</p>
             )}
-          </BottomSheet>
-        )}
-      </AnimatePresence>
-
-      {/* Camera / gallery choice */}
-      <AnimatePresence>
-        {choiceOpen && (
-          <BottomSheet key="choice" onClose={() => setChoiceOpen(false)}>
-            <div className={styles.dropdownHeader}>
-              <h3 className={styles.dropdownTitle}>Add a photo</h3>
-              <button className={styles.modalClose} onClick={() => setChoiceOpen(false)} aria-label="Close">
-                <X size={20} color="var(--color-text-primary)" />
-              </button>
-            </div>
-            {cameraBlocked && (
-              <p className={styles.permHint}>
-                Camera is blocked — allow camera access in your browser settings, or choose from gallery instead.
-              </p>
-            )}
-            <button className={styles.choiceBtn} onClick={handleCamera}>
-              <Camera size={20} color="var(--color-primary)" />
-              <span className={styles.choiceBtnText}>Take Photo</span>
-            </button>
-            <button className={styles.choiceBtn} onClick={handleGallery}>
-              <ImageIcon size={20} color="var(--color-primary)" />
-              <span className={styles.choiceBtnText}>Choose from Gallery</span>
-            </button>
           </BottomSheet>
         )}
       </AnimatePresence>

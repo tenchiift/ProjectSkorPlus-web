@@ -86,43 +86,6 @@
   padding: var(--spacing-lg) 0;
 }
 
-/* Camera / gallery choice buttons */
-.choiceBtn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  margin-bottom: var(--spacing-sm);
-  cursor: pointer;
-  font-family: var(--font-heading-bold);
-  font-size: 15px;
-  color: var(--color-text-primary);
-  text-align: left;
-}
-
-.choiceBtn:active {
-  opacity: 0.7;
-}
-
-.choiceBtnText {
-  flex: 1;
-}
-
-.permHint {
-  font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 20px;
-  color: var(--color-error);
-  background: rgba(240, 68, 68, 0.08);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
 .imageArea {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
