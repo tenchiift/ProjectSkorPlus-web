@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowLeft, Plus, Send, Sparkles, MessageCircle, X, Menu, Zap, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Send, Sparkles, X, Menu, Zap, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
 import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
+import { MetalFx } from 'metal-fx';
 import { useAuth } from '../context/AuthContext';
 import {
   createConversation,
@@ -48,6 +49,7 @@ function Sheet({ onClose, children }) {
 export default function AiChatScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const prefersReduced = useReducedMotion();
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -203,22 +205,6 @@ export default function AiChatScreen() {
       </div>
 
       <div className={styles.body}>
-        {conversations.length > 0 && (
-          <div className={styles.history}>
-            <span className={styles.historyLabel}>Recent chats</span>
-            {conversations.map((c) => (
-              <button
-                key={c.id}
-                className={`${styles.historyItem} ${c.id === activeId ? styles.historyItemActive : ''}`}
-                onClick={() => setActiveId(c.id)}
-              >
-                <MessageCircle size={14} color="var(--color-text-secondary)" />
-                <span className={styles.historyTitle}>{c.title}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className={styles.chat}>
           {loading ? (
             <div className={styles.center}><div className={styles.spinner} /></div>
@@ -262,7 +248,7 @@ export default function AiChatScreen() {
         </div>
       )}
 
-      <div className={`${styles.bottomZone} ${conversations.length > 0 ? styles.bottomZoneIndented : ''}`}>
+      <div className={styles.bottomZone}>
       <div className={styles.mobileToolbar}>
         <button
           className={styles.toolbarPill}
@@ -312,9 +298,11 @@ export default function AiChatScreen() {
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Ask your study buddy..."
         />
-        <button className={styles.sendBtn} onClick={handleSend} disabled={waiting || !input.trim()}>
-          <Send size={20} color="#FFFFFF" />
-        </button>
+        <MetalFx preset="chromatic" strength={1} variant="circle" theme="dark" paused={prefersReduced}>
+          <button className={styles.sendBtn} onClick={handleSend} disabled={waiting || !input.trim()}>
+            <Send size={20} color="#FFFFFF" />
+          </button>
+        </MetalFx>
       </div>
       </BorderBeam>
       </div>

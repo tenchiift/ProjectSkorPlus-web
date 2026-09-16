@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
-const THEME_MODES = { light: true, dark: true, pink: true, ocean: true, forest: true, midnight: true };
+const THEME_MODES = { light: true, pink: true, ocean: true, forest: true };
 
 const ThemeContext = createContext({
   themeMode: 'light',
@@ -9,8 +9,11 @@ const ThemeContext = createContext({
 
 export function ThemeProvider({ children }) {
   const [mode, setMode] = useState(() => {
-    try { return localStorage.getItem('skorplus-theme') || 'light'; }
-    catch { return 'light'; }
+    try {
+      const saved = localStorage.getItem('skorplus-theme') || 'light';
+      // Fallback: dark/midnight were removed — existing users drop to light.
+      return THEME_MODES[saved] ? saved : 'light';
+    } catch { return 'light'; }
   });
 
   const setThemeMode = useCallback((newMode) => {

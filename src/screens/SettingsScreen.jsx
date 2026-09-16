@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Sun, Moon, Heart, Waves, TreePine, Stars, ChevronRight, X,
+  ArrowLeft, Sun, Heart, Waves, TreePine, ChevronRight, X,
   Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette, ShieldCheck, Layers,
 } from 'lucide-react';
 import { supabase } from '../config/supabase';
@@ -13,11 +13,9 @@ import styles from './SettingsScreen.module.css';
 
 const THEME_OPTIONS = [
   { mode: 'light', icon: Sun, label: 'Light', color: '#FFFFFF', accent: '#8E6BE2', hint: 'Bright & clean' },
-  { mode: 'dark', icon: Moon, label: 'Dark', color: '#1C1C20', accent: '#9D82E8', hint: 'Easy on the eyes' },
   { mode: 'pink', icon: Heart, label: 'Soft Pink', color: '#FDF6F7', accent: '#E0698C', hint: 'Warm & cozy' },
   { mode: 'ocean', icon: Waves, label: 'Ocean Blue', color: '#F4F8FC', accent: '#3E7BD6', hint: 'Cool & focused' },
   { mode: 'forest', icon: TreePine, label: 'Forest', color: '#F4FAF5', accent: '#2F9E5F', hint: 'Fresh & calm' },
-  { mode: 'midnight', icon: Stars, label: 'Midnight', color: '#0D1220', accent: '#6C8CFF', hint: 'Deep night vibes' },
 ];
 
 const AI_LANG_OPTIONS = [

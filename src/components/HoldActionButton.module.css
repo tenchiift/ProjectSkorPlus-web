@@ -1,5 +1,5 @@
 /* Hold-to-confirm button — ported from beui hold-action-button,
-   restyled with app theme vars (follows light/dark/pink/ocean/forest/midnight). */
+   restyled with app theme vars. */
 
 .hold {
   --hold-radius: var(--radius-full);
