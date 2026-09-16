@@ -278,7 +278,7 @@ export default function ScanSolveScreen() {
             value={problemDesc}
             onChange={(e) => setProblemDesc(e.target.value)}
             placeholder="What are you trying to solve? Add context so the AI can help better..."
-            rows={3}
+            rows={5}
           />
         </div>
 
@@ -296,7 +296,17 @@ export default function ScanSolveScreen() {
         </button>
 
         {/* Dark-only beam wrapper so the beam pops in any theme */}
-        <BorderBeam size="md" className={styles.solveBeam}>
+        <BorderBeam
+          size="md"
+          colorVariant="colorful"
+          theme="dark"
+          duration={1.1}
+          brightness={2}
+          saturation={1.8}
+          hueRange={90}
+          strength={1}
+          className={styles.solveBeam}
+        >
           <button
             className={`${styles.solveBtn} ${!image ? styles.solveBtnDisabled : ''}`}
             onClick={handleSolve}
@@ -379,9 +389,7 @@ export default function ScanSolveScreen() {
             <div className={styles.topHandle} />
             <div className={styles.dropdownHeader}>
               {loading || result === 'loading' ? (
-                <h3 className={styles.dropdownTitle}>
-                  <span className={styles.shimmer} data-text="Solving…">Solving…</span>
-                </h3>
+                <span />
               ) : (
                 <h3 className={styles.dropdownTitle}>AI Solution</h3>
               )}
@@ -402,6 +410,9 @@ export default function ScanSolveScreen() {
             )}
             {loading || result === 'loading' ? (
               <div className={styles.solvingLoading}>
+                <p className={styles.solvingShimmer}>
+                  <span className={styles.shimmer} data-text="Solving…">Solving…</span>
+                </p>
                 <ThinkingOrb state="composing" size={64} />
                 <p className={styles.solvingText}>AI is reading your question…</p>
               </div>

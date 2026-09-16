@@ -122,6 +122,7 @@
   resize: vertical;
   outline: none;
   box-sizing: border-box;
+  min-height: 132px;
 }
 
 .problemInput:focus {
@@ -214,13 +215,37 @@
   width: 100%;
 }
 
-/* Dark-only beam wrapper so the beam pops in any theme (like AI inputBeam). */
+/* Dark-only beam wrapper so the beam pops in any theme. */
 .solveBeam {
+  --beam-strength: 1;
+  --beam-stroke-opacity: 1;
+  --beam-inner-opacity: 1;
   border-radius: var(--radius-full);
   background: #232329;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 0 24px rgba(142, 107, 226, 0.45),
+    0 0 48px rgba(64, 140, 255, 0.25);
   padding: 5px;
   margin-bottom: var(--spacing-lg);
+  animation: solve-beam-pulse 2.2s ease-in-out infinite;
+}
+@keyframes solve-beam-pulse {
+  0%, 100% {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      0 0 18px rgba(142, 107, 226, 0.35),
+      0 0 36px rgba(64, 140, 255, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      0 0 32px rgba(142, 107, 226, 0.6),
+      0 0 64px rgba(64, 140, 255, 0.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solveBeam { animation: none; }
 }
 
 .solveBeam .solveBtn {
@@ -349,6 +374,13 @@
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-xl) 0;
+}
+
+.solvingShimmer {
+  font-family: var(--font-heading-bold);
+  font-size: 22px;
+  text-align: center;
+  margin: 0;
 }
 
 .solvingText {
