@@ -42,14 +42,6 @@
   padding: var(--spacing-xs) var(--spacing-lg) 0;
 }
 
-.logoImage {
-  width: 290px;
-  height: 290px;
-  display: block;
-  margin: -24px auto -8px;
-  object-fit: contain;
-}
-
 .title {
   font-family: var(--font-heading-bold);
   font-size: 26px;
@@ -160,12 +152,6 @@
 
   .content {
     padding-top: 0;
-  }
-
-  .logoImage {
-    width: 168px;
-    height: 168px;
-    margin: 0 0 20px;
   }
 
   .title {

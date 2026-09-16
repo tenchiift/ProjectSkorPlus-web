@@ -4,7 +4,6 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { verifyLecturerCode } from '../services/adminService';
 import AuthSplitLayout from '../components/AuthSplitLayout';
-import logo from '../assets/images/logo.png';
 import styles from './RegisterScreen.module.css';
 
 export default function RegisterScreen() {
@@ -90,7 +89,6 @@ export default function RegisterScreen() {
       </div>
 
       <div className={styles.content}>
-        <img src={logo} alt="ProjectSkor+" className={styles.logoImage} />
         <h1 className={styles.title}>Get started with ProjectSkor+</h1>
 
         <div className={styles.roleRow}>
