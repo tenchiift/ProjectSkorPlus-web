@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, Sparkles, NotebookPen } from 'lucide-react';
+import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, NotebookPen } from 'lucide-react';
+import { ThinkingOrb } from 'thinking-orbs';
+import { BorderBeam } from 'border-beam';
 import { supabase } from '../config/supabase';
 import { getModules, getModulesForStudent, getUserModuleProgress } from '../services/moduleService';
 import { setWeekAnchor, setSemesterPaused, claimDailyStreak } from '../services/userService';
@@ -246,7 +248,7 @@ export default function DashboardScreen() {
 
   const actionCards = [
     { icon: ScanLine, label: 'Scan Solve', path: '/scan-solve' },
-    { icon: Sparkles, label: <>AI Study<br />Buddy</>, path: '/ai-chat' },
+    { orb: true, label: <>AI Study<br />Buddy</>, path: '/ai-chat' },
     { icon: Send, label: 'Send Work', path: '/submit-work' },
   ];
 
@@ -423,6 +425,33 @@ export default function DashboardScreen() {
         <div className={styles.statsRow}>
           {actionCards.map((item, i) => {
             const Icon = item.icon;
+            if (item.orb) {
+              return (
+                <BorderBeam
+                  key={i}
+                  size="pulse-outside"
+                  colorVariant="colorful"
+                  theme="dark"
+                  duration={2}
+                  brightness={2}
+                  saturation={1.8}
+                  hueRange={90}
+                  strength={1}
+                  className={styles.orbCardBeam}
+                >
+                  <motion.button
+                    className={styles.statCard}
+                    onClick={() => navigate(item.path)}
+                    {...riseProps(i * 0.08 + 0.05)}
+                  >
+                    <span className={styles.orbIcon}>
+                      <ThinkingOrb state="composing" size={64} />
+                    </span>
+                    <span className={styles.statLabel}>{item.label}</span>
+                  </motion.button>
+                </BorderBeam>
+              );
+            }
             return (
               <motion.button
                 key={i}

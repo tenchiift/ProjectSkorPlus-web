@@ -351,6 +351,38 @@
   transform: scale(0.97);
 }
 
+/* Beam wrapper around the AI Study Buddy card — flexes like a statCard. */
+.orbCardBeam {
+  --beam-strength: 1;
+  --beam-stroke-opacity: 1;
+  --beam-inner-opacity: 1;
+  flex: 1;
+  display: flex;
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+
+.orbCardBeam > button {
+  flex: 1;
+  width: 100%;
+}
+
+/* ThinkingOrb only ships tuned sizes 64/20 — scale 64 down to ~40px
+   so it sits balanced with the 28px lucide icons. */
+.orbIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.orbIcon > * {
+  transform: scale(0.625);
+}
+
 @media (min-width: 768px) {
   .statCard {
     padding: var(--spacing-xl) 0;
@@ -368,6 +400,12 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-primary);
+  text-align: center;
+  line-height: 1.5;
+  min-height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sectionRow {
