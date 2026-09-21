@@ -6,6 +6,7 @@ import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
 import { ImageGeneration } from 'img-fx';
 import { solveQuestion } from '../services/aiService';
+import { stripMarkdown } from '../utils/plainText';
 import styles from './ScanSolveScreen.module.css';
 
 const HISTORY_KEY = 'skorplus-scan-history';
@@ -434,7 +435,7 @@ export default function ScanSolveScreen() {
               </div>
             ) : result && result.startsWith('Error:') ? (
               <div className={styles.topResult}>
-                <p className={styles.resultText}>{result}</p>
+                <p className={styles.resultText}>{stripMarkdown(result)}</p>
                 <button className={styles.topCloseBtn} onClick={handleSolve} disabled={loading}>
                   Retry
                 </button>
@@ -444,7 +445,7 @@ export default function ScanSolveScreen() {
               </div>
             ) : (
               <div className={styles.topResult}>
-                <p className={styles.resultText}>{result}</p>
+                <p className={styles.resultText}>{stripMarkdown(result)}</p>
                 <button className={styles.topCloseBtn} onClick={() => setSolvingOpen(false)}>
                   Done
                 </button>

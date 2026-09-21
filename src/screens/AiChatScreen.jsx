@@ -6,6 +6,7 @@ import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
 import { MetalFx } from 'metal-fx';
 import { useAuth } from '../context/AuthContext';
+import { stripMarkdown } from '../utils/plainText';
 import {
   createConversation,
   getConversations,
@@ -221,7 +222,7 @@ export default function AiChatScreen() {
                 return (
                   <div key={m.id} className={`${styles.bubbleRow} ${mine ? styles.bubbleRowMine : ''}`}>
                     <div className={`${styles.bubble} ${mine ? styles.bubbleMine : styles.bubbleTheirs}`}>
-                      <p className={styles.bubbleText}>{m.content}</p>
+                      <p className={styles.bubbleText}>{stripMarkdown(m.content)}</p>
                     </div>
                   </div>
                 );

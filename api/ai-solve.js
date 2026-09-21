@@ -27,7 +27,7 @@ You are a strict math tutor grading a student's answer. The image contains a que
 4. At the end, clearly say "✅ CORRECT" or "❌ INCORRECT" with reasoning
 5. If incorrect, show the correct solution
 
-Format your response nicely with line breaks between steps. NEVER use LaTeX, dollar signs ($), or any math markup — always write math in plain text.`;
+Format your response nicely with line breaks between steps. NEVER use LaTeX, dollar signs ($), or any math markup — always write math in plain text. ALWAYS reply in plain text only — NEVER use Markdown (no asterisks, no **bold**, no # headings, no backticks). Use numbered steps (1. 2. 3.) for structure.`;
   }
   return `You are a helpful math tutor.
 
@@ -35,7 +35,7 @@ Format your response nicely with line breaks between steps. NEVER use LaTeX, dol
 2. Solve it step-by-step with clear explanations
 3. Give the final answer clearly
 
-Format your response nicely with line breaks between steps. NEVER use LaTeX, dollar signs ($), or any math markup — always write math in plain text.`;
+Format your response nicely with line breaks between steps. NEVER use LaTeX, dollar signs ($), or any math markup — always write math in plain text. ALWAYS reply in plain text only — NEVER use Markdown (no asterisks, no **bold**, no # headings, no backticks). Use numbered steps (1. 2. 3.) for structure.`;
 }
 
 async function isAuthenticated(req) {
