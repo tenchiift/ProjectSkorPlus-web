@@ -2,7 +2,15 @@
   "name": "projectskorplus-web",
   "private": true,
   "version": "1.0.0",
+  "description": "SkorPlus — student study companion web app (React + Vite + Supabase)",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tenchiift/ProjectSkorPlus-web.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

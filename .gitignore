@@ -50,3 +50,19 @@ final exams/
 VECTOR MODULES/
 .vercel
 .env*
+
+# --- SkorPlus: keep public repo lean (local-only, never commit) ---
+video-assets/
+assets/
+assets.zip
+login dekstop/
+module page/
+exam/
+task/
+reference/
+zep quizz/
+vibecoder-review.md
+
+# local agent / editor config (kept on disk, not in public repo)
+.opencode/
+AGENTS.md

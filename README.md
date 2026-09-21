@@ -1,8 +1,27 @@
-# ProjectSkorPlus Web
+# SkorPlus Web
 
-SkorPlus is a student study companion web app — track your semester progress, practice with past papers, scan & solve questions, chat with an AI study buddy, submit work, and stay connected with friends.
+![CI](https://github.com/tenchiift/ProjectSkorPlus-web/actions/workflows/ci/badge.svg)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-auth%20%2B%20db-3ECF8E?logo=supabase&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deploys_on-Vercel-black?logo=vercel)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## ✨ Features
+SkorPlus is a student study companion web app — track semester progress, practice with past papers, scan & solve questions, chat with an AI study buddy, submit work to lecturers, and stay connected with friends.
+
+## Screenshots
+
+| Onboarding | Onboarding | Login |
+| --- | --- | --- |
+| ![Onboarding 1](docs/screenshots/01-onboarding.png) | ![Onboarding 2](docs/screenshots/02-onboarding.png) | ![Login](docs/screenshots/03-login.png) |
+
+| Past papers | Tasks | Get started |
+| --- | --- | --- |
+| ![Past papers](docs/screenshots/04-exam.jpeg) | ![Tasks](docs/screenshots/05-tasks.jpg) | ![Get started](docs/screenshots/06-get-started.png) |
+
+> Live captures of Dashboard, Modules, Scan & Solve, and AI Chat will replace these previews. See [`docs/screenshots/`](docs/screenshots/).
+
+## Features
 
 ### Dashboard
 - **Semester Pulse card** — set your semester start date once and it tracks the current week (Week 1 → Week 14 → Study Week → Exam Week), auto-incrementing every 7 days, with an animated progress bar
@@ -11,7 +30,7 @@ SkorPlus is a student study companion web app — track your semester progress, 
 - **Zep Quiz** — quick practice card linking to quiz.zep.us
 - **Module carousel** — view your enrolled modules with per-module progress
 
-### Study Tools
+### Study tools
 - **Past Papers / Final Exam** — browse past-year papers and take final exams
 - **Scan & Solve** — upload or capture a question image and get an AI solution
 - **Modules** — module pages with questions and progress tracking
@@ -20,28 +39,29 @@ SkorPlus is a student study companion web app — track your semester progress, 
 ### AI Study Buddy
 - Chat with an AI assistant tailored for studying (AI-powered explanations and help)
 
-### Social & Collaboration
+### Social & collaboration
 - **Friends** — add friends and view their profiles/progress
 - **Send Work / Submissions** — submit your work to lecturers and track submissions (with **reviewed status** badges)
 - **Lecturer Inbox** — review student submissions, mark them reviewed
 - **Notifications** — read/receive app notifications
 
-### Lecturer & Admin
+### Lecturer & admin
 - **Verified lecturer signup** — lecturers register with a single-use code (admin-issued)
 - **Lecturer dashboard** — students count, submissions stats, pending review, recent submissions
 - **Past Papers manager** (`/manage-exams`) — CRUD + PDF upload, students see changes instantly
 - **Modules manager** (`/manage-modules`) — CRUD modules (title, description, color, order)
 - **Admin screen** (`/admin`) — create/deactivate lecturer codes (requires `role='admin'` on your profile)
 
-## 🛠 Tech Stack
+## Tech stack
 
 - **React 19** + **Vite 6**
 - **React Router 7**
 - **Supabase** (auth, database)
 - **lucide-react** (icons)
 - **CSS Modules** with theme-aware CSS variables
+- **Vercel** serverless functions (`api/`) proxying OpenRouter for AI features
 
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
 - Node.js 18+
@@ -114,11 +134,11 @@ npm run preview
 
 The app is also configured for Vercel deployment (`vercel.json` with SPA rewrites).
 
-## 🎨 Theming
+## Theming
 
 SkorPlus ships with three themes — **Light**, **Dark**, and **Soft Pink** — switchable from Settings. All screens use theme-aware CSS variables (see `src/styles/theme.css`), so the entire UI adapts instantly.
 
-## 🧭 Screens & Routing
+## Screens & routing
 
 | Route | Screen |
 |-------|--------|
@@ -140,16 +160,33 @@ SkorPlus ships with three themes — **Light**, **Dark**, and **Soft Pink** — 
 | `/pdf-viewer` | PDF viewer |
 | `/set-exam` | Set exam countdown |
 
-## 📁 Project Structure
+## Project structure
 
 ```
 src/
 ├── components/     # Shared components (Sidebar, Layout, ProtectedRoute…)
-├── screens/        # One folder per screen (+ CSS Modules)
+├── screens/        # One file per screen (+ CSS Modules)
 ├── services/       # Supabase API wrappers (auth, modules, friends…)
 ├── styles/         # theme.css (tokens), variables.css, global.css
 ├── config/         # Supabase client config
-└── context/        # React context (auth, theme)
+├── context/        # React context (auth, theme)
+├── data/           # Static data (e.g. vector questions)
+├── hooks/          # Shared React hooks
+└── navigation/     # Route definitions
 api/                # Vercel serverless functions (AI proxies)
 supabase/           # SQL migrations
+docs/
+└── screenshots/    # README visuals
 ```
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). Run `npm run build` before pushing, and never commit secrets.
+
+## Security
+
+See [`SECURITY.md`](SECURITY.md). Report vulnerabilities privately — do not open public issues for them.
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
