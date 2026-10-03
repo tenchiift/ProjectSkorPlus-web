@@ -308,3 +308,171 @@
 @keyframes adminSpin {
   to { transform: rotate(360deg); }
 }
+
+/* Users tab: section switcher. Active tab gets the primary underline so
+   the current section is obvious at a glance. */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 var(--spacing-lg);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.tabActive {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Users tab: search row sits above the list to narrow test accounts. */
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.searchRow .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchRow .submitBtn {
+  flex-shrink: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.roleSelect {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-input-bg);
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.selectAllRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 4px 4px 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.selectAllRow input,
+.userCheck {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* User rows reuse .card for the surface; the label wrapper makes the
+   whole row toggle the checkbox, a bigger tap target on phones. */
+.userRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.userMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.userMain .codeText,
+.userMain .codeLabel {
+  overflow-wrap: break-word;
+}
+
+.userMeta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 0;
+}
+
+.pagerText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.pagerBtn {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  padding: 10px 14px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.pagerBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Destructive action: solid error fill marks the irreversible delete,
+   distinct from the primary submit button used elsewhere. */
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  background: var(--color-error);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
