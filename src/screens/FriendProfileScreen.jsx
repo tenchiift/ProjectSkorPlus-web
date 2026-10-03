@@ -88,7 +88,7 @@ export default function FriendProfileScreen() {
 
         {friend.semester && (
           <div className={styles.infoBlock}>
-            <span className={styles.infoLabel}>Semester / Year</span>
+            <span className={styles.infoLabel}>Semester</span>
             <span className={styles.infoValue}>{friend.semester}</span>
           </div>
         )}

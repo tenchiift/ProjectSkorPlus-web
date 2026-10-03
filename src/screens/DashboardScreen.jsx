@@ -6,9 +6,11 @@ import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
 import { supabase } from '../config/supabase';
 import { getModules, getModulesForStudent, getUserModuleProgress } from '../services/moduleService';
-import { setWeekAnchor, setSemesterPaused, claimDailyStreak } from '../services/userService';
+import { setWeekAnchor, setSemesterPaused, claimDailyStreak, localDateStr } from '../services/userService';
 import { ensureDailyNotifications, subscribeToNotifications, getUnreadCount } from '../services/notificationService';
 import LecturerDashboardScreen from './LecturerDashboardScreen';
+import ClassPrompt from '../components/ClassPrompt';
+import { parseClassCode } from '../utils/parseClass';
 import examImage from '../assets/images/exam.jpeg';
 import zepImage from '../assets/images/zep.avif';
 import styles from './DashboardScreen.module.css';
@@ -53,6 +55,13 @@ export default function DashboardScreen() {
   const [unreadNotif, setUnreadNotif] = useState(0);
   const [role, setRole] = useState(null);
 
+  // One-time class prompt for students whose profile predates class codes.
+  const [classPrompt, setClassPrompt] = useState(false);
+  const [promptClass, setPromptClass] = useState('');
+  const [promptConfirming, setPromptConfirming] = useState(null);
+  const [promptSaving, setPromptSaving] = useState(false);
+  const [promptError, setPromptError] = useState('');
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -69,6 +78,15 @@ export default function DashboardScreen() {
         setUserData(profile);
         setRole(profile.role ?? 'student');
         setPaused(profile.semester_paused ?? false);
+        try {
+          if (
+            (profile.role ?? 'student') === 'student' &&
+            !profile.class_code &&
+            !sessionStorage.getItem('skorplus-class-asked')
+          ) {
+            setClassPrompt(true);
+          }
+        } catch { /* ignore */ }
         if (profile.week_anchor_date && profile.week_anchor_week && profile.week_anchor_day) {
           setAnchor({
             date: profile.week_anchor_date,
@@ -172,6 +190,48 @@ export default function DashboardScreen() {
     return user?.id;
   };
 
+  const dismissClassPrompt = () => {
+    try { sessionStorage.setItem('skorplus-class-asked', '1'); } catch { /* ignore */ }
+    setClassPrompt(false);
+    setPromptClass('');
+    setPromptConfirming(null);
+    setPromptError('');
+  };
+
+  const continueClassPrompt = () => {
+    const parsed = parseClassCode(promptClass);
+    if (!parsed) {
+      setPromptError('Use your class code, e.g. DCS 4B');
+      return;
+    }
+    setPromptError('');
+    setPromptConfirming(parsed);
+  };
+
+  const confirmClassPrompt = async () => {
+    const parsed = promptConfirming;
+    setPromptConfirming(null);
+    setPromptSaving(true);
+    setPromptError('');
+    try {
+      const userId = await getUserId();
+      if (!userId) return;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ class_code: parsed.canonical, semester: parsed.semesterLabel })
+        .eq('id', userId);
+      if (error) throw error;
+      setUserData((prev) => (prev ? { ...prev, class_code: parsed.canonical, semester: parsed.semesterLabel } : prev));
+      dismissClassPrompt();
+    } catch (err) {
+      console.error('Save class error:', err);
+      // Dismiss for this session so a missing migration never nag-loops.
+      dismissClassPrompt();
+    } finally {
+      setPromptSaving(false);
+    }
+  };
+
   const handlePickWeek = (week) => {
     setPendingWeek(week);
     setPickerStep('day');
@@ -185,7 +245,7 @@ export default function DashboardScreen() {
       await setWeekAnchor(userId, { week: pendingWeek, day });
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      setAnchor({ date: today.toISOString().slice(0, 10), week: pendingWeek, day });
+      setAnchor({ date: localDateStr(today), week: pendingWeek, day });
       setPaused(false);
       setPickerOpen(false);
       setPickerStep('week');
@@ -281,6 +341,18 @@ export default function DashboardScreen() {
 
   return (
     <div className={styles.container}>
+      {classPrompt && (
+        <ClassPrompt
+          value={promptClass}
+          onChange={(v) => { setPromptClass(v); setPromptConfirming(null); }}
+          confirming={promptConfirming}
+          onContinue={continueClassPrompt}
+          onConfirm={confirmClassPrompt}
+          onCancel={dismissClassPrompt}
+          saving={promptSaving}
+          error={promptError}
+        />
+      )}
       <div className={styles.scrollContent}>
         <div className={styles.topBar}>
           <button className={styles.mobileHamburger} onClick={() => document.dispatchEvent(new CustomEvent('toggle-sidebar'))} aria-label="Menu">

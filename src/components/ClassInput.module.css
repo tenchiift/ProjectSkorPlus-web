@@ -1,0 +1,94 @@
+/* Class code field. Same tokens as the auth/profile screens so the field
+   looks native wherever it is used (setup, edit profile, one-time prompt). */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  background: var(--color-input-bg);
+  outline: none;
+  width: 100%;
+  min-height: 44px;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.hint {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.error {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-error);
+  margin: 0;
+}
+
+/* Inline confirmation: plain surface box, no decoration. Its seriousness
+   comes from the words, not from color or glow. */
+.confirmBox {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmTitle {
+  font-family: var(--font-body-bold);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.confirmRow {
+  display: flex;
+  gap: 8px;
+}
+
+.confirmYes {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-height: 44px;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.confirmNo {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-height: 44px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  cursor: pointer;
+}
