@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { parseClassCode } from '../utils/parseClass';
+import ClassInput from '../components/ClassInput';
 import styles from './ProfileScreen.module.css';
 
 const GENDER_OPTIONS = ['Male', 'Female'];
@@ -21,7 +23,9 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('');
-  const [semester, setSemester] = useState('');
+  const [classCode, setClassCode] = useState('');
+  const [confirming, setConfirming] = useState(null);
+  const [role, setRole] = useState('student');
   const [bio, setBio] = useState('');
   const [photoURL, setPhotoURL] = useState(null);
   const [existingProfileSetup, setExistingProfileSetup] = useState(false);
@@ -49,7 +53,8 @@ export default function ProfileScreen() {
         setUsername(profile.username ?? '');
         setEmail(profile.email ?? '');
         setGender(profile.gender ?? '');
-        setSemester(profile.semester ?? '');
+        setRole(profile.role ?? 'student');
+        setClassCode(profile.class_code ?? '');
         setBio(profile.bio ?? '');
         setExistingProfileSetup(profile.profile_setup ?? false);
         if (profile.photo_url) {
@@ -101,6 +106,26 @@ export default function ProfileScreen() {
   };
 
   const handleSave = async () => {
+    const trimmedUsername = username.trim();
+    if (trimmedUsername && !/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
+      setProfileError('Username must be 3-20 characters (letters, numbers, underscores only).');
+      return;
+    }
+
+    if (role !== 'lecturer') {
+      const parsed = parseClassCode(classCode);
+      if (!parsed) {
+        setProfileError('Use your class code, e.g. DCS 4B');
+        return;
+      }
+      // Pause here: the user confirms the derived semester first.
+      setConfirming(parsed);
+      return;
+    }
+    await doSave(null);
+  };
+
+  const doSave = async (parsed) => {
     setSaving(true);
     setSaved(false);
     setProfileError('');
@@ -109,12 +134,6 @@ export default function ProfileScreen() {
       if (!userId) return;
 
       const trimmedUsername = username.trim();
-      if (trimmedUsername && !/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
-        setProfileError('Username must be 3-20 characters (letters, numbers, underscores only).');
-        setSaving(false);
-        return;
-      }
-
       if (trimmedUsername) {
         const { data: taken } = await supabase
           .from('profiles')
@@ -134,7 +153,9 @@ export default function ProfileScreen() {
         name: name.trim(),
         // Email belongs to auth.users — not stored in profiles (public read).
         gender,
-        semester,
+        // Students store the class code plus the derived semester label so
+        // every existing display keeps working unchanged.
+        ...(parsed ? { class_code: parsed.canonical, semester: parsed.semesterLabel } : {}),
         bio: bio.trim(),
       };
       if (trimmedUsername) updateData.username = trimmedUsername;
@@ -269,15 +290,20 @@ export default function ProfileScreen() {
           </div>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Semester / Year</label>
-          <input
-            className={styles.input}
-            value={semester}
-            onChange={(e) => setSemester(e.target.value)}
-            placeholder="e.g. Semester 2, 2026"
+        {role !== 'lecturer' && (
+          <ClassInput
+            id="profile-class-code"
+            value={classCode}
+            onChange={(v) => { setClassCode(v); setConfirming(null); }}
+            confirming={confirming}
+            onConfirm={() => {
+              const parsed = confirming;
+              setConfirming(null);
+              doSave(parsed);
+            }}
+            onCancel={() => setConfirming(null)}
           />
-        </div>
+        )}
 
         <div className={styles.field}>
           <label className={styles.label}>Bio</label>

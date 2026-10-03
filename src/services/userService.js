@@ -34,7 +34,7 @@ export const setWeekAnchor = async (userId, { week, day }) => {
   const { error } = await supabase
     .from('profiles')
     .update({
-      week_anchor_date: today.toISOString().slice(0, 10),
+      week_anchor_date: localDateStr(today),
       week_anchor_week: week,
       week_anchor_day: day,
       semester_paused: false,
@@ -63,7 +63,7 @@ export const updateUserStats = async (userId, { expGained, completed }) => {
   }
 };
 
-const localDateStr = (d) =>
+export const localDateStr = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 // Daily streak: +1 day & +5 EXP when the last active day was yesterday,

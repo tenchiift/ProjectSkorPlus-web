@@ -66,3 +66,6 @@ vibecoder-review.md
 # local agent / editor config (kept on disk, not in public repo)
 .opencode/
 AGENTS.md
+
+# load-test credentials (throwaway test accounts, never commit)
+loadtest/.accounts.json

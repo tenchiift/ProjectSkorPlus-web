@@ -50,7 +50,7 @@ SkorPlus is a student study companion web app — track semester progress, pract
 - **Lecturer dashboard** — students count, submissions stats, pending review, recent submissions
 - **Past Papers manager** (`/manage-exams`) — CRUD + PDF upload, students see changes instantly
 - **Modules manager** (`/manage-modules`) — CRUD modules (title, description, color, order)
-- **Admin screen** (`/admin`) — create/deactivate lecturer codes (requires `role='admin'` on your profile)
+- **Admin screen** (`/admin`) — create/deactivate lecturer codes, list users and permanently delete test accounts so their emails can register again (requires `role='admin'` on your profile)
 
 ## Tech stack
 

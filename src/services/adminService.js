@@ -53,3 +53,32 @@ export const generateCode = () => {
   for (let i = 0; i < 8; i++) out += chars[Math.floor(Math.random() * chars.length)];
   return `SKOR-${out}`;
 };
+
+// Admin user management — calls the /api/admin-users serverless function,
+// which holds the service_role key server-side. The caller's own Supabase
+// JWT proves they are an admin; the anon key alone can do nothing here.
+const callAdminUsers = async (body) => {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  const res = await fetch('/api/admin-users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'User management request failed.');
+  return data;
+};
+
+export const listUsers = async ({ q = '', role = 'all', page = 1 } = {}) => {
+  const data = await callAdminUsers({ action: 'list', q, role, page });
+  return { users: data.users || [], total: data.total || 0 };
+};
+
+export const deleteUsers = async (ids) => {
+  const data = await callAdminUsers({ action: 'delete', ids });
+  return { ok: data.ok || [], failed: data.failed || [] };
+};

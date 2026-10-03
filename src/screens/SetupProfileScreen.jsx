@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../config/supabase';
+import { parseClassCode } from '../utils/parseClass';
+import ClassInput from '../components/ClassInput';
 import styles from './SetupProfileScreen.module.css';
 
 export default function SetupProfileScreen() {
@@ -8,7 +10,8 @@ export default function SetupProfileScreen() {
   const location = useLocation();
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const [semester, setSemester] = useState('');
+  const [classCode, setClassCode] = useState('');
+  const [confirming, setConfirming] = useState(null);
   const [photoURL, setPhotoURL] = useState('');
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -75,6 +78,21 @@ export default function SetupProfileScreen() {
       setError('Username must be 3-20 chars (letters, numbers, underscore)');
       return;
     }
+    if (role !== 'lecturer') {
+      const parsed = parseClassCode(classCode);
+      if (!parsed) {
+        setError('Use your class code, e.g. DCS 4B');
+        return;
+      }
+      // Pause here: the user confirms the derived semester first.
+      setError('');
+      setConfirming(parsed);
+      return;
+    }
+    await saveProfile(trimmedName, trimmedUsername, null);
+  };
+
+  const saveProfile = async (trimmedName, trimmedUsername, parsed) => {
     setLoading(true);
     setError('');
     try {
@@ -97,8 +115,10 @@ export default function SetupProfileScreen() {
           name: trimmedName,
           username: trimmedUsername,
           role,
-          // Lecturers aren't tied to a semester/year.
-          semester: role === 'lecturer' ? null : semester.trim(),
+          // Lecturers aren't tied to a class. Students store the class code
+          // plus the semester derived from it (e.g. DCS 4B -> Semester 4).
+          semester: role === 'lecturer' ? null : parsed.semesterLabel,
+          ...(role === 'lecturer' ? {} : { class_code: parsed.canonical }),
           // Email lives in auth.users; storing it in profiles exposed every
           // user's address to "read all profiles" queries. Don't write it here.
           ...(photoURL ? { photo_url: photoURL } : {}),
@@ -172,15 +192,18 @@ export default function SetupProfileScreen() {
           </div>
 
           {role !== 'lecturer' && (
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>Semester / Year</label>
-              <input
-                className={styles.input}
-                value={semester}
-                onChange={(e) => setSemester(e.target.value)}
-                placeholder="e.g. Semester 2, 2025"
-              />
-            </div>
+            <ClassInput
+              id="setup-class-code"
+              value={classCode}
+              onChange={(v) => { setClassCode(v); setConfirming(null); }}
+              confirming={confirming}
+              onConfirm={() => {
+                const parsed = confirming;
+                setConfirming(null);
+                saveProfile(name.trim(), username.trim(), parsed);
+              }}
+              onCancel={() => setConfirming(null)}
+            />
           )}
 
           {error && <p className={styles.error} role="alert">{error}</p>}
