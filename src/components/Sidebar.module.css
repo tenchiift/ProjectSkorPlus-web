@@ -37,11 +37,15 @@
   transform: translateX(0);
 }
 
+/* Locked banner: fixed height + no shrinking, so the profile block always
+   renders full-size at any text zoom. The menu below scrolls instead. */
 .header {
   position: relative;
   padding: 60px 24px 32px;
   border-radius: 0 24px 0 0;
   overflow: hidden;
+  flex-shrink: 0;
+  height: 300px;
 }
 
 /* Avatar sebagai background penuh — blur sikit supaya text jelas. */
@@ -128,6 +132,12 @@
   font-size: 18px;
   color: #FFFFFF;
   text-align: center;
+  /* Long names at large text sizes clip with an ellipsis instead of
+     pushing the locked banner apart. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .roleTag {
@@ -195,6 +205,8 @@
 
 .menu {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -224,6 +236,7 @@
 .footer {
   padding: 0 24px 40px;
   border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .footerBtn {
@@ -267,23 +280,27 @@
   height: 100vh;
   position: sticky;
   top: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .persistentInner {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .persistent .header {
   padding: 56px 20px 44px;
   border-radius: 0;
   flex-shrink: 0;
+  height: 300px;
 }
 
 .persistent .menu {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 16px 12px;
 }
 
