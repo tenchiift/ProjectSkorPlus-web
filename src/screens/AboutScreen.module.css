@@ -1,0 +1,90 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+.header {
+  width: min(100%, 940px);
+  min-height: 56px;
+  margin-inline: auto;
+  padding: 6px max(16px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backButton {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.backButton:hover,
+.backButton:active {
+  background: var(--color-soft-blue-bg);
+}
+
+.backButton:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+}
+
+.headerTitle {
+  font: 20px var(--font-heading-bold);
+}
+
+/* Centered single-screen layout matching the approved mockup. */
+.content {
+  width: min(100%, 560px);
+  flex: 1;
+  margin-inline: auto;
+  padding: 12px 28px max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+.logo {
+  display: block;
+  width: min(56vw, 230px);
+  height: auto;
+  margin-top: 104px;
+}
+
+.tagline {
+  margin-top: 18px;
+  font: 17px / 1.4 var(--font-body);
+}
+
+.version {
+  margin-top: 14px;
+  font: 16px / 1.4 var(--font-body);
+  color: var(--color-text-secondary);
+}
+
+.heading {
+  margin-top: 120px;
+  font: 19px / 1.25 var(--font-heading-bold);
+}
+
+.body {
+  margin-top: 24px;
+  font: 17px / 1.65 var(--font-body);
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 20px;
+  font: 15px / 1.4 var(--font-body);
+}

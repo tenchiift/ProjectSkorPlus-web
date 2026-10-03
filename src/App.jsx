@@ -51,6 +51,7 @@ const ManageExamsScreen = lazy(() => import('./screens/ManageExamsScreen'));
 const ManageModulesScreen = lazy(() => import('./screens/ManageModulesScreen'));
 const ManageTopicsScreen = lazy(() => import('./screens/ManageTopicsScreen'));
 const AdminScreen = lazy(() => import('./screens/AdminScreen'));
+const AboutScreen = lazy(() => import('./screens/AboutScreen'));
 
 export default function App() {
   const location = useLocation();
@@ -88,6 +89,7 @@ export default function App() {
             <Route path="/manage-modules" element={<ManageModulesScreen />} />
             <Route path="/manage-topics/:moduleId" element={<ManageTopicsScreen />} />
             <Route path="/admin" element={<AdminScreen />} />
+            <Route path="/about" element={<AboutScreen />} />
             <Route path="/submission/:id" element={<SubmissionThreadScreen />} />
             <Route path="/notifications" element={<NotificationsScreen />} />
             <Route path="/ai-chat" element={<AiChatScreen />} />

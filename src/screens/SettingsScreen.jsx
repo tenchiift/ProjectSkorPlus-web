@@ -47,7 +47,6 @@ export default function SettingsScreen() {
   const [themeModal, setThemeModal] = useState(false);
   const [langModal, setLangModal] = useState(false);
   const [personaModal, setPersonaModal] = useState(false);
-  const [aboutModal, setAboutModal] = useState(false);
   const [passModal, setPassModal] = useState(false);
   const [clearModal, setClearModal] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState(() =>
@@ -182,7 +181,7 @@ export default function SettingsScreen() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/dashboard')}>
           <ArrowLeft size={24} color="var(--color-text-primary)" />
         </button>
       </div>
@@ -308,11 +307,11 @@ export default function SettingsScreen() {
         </div>
 
         <div className={styles.card}>
-          <button className={styles.row} onClick={() => setAboutModal(true)}>
+          <button className={styles.row} onClick={() => navigate('/about')}>
             <Info size={20} color="var(--color-text-secondary)" />
             <div className={styles.rowInfo}>
               <span className={styles.rowLabel}>About</span>
-              <span className={styles.rowHint}>Version & app info</span>
+              <span className={styles.rowHint}>Project, features & version</span>
             </div>
             <ChevronRight size={18} color="var(--color-text-secondary)" />
           </button>
@@ -472,27 +471,6 @@ export default function SettingsScreen() {
         </div>
       )}
 
-      {aboutModal && (
-        <div className={styles.modalOverlay} onClick={() => setAboutModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>About SkorPlus</h3>
-              <button className={styles.modalClose} onClick={() => setAboutModal(false)}>
-                <X size={20} color="var(--color-text-primary)" />
-              </button>
-            </div>
-            <div className={styles.aboutBody}>
-              <p className={styles.aboutName}>SkorPlus</p>
-              <p className={styles.aboutVersion}>Version 1.0.0</p>
-              <p className={styles.aboutText}>
-                Study companion for Malaysian students — semester tracking, past papers,
-                AI study buddy & scan solve, tasks, and classmates.
-              </p>
-              <p className={styles.aboutText}>AI features powered by OpenRouter.</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
