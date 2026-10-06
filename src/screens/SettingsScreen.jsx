@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Sun, Heart, Waves, TreePine, ChevronRight, X,
-  Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette, ShieldCheck, Layers,
+  Bell, Languages, Smile, Trash2, User, KeyRound, LogOut, Info, Palette, ShieldCheck, Layers, Bug,
 } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -279,8 +279,8 @@ export default function SettingsScreen() {
             <button className={styles.row} onClick={() => navigate('/admin')}>
               <ShieldCheck size={20} color="var(--color-text-secondary)" />
               <div className={styles.rowInfo}>
-                <span className={styles.rowLabel}>Admin</span>
-                <span className={styles.rowHint}>Manage lecturer codes</span>
+              <span className={styles.rowLabel}>Admin</span>
+              <span className={styles.rowHint}>Codes, users & bug reports</span>
               </div>
               <ChevronRight size={18} color="var(--color-text-secondary)" />
             </button>
@@ -290,6 +290,15 @@ export default function SettingsScreen() {
               <div className={styles.rowInfo}>
                 <span className={styles.rowLabel}>Module Visibility</span>
                 <span className={styles.rowHint}>Show modules to all students</span>
+              </div>
+              <ChevronRight size={18} color="var(--color-text-secondary)" />
+            </button>
+
+            <button className={styles.row} onClick={() => navigate('/admin?tab=reports')}>
+              <Bug size={20} color="var(--color-text-secondary)" />
+              <div className={styles.rowInfo}>
+                <span className={styles.rowLabel}>Bug Reports</span>
+                <span className={styles.rowHint}>View what users reported</span>
               </div>
               <ChevronRight size={18} color="var(--color-text-secondary)" />
             </button>

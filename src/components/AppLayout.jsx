@@ -7,6 +7,7 @@ import { notifyEvent } from '../services/notificationService';
 import { startPresenceTracking, stopPresenceTracking } from '../services/friendChatService';
 import Sidebar from './Sidebar';
 import LoadingScreen from './LoadingScreen';
+import ReportBugModal from './ReportBugModal';
 import styles from './AppLayout.module.css';
 
 export default function AppLayout({ children }) {
@@ -17,6 +18,7 @@ export default function AppLayout({ children }) {
   const [userData, setUserData] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   // Entrance animation on every route change (Outlet remounts per path).
   const pageMotion = {
@@ -41,6 +43,12 @@ export default function AppLayout({ children }) {
     const toggle = () => setSidebarVisible((v) => !v);
     document.addEventListener('toggle-sidebar', toggle);
     return () => document.removeEventListener('toggle-sidebar', toggle);
+  }, []);
+
+  useEffect(() => {
+    const openReport = () => setReportOpen(true);
+    document.addEventListener('open-report-bug', openReport);
+    return () => document.removeEventListener('open-report-bug', openReport);
   }, []);
 
   const fetchProfile = useCallback(() => {
@@ -134,6 +142,7 @@ export default function AppLayout({ children }) {
             </motion.div>
           </Suspense>
         </main>
+        <ReportBugModal open={reportOpen} onClose={() => setReportOpen(false)} />
       </div>
     );
   }
@@ -152,6 +161,7 @@ export default function AppLayout({ children }) {
         onNavigate={handleSidebarNavigate}
         userData={userData}
       />
+      <ReportBugModal open={reportOpen} onClose={() => setReportOpen(false)} />
     </>
   );
 }

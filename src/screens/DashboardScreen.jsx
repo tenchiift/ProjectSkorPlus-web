@@ -20,16 +20,6 @@ export default function DashboardScreen() {
   const carouselRef = useRef(null);
   const reducedMotion = useReducedMotion();
 
-  // Entrance-only motion for dashboard cards (module cards stay static).
-  const riseProps = (delay = 0) =>
-    reducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 12 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.3, ease: 'easeOut', delay },
-        };
-
   // Spring expand/collapse for the week picker.
   const pickerSpring = {
     initial: { height: 0, opacity: 0 },
@@ -511,34 +501,32 @@ export default function DashboardScreen() {
                   strength={1}
                   className={styles.orbCardBeam}
                 >
-                  <motion.button
+                  <button
                     className={styles.statCard}
                     onClick={() => navigate(item.path)}
-                    {...riseProps(i * 0.08 + 0.05)}
                   >
                     <span className={styles.orbIcon}>
                       <ThinkingOrb state="composing" size={64} />
                     </span>
                     <span className={styles.statLabel}>{item.label}</span>
-                  </motion.button>
+                  </button>
                 </BorderBeam>
               );
             }
             return (
-              <motion.button
+              <button
                 key={i}
                 className={styles.statCard}
                 onClick={() => navigate(item.path)}
-                {...riseProps(i * 0.08 + 0.05)}
               >
                 <Icon size={28} color="var(--color-primary)" />
                 <span className={styles.statLabel}>{item.label}</span>
-              </motion.button>
+              </button>
             );
           })}
         </div>
 
-        <motion.div className={styles.countdownCompact} {...riseProps(0.2)}>
+        <div className={styles.countdownCompact}>
           {countdown ? (
             <>
               <img src={examImage} className={styles.countdownBg} alt="" />
@@ -574,10 +562,10 @@ export default function DashboardScreen() {
               <button className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</button>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {modules.length > 0 && (
-          <motion.button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')} {...riseProps(0.28)}>
+          <button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
             <img src={zepImage} className={styles.zepBg} alt="" />
             <div className={styles.zepOverlay} />
             <div className={styles.zepContent}>
@@ -591,7 +579,7 @@ export default function DashboardScreen() {
               </div>
               <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
             </div>
-          </motion.button>
+          </button>
         )}
 
         <div className={styles.sectionRow}>

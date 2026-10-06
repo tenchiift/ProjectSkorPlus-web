@@ -1,7 +1,10 @@
 import { useCallback, useEffect } from 'react';
 import { animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
-import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, Bug } from 'lucide-react';
 import styles from './Sidebar.module.css';
+
+// Opens the global bug-report popup (handled in AppLayout).
+export const REPORT_BUG_ACTION = 'report-bug';
 
 // Animated number: counts up from 0 when `value` lands (profile fetch).
 function CountUp({ value }) {
@@ -34,6 +37,7 @@ const STUDENT_MENU = [
   { icon: Users, label: 'Friends', route: '/friends' },
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
   { icon: FolderOpen, label: 'My Submissions', route: '/my-submissions' },
+  { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
 ];
 
 const LECTURER_MENU = [
@@ -43,16 +47,25 @@ const LECTURER_MENU = [
   { icon: Layers, label: 'Modules', route: '/manage-modules' },
   { icon: Users, label: 'Friends', route: '/friends' },
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
+  { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
 ];
 
 // Admin access lives in Settings, not the sidebar.
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const reducedMotion = useReducedMotion();
+  const openReportBug = useCallback(() => {
+    document.dispatchEvent(new CustomEvent('open-report-bug'));
+  }, []);
   const handleNav = useCallback((route) => {
+    if (route === REPORT_BUG_ACTION) {
+      onClose();
+      setTimeout(() => openReportBug(), 200);
+      return;
+    }
     onClose();
     setTimeout(() => onNavigate(route), 200);
-  }, [onClose, onNavigate]);
+  }, [onClose, onNavigate, openReportBug]);
 
   // Profile still loading — render nothing role-specific so the lecturer
   // never sees the student menu / streak flash before the fetch lands.
@@ -123,8 +136,9 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
           <div className={styles.menu}>
             {MENU.map((item) => {
               const Icon = item.icon;
+              const isReport = item.route === REPORT_BUG_ACTION;
               return (
-                <button key={item.route} className={styles.menuItem} onClick={() => onNavigate(item.route)}>
+                <button key={item.route} className={styles.menuItem} onClick={() => isReport ? (onClose(), openReportBug()) : onNavigate(item.route)}>
                   <Icon size={20} />
                   <span>{item.label}</span>
                 </button>

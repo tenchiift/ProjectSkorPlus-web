@@ -3,13 +3,15 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
 }
 
 .label {
-  font-family: var(--font-body-bold);
-  font-size: 13px;
-  color: var(--color-text-secondary);
+  font-family: var(--font-heading-bold);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  display: block;
 }
 
 .input {
@@ -19,10 +21,15 @@
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--color-text-primary);
-  background: var(--color-input-bg);
+  background-color: #FAFAFA;
   outline: none;
   width: 100%;
-  min-height: 44px;
+  min-height: 52px;
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
 }
 
 .input:focus {

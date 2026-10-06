@@ -14,7 +14,7 @@
   border: 1px solid rgba(240, 68, 68, 0.25);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
-  margin: var(--spacing-md) var(--spacing-lg);
+  margin: 0 0 var(--spacing-md);
 }
 
 .container {
@@ -168,6 +168,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
+  min-height: 52px;
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--color-text-primary);
@@ -176,13 +177,18 @@
   transition: border-color 0.2s;
 }
 
+.input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
 .input:focus {
   border-color: var(--color-primary);
 }
 
 .readOnly {
   background-color: #E0E0E0;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .bioInput {

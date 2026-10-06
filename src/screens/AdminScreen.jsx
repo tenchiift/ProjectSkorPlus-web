@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, X, KeyRound, ShieldCheck, ShieldOff, Trash2, RefreshCw, Users } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Plus, X, KeyRound, ShieldCheck, ShieldOff, Trash2, RefreshCw, Users, Bug } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -12,7 +12,39 @@ import {
   listUsers,
   deleteUsers,
 } from '../services/adminService';
+import {
+  BUG_CATEGORIES,
+  BUG_SEVERITIES,
+  BUG_STATUSES,
+  getScreenshotViewUrl,
+  listBugReports,
+  setBugStatus,
+} from '../services/bugReportService';
 import styles from './AdminScreen.module.css';
+
+// Screenshot lives in a private bucket — resolve a signed URL on expand.
+function ReportShot({ url }) {
+  const [viewUrl, setViewUrl] = useState(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let live = true;
+    getScreenshotViewUrl(url)
+      .then((signed) => { if (live) setViewUrl(signed); })
+      .catch(() => { if (live) setFailed(true); });
+    return () => { live = false; };
+  }, [url]);
+  if (failed) return <p className={styles.errorText}>Could not load screenshot.</p>;
+  if (!viewUrl) return <div className={styles.center}><div className={styles.spinner} /></div>;
+  return (
+    <a href={viewUrl} target="_blank" rel="noreferrer">
+      <img
+        src={viewUrl}
+        alt="Bug report screenshot"
+        style={{ width: '100%', borderRadius: 12, border: '1px solid var(--color-border)' }}
+      />
+    </a>
+  );
+}
 
 export default function AdminScreen() {
   const navigate = useNavigate();
@@ -28,8 +60,11 @@ export default function AdminScreen() {
 
   // Users tab: cleanup for test accounts. Deletion is permanent and
   // frees the email address for re-registration.
-  const [tab, setTab] = useState('codes');
-  const [users, setUsers] = useState([]);
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab');
+  const [tab, setTab] = useState(
+    initialTab === 'reports' || initialTab === 'users' ? initialTab : 'codes'
+  );  const [users, setUsers] = useState([]);
   const [usersTotal, setUsersTotal] = useState(0);
   const [usersPage, setUsersPage] = useState(1);
   const [query, setQuery] = useState('');
@@ -41,6 +76,15 @@ export default function AdminScreen() {
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [deleteResult, setDeleteResult] = useState(null);
+
+  // Reports tab: bug reports filed from the sidebar popup.
+  const [reports, setReports] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportsError, setReportsError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [expandedReport, setExpandedReport] = useState(null);
+  const [statusBusy, setStatusBusy] = useState({});
 
   const USERS_PAGE_SIZE = 20;
 
@@ -135,7 +179,6 @@ export default function AdminScreen() {
     loadUsers(usersPage, query, roleFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, checking]);
-
   useEffect(() => {
     if (!deleteOpen) return;
     const onKey = (e) => {
@@ -148,6 +191,57 @@ export default function AdminScreen() {
     return () => window.removeEventListener('keydown', onKey);
   }, [deleteOpen]);
 
+  const loadReports = async (status, category) => {
+    setReportsLoading(true);
+    setReportsError('');
+    try {
+      setReports(await listBugReports({ status, category }));
+    } catch (err) {
+      console.error(err);
+      setReportsError(err.message || 'Failed to load reports.');
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (checking || tab !== 'reports') return;
+    loadReports(statusFilter, categoryFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, checking]);
+
+  const applyReportFilter = () => {
+    setExpandedReport(null);
+    loadReports(statusFilter, categoryFilter);
+  };
+
+  const reportStatusBadge = (status) => {
+    if (status === 'resolved') return styles.badgeAvailable;
+    if (status === 'in_progress') return styles.badgeUsed;
+    return styles.badgeInactive;
+  };
+
+  const reportStatusLabel = (status) =>
+    BUG_STATUSES.find((s) => s.value === status)?.label ?? status;
+
+  const reportCategoryLabel = (value) =>
+    BUG_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+
+  const reportSeverityLabel = (value) =>
+    BUG_SEVERITIES.find((s) => s.value === value)?.label ?? value;
+
+  const handleReportStatus = async (report, status) => {
+    setStatusBusy((prev) => ({ ...prev, [report.id]: true }));
+    try {
+      await setBugStatus(report.id, status);
+      setReports((prev) => prev.map((r) => r.id === report.id ? { ...r, status } : r));
+    } catch (err) {
+      console.error(err);
+      setReportsError(err.message || 'Failed to update status.');
+    } finally {
+      setStatusBusy((prev) => ({ ...prev, [report.id]: false }));
+    }
+  };
   const applyUserFilter = () => {
     setUsersPage(1);
     setSelected({});
@@ -244,6 +338,15 @@ export default function AdminScreen() {
         >
           <Users size={16} />
           <span>Users</span>
+        </button>
+        <button
+          role="tab"
+          aria-selected={tab === 'reports'}
+          className={`${styles.tab} ${tab === 'reports' ? styles.tabActive : ''}`}
+          onClick={() => setTab('reports')}
+        >
+          <Bug size={16} />
+          <span>Reports</span>
         </button>
       </div>
 
@@ -406,6 +509,113 @@ export default function AdminScreen() {
             <Trash2 size={18} color="#FFFFFF" />
             <span>Delete {selectedIds.length} user{selectedIds.length > 1 ? 's' : ''}</span>
           </button>
+        )}
+      </div>
+      )}
+
+      {tab === 'reports' && (
+      <div className={styles.scroll}>
+        <h2 className={styles.pageTitle}>Bug Reports</h2>
+        <p className={styles.pageSub}>
+          Reports filed from the sidebar popup. Tap one to see details, then triage it.
+        </p>
+
+        <div className={styles.searchRow}>
+          <select
+            className={styles.roleSelect}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="Filter by status"
+          >
+            <option value="all">All statuses</option>
+            {BUG_STATUSES.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+          <select
+            className={styles.roleSelect}
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            aria-label="Filter by category"
+          >
+            <option value="all">All categories</option>
+            {BUG_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+          <button className={styles.submitBtn} onClick={applyReportFilter} disabled={reportsLoading}>
+            Filter
+          </button>
+        </div>
+
+        {reportsError && <p className={styles.errorText} role="alert">{reportsError}</p>}
+
+        {reportsLoading ? (
+          <div className={styles.center}><div className={styles.spinner} /></div>
+        ) : reports.length === 0 ? (
+          <div className={styles.empty}>
+            <Bug size={32} color="var(--color-text-secondary)" />
+            <span className={styles.emptyText}>No bug reports match this filter.</span>
+          </div>
+        ) : (
+          reports.map((r) => {
+            const expanded = expandedReport === r.id;
+            return (
+              <div key={r.id} className={styles.card}>
+                <button
+                  className={styles.codeRow}
+                  onClick={() => setExpandedReport(expanded ? null : r.id)}
+                  aria-expanded={expanded}
+                  style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <div className={styles.codeInfo}>
+                    <span className={styles.codeText}>{r.title}</span>
+                    <span className={styles.codeLabel}>
+                      {r.reporter?.name || r.reporter?.username ? `${r.reporter?.name || r.reporter?.username} · ` : ''}
+                      {reportCategoryLabel(r.category)} · {new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    <span className={`${styles.badge} ${reportStatusBadge(r.status)}`}>
+                      {reportStatusLabel(r.status)}
+                    </span>
+                  </div>
+                </button>
+                {expanded && (
+                  <div className={styles.formBody}>
+                    <div className={styles.codeInfo}>
+                      <span className={styles.codeText}>
+                        {r.reporter?.name || 'Unknown user'}
+                        {r.reporter?.username ? ` (@${r.reporter.username})` : ''}
+                      </span>
+                      {r.reporter?.email && <span className={styles.codeLabel}>{r.reporter.email}</span>}
+                      <span className={styles.codeLabel}>
+                        {reportCategoryLabel(r.category)} · Severity: {reportSeverityLabel(r.severity)} ·{' '}
+                        {new Date(r.created_at).toLocaleDateString('en-GB', {
+                          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    {r.details
+                      ? <p className={styles.pageSub} style={{ padding: 0 }}>{r.details}</p>
+                      : <p className={styles.codeLabel}>No extra details given.</p>}
+                    {r.screenshot_url && <ReportShot url={r.screenshot_url} />}
+                    <div className={styles.searchRow}>
+                      {BUG_STATUSES.map((s) => (
+                        <button
+                          key={s.value}
+                          className={r.status === s.value ? styles.submitBtn : styles.pagerBtn}
+                          onClick={() => handleReportStatus(r, s.value)}
+                          disabled={!!statusBusy[r.id] || r.status === s.value}
+                          style={{ flex: 1 }}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
       )}

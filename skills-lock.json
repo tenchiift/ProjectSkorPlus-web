@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "gluestack-ui-v5": {
+      "source": "gluestack/agent-skills",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/gluestack-ui-v5/SKILL.md",
+      "computedHash": "2d7e2ed985d31d2d058d62d3e14c56e3e159c4417d12afc0b22f0ce9702fa0a1"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "d600e554b3118672b5f82cf6f21352dc6b15374ed5976e14a64a4b3c6c131d6b"
+    }
+  }
+}

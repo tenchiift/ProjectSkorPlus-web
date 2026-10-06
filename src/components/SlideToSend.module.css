@@ -1,0 +1,82 @@
+.track {
+  position: relative;
+  height: 60px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 4px;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: var(--color-primary);
+  will-change: transform;
+}
+
+.label {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-left: 48px;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.doneLabel {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  color: #FFFFFF;
+}
+
+.thumb {
+  position: relative;
+  z-index: 1;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  cursor: grab;
+  touch-action: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.thumb:active {
+  cursor: grabbing;
+}
+
+.thumb:disabled {
+  cursor: default;
+}
+
+.thumb:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.thumbDone {
+  background: var(--color-success);
+}
+
+.spin {
+  animation: slide-spin 0.8s linear infinite;
+}
+
+@keyframes slide-spin {
+  to { transform: rotate(360deg); }
+}
