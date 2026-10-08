@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, X, Pencil, Trash2, FileText, Upload } from 'lucide-react';
+import { ArrowLeft, Plus, X, Pencil, Trash2, FileText, Upload, Eye } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -136,6 +136,11 @@ export default function ManageExamsScreen() {
     }
   };
 
+  const handleView = (exam) => {
+    if (!exam.pdf_url) return;
+    navigate('/pdf-viewer', { state: { exam } });
+  };
+
   if (checking) {
     return <div className={styles.container}><div className={styles.center}><div className={styles.spinner} /></div></div>;
   }
@@ -167,20 +172,40 @@ export default function ManageExamsScreen() {
           exams.map((exam) => (
             <div key={exam.id} className={styles.card}>
               <div className={styles.row}>
-                <div className={styles.info}>
-                  <span className={styles.title}>{exam.title}</span>
-                  <span className={styles.sub}>
-                    {[exam.subject, exam.semester, exam.year ? `Year ${exam.year}` : null].filter(Boolean).join(' · ') || 'No details'}
+                <button
+                  className={`${styles.info} ${exam.pdf_url ? styles.infoClickable : ''}`}
+                  onClick={() => handleView(exam)}
+                  disabled={!exam.pdf_url}
+                  title={exam.pdf_url ? 'View PDF' : 'No PDF available'}
+                  aria-label={exam.pdf_url ? `View ${exam.title}` : `${exam.title} has no PDF`}
+                >
+                  <span className={styles.fileIcon} aria-hidden="true">
+                    <FileText size={22} color="#FFFFFF" />
                   </span>
-                  <span className={`${styles.pdfBadge} ${exam.pdf_url ? styles.pdfYes : styles.pdfNo}`}>
-                    {exam.pdf_url ? 'PDF attached' : 'No PDF'}
+                  <span className={styles.infoText}>
+                    <span className={styles.title}>{exam.title}</span>
+                    <span className={styles.sub}>
+                      {[exam.subject, exam.semester, exam.year ? `Year ${exam.year}` : null].filter(Boolean).join(' · ') || 'No details'}
+                    </span>
+                    <span className={`${styles.pdfBadge} ${exam.pdf_url ? styles.pdfYes : styles.pdfNo}`}>
+                      {exam.pdf_url ? 'PDF attached' : 'No PDF'}
+                    </span>
                   </span>
-                </div>
+                </button>
                 <div className={styles.actions}>
-                  <button className={styles.iconBtn} onClick={() => openEdit(exam)} title="Edit">
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() => handleView(exam)}
+                    disabled={!exam.pdf_url}
+                    title={exam.pdf_url ? 'View PDF' : 'No PDF available'}
+                    aria-label={exam.pdf_url ? `View ${exam.title}` : `${exam.title} has no PDF`}
+                  >
+                    <Eye size={17} color="var(--color-text-secondary)" />
+                  </button>
+                  <button className={styles.iconBtn} onClick={() => openEdit(exam)} title="Edit" aria-label={`Edit ${exam.title}`}>
                     <Pencil size={17} color="var(--color-text-secondary)" />
                   </button>
-                  <button className={styles.iconBtn} onClick={() => handleDelete(exam)} title="Delete">
+                  <button className={styles.iconBtn} onClick={() => handleDelete(exam)} title="Delete" aria-label={`Delete ${exam.title}`}>
                     <Trash2 size={17} color="var(--color-error)" />
                   </button>
                 </div>
