@@ -12,7 +12,19 @@ import {
 } from '../services/examService';
 import styles from './ManageExamsScreen.module.css';
 
-const BLANK = { title: '', subject: '', semester: '', year: '' };
+// Add new subjects here as one line each when needed.
+const SUBJECT_OPTIONS = ['Discrete Mathematics'];
+
+const DEFAULT_SUBJECT = SUBJECT_OPTIONS[0];
+
+const normalizeSubject = (value) => {
+  if (SUBJECT_OPTIONS.includes(value)) return value;
+  // Legacy data used 'Mathematics' for these papers.
+  if (value === 'Mathematics') return 'Discrete Mathematics';
+  return DEFAULT_SUBJECT;
+};
+
+const BLANK = { title: '', subject: DEFAULT_SUBJECT, semester: '', year: '' };
 
 export default function ManageExamsScreen() {
   const navigate = useNavigate();
@@ -57,7 +69,7 @@ export default function ManageExamsScreen() {
 
   const openCreate = () => {
     setEditId(null);
-    setForm(BLANK);
+    setForm({ ...BLANK, subject: DEFAULT_SUBJECT });
     setPdfFile(null);
     setPdfName('');
     setError('');
@@ -68,7 +80,7 @@ export default function ManageExamsScreen() {
     setEditId(exam.id);
     setForm({
       title: exam.title ?? '',
-      subject: exam.subject ?? '',
+      subject: normalizeSubject(exam.subject ?? ''),
       semester: exam.semester ?? '',
       year: exam.year ?? '',
     });
@@ -105,7 +117,7 @@ export default function ManageExamsScreen() {
       }
       const payload = {
         title,
-        subject: form.subject.trim() || null,
+        subject: form.subject || null,
         semester: form.semester.trim() || null,
         year: form.year ? Number(form.year) : null,
         ...(pdfUrl ? { pdf_url: pdfUrl } : {}),
@@ -185,7 +197,7 @@ export default function ManageExamsScreen() {
                   <span className={styles.infoText}>
                     <span className={styles.title}>{exam.title}</span>
                     <span className={styles.sub}>
-                      {[exam.subject, exam.semester, exam.year ? `Year ${exam.year}` : null].filter(Boolean).join(' · ') || 'No details'}
+                      {[normalizeSubject(exam.subject ?? ''), exam.semester, exam.year ? `Year ${exam.year}` : null].filter(Boolean).join(' · ') || 'No details'}
                     </span>
                     <span className={`${styles.pdfBadge} ${exam.pdf_url ? styles.pdfYes : styles.pdfNo}`}>
                       {exam.pdf_url ? 'PDF attached' : 'No PDF'}
@@ -237,12 +249,17 @@ export default function ManageExamsScreen() {
               <div className={styles.inputPair}>
                 <div className={styles.inputGroup}>
                   <label className={styles.label}>Subject</label>
-                  <input
-                    className={styles.input}
+                  <select
+                    className={`${styles.input} ${styles.select}`}
                     value={form.subject}
                     onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-                    placeholder="e.g. Mathematics"
-                  />
+                  >
+                    {SUBJECT_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className={styles.inputGroup}>
                   <label className={styles.label}>Year</label>

@@ -331,6 +331,11 @@
   border-color: var(--color-primary);
 }
 
+.select {
+  cursor: pointer;
+  appearance: auto;
+}
+
 .uploadRow {
   display: flex;
   align-items: center;
