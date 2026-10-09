@@ -3,7 +3,15 @@ import { Component } from 'react';
 export default class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, resetKey: props.resetKey };
+  }
+  // Reset a failed route without remounting the persistent app shell on
+  // every successful navigation (which also restarted profile/XP motion).
+  static getDerivedStateFromProps(props, state) {
+    if (props.resetKey !== state.resetKey) {
+      return { hasError: false, resetKey: props.resetKey };
+    }
+    return null;
   }
   static getDerivedStateFromError() { return { hasError: true }; }
   render() {

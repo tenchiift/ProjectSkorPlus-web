@@ -11,21 +11,107 @@ import { ensureDailyNotifications, subscribeToNotifications, getUnreadCount } fr
 import LecturerDashboardScreen from './LecturerDashboardScreen';
 import ClassPrompt from '../components/ClassPrompt';
 import { parseClassCode } from '../utils/parseClass';
+import { motionEase, motionTiming, sheetSpring, pressFeedback } from '../utils/motion';
 import examImage from '../assets/images/exam.jpeg';
 import zepImage from '../assets/images/zep.avif';
 import styles from './DashboardScreen.module.css';
+
+const dashboardReveal = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: motionTiming.enter, ease: motionEase } },
+};
+
+function DashboardSkeleton() {
+  return (
+    <div className={styles.container} role="status" aria-label="Loading your dashboard" aria-busy="true">
+      <div className={styles.scrollContent} aria-hidden="true">
+        <div className={styles.topBar}>
+          <div className={`${styles.skeletonBlock} ${styles.skeletonLogo}`} />
+          <div className={`${styles.skeletonBlock} ${styles.skeletonIcon}`} />
+        </div>
+        <div className={`${styles.semesterCard} ${styles.skeletonSemester}`}>
+          <div className={styles.semesterTitleRow}>
+            <div className={`${styles.skeletonBlock} ${styles.skeletonTitle}`} />
+            <div className={`${styles.skeletonBlock} ${styles.skeletonBadge}`} />
+          </div>
+          <div className={`${styles.skeletonBlock} ${styles.skeletonMeta}`} />
+          <div className={`${styles.skeletonBlock} ${styles.skeletonProgress}`} />
+          <div className={`${styles.skeletonBlock} ${styles.skeletonButton}`} />
+        </div>
+        <div className={styles.statsRow}>
+          {[0, 1, 2].map((card) => (
+            <div key={card} className={`${styles.statCard} ${styles.skeletonAction}`}>
+              <div className={`${styles.skeletonBlock} ${styles.skeletonIcon}`} />
+              <div className={`${styles.skeletonBlock} ${styles.skeletonLabel}`} />
+            </div>
+          ))}
+        </div>
+        <div className={`${styles.countdownCompact} ${styles.skeletonCountdown}`}>
+          <div className={`${styles.skeletonBlock} ${styles.skeletonIcon}`} />
+          <div className={`${styles.skeletonBlock} ${styles.skeletonTitle}`} />
+          <div className={`${styles.skeletonBlock} ${styles.skeletonButton}`} />
+        </div>
+        <div className={`${styles.skeletonBlock} ${styles.skeletonZep}`} />
+        <div className={styles.sectionRow}>
+          <div className={`${styles.skeletonBlock} ${styles.skeletonTitle}`} />
+        </div>
+        <div className={styles.skeletonModuleGrid}>
+          {[0, 1, 2].map((card) => (
+            <div key={card} className={styles.skeletonModule}>
+              <div className={`${styles.skeletonBlock} ${styles.skeletonTitle}`} />
+              <div className={`${styles.skeletonBlock} ${styles.skeletonMeta}`} />
+              <div className={`${styles.skeletonBlock} ${styles.skeletonProgress}`} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModuleCards({ modules, moduleProgress, navigate, reducedMotion }) {
+  return modules.map((mod) => {
+    const progress = moduleProgress[mod.id]?.progress ?? 0;
+    return (
+      <motion.button
+        key={mod.id}
+        className={styles.moduleCardWrapper}
+        onClick={() => navigate('/module/' + mod.id, { state: { module: mod } })}
+        {...pressFeedback(reducedMotion)}
+      >
+        <h3 className={styles.moduleTitle}>{mod.title}</h3>
+        <p className={styles.moduleDesc}>{mod.description}</p>
+        <div className={styles.moduleProgressBarBg}>
+          <motion.div
+            className={styles.moduleProgressBarFill}
+            initial={reducedMotion ? false : { scaleX: 0 }}
+            animate={{ scaleX: Math.min(1, Math.max(0, progress)) }}
+            transition={{ duration: reducedMotion ? 0 : motionTiming.progress, ease: motionEase }}
+          />
+        </div>
+        <div className={styles.moduleFooter}>
+          <span className={styles.modulePercent}>{Math.round(progress * 100)}%</span>
+          <div className={styles.continueBtn}>
+            <ArrowRight size={20} color="#FFFFFF" />
+          </div>
+        </div>
+      </motion.button>
+    );
+  });
+}
 
 export default function DashboardScreen() {
   const navigate = useNavigate();
   const carouselRef = useRef(null);
   const reducedMotion = useReducedMotion();
+  const sectionReveal = reducedMotion ? undefined : dashboardReveal;
 
   // Spring expand/collapse for the week picker.
   const pickerSpring = {
     initial: { height: 0, opacity: 0 },
     animate: { height: 'auto', opacity: 1 },
     exit: { height: 0, opacity: 0 },
-    transition: reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 26 },
+    transition: reducedMotion ? { duration: 0 } : sheetSpring,
     style: { overflow: 'hidden' },
   };
 
@@ -86,13 +172,6 @@ export default function DashboardScreen() {
         }
       }
 
-      // Daily login streak (+EXP). Needs streak_migration.sql; degrades quietly.
-      // The sidebar header shows the streak — nudge AppLayout to refresh it.
-      try {
-        const result = await claimDailyStreak(user.id);
-        if (result?.claimed) window.dispatchEvent(new CustomEvent('skorplus-profile-refresh'));
-      } catch { /* ignore */ }
-
       const isStudent = (profile?.role ?? 'student') === 'student';
 
       const [modulesData, progress, countdownData] = await Promise.all([
@@ -115,6 +194,14 @@ export default function DashboardScreen() {
         setCountdown(null);
         setDaysLeft(null);
       }
+
+      // Primary content is ready; notification writes should not hold up the dashboard.
+      setLoading(false);
+
+      // Streak rewards can refresh the persistent sidebar in the background.
+      claimDailyStreak(user.id).then((result) => {
+        if (result?.claimed) window.dispatchEvent(new CustomEvent('skorplus-profile-refresh'));
+      }).catch(() => {});
 
       // Seed daily quote/reminder notifications (idempotent) and load unread count.
       try {
@@ -238,8 +325,7 @@ export default function DashboardScreen() {
       setAnchor({ date: localDateStr(today), week: pendingWeek, day });
       setPaused(false);
       setPickerOpen(false);
-      setPickerStep('week');
-      setPendingWeek(null);
+      // Keep the current step visible through its closing animation.
     } catch (err) {
       console.error('Save week anchor error:', err);
     } finally {
@@ -284,11 +370,7 @@ export default function DashboardScreen() {
   const semester = computeSemester();
 
   if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner} />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Lecturers get their own dashboard (stats, content management, submissions).
@@ -301,33 +383,6 @@ export default function DashboardScreen() {
     { orb: true, label: <>AI Study<br />Buddy</>, path: '/ai-chat' },
     { icon: Send, label: 'Send Work', path: '/submit-work' },
   ];
-
-  const ModuleCards = () => (
-    <>
-      {modules.map((mod) => {
-        const progress = moduleProgress[mod.id]?.progress ?? 0;
-        return (
-          <button
-            key={mod.id}
-            className={styles.moduleCardWrapper}
-            onClick={() => navigate('/module/' + mod.id, { state: { module: mod } })}
-          >
-            <h3 className={styles.moduleTitle}>{mod.title}</h3>
-            <p className={styles.moduleDesc}>{mod.description}</p>
-            <div className={styles.moduleProgressBarBg}>
-              <div className={styles.moduleProgressBarFill} style={{ width: `${progress * 100}%` }} />
-            </div>
-            <div className={styles.moduleFooter}>
-              <span className={styles.modulePercent}>{Math.round(progress * 100)}%</span>
-              <div className={styles.continueBtn}>
-                <ArrowRight size={20} color="#FFFFFF" />
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </>
-  );
 
   return (
     <div className={styles.container}>
@@ -343,23 +398,28 @@ export default function DashboardScreen() {
           error={promptError}
         />
       )}
-      <div className={styles.scrollContent}>
+      <motion.div
+        className={styles.scrollContent}
+        initial={reducedMotion ? false : 'hidden'}
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.04 } } }}
+      >
         <div className={styles.topBar}>
-          <button className={styles.mobileHamburger} onClick={() => document.dispatchEvent(new CustomEvent('toggle-sidebar'))} aria-label="Menu">
+          <motion.button {...pressFeedback(reducedMotion)} className={styles.mobileHamburger} onClick={() => document.dispatchEvent(new CustomEvent('toggle-sidebar'))} aria-label="Menu">
             <MoreHorizontal size={24} color="var(--color-text-primary)" />
-          </button>
+          </motion.button>
           <div className={styles.logoWrap}>
             <img src="/assets/images/logo.png" className={styles.logoImage} alt="SkorPlus" />
           </div>
           <div className={styles.topBarActions}>
-            <button className={styles.iconBtn} onClick={() => navigate('/notifications')} aria-label="Notifications">
+            <motion.button {...pressFeedback(reducedMotion)} className={styles.iconBtn} onClick={() => navigate('/notifications')} aria-label="Notifications">
               <Bell size={22} color="var(--color-text-primary)" />
               {unreadNotif > 0 && <span className={styles.notifBadge}>{unreadNotif > 9 ? '9+' : unreadNotif}</span>}
-            </button>
+            </motion.button>
           </div>
         </div>
 
-        <div className={styles.semesterCard}>
+        <motion.div className={styles.semesterCard} variants={sectionReveal}>
           <div className={styles.semesterTitleRow}>
             <span className={styles.semesterTitle}>
               {paused && semester
@@ -398,38 +458,40 @@ export default function DashboardScreen() {
           </div>
 
           <div className={styles.semesterBar}>
-            <div
+            <motion.div
               className={styles.semesterBarFill}
-              style={{ width: `${semester ? semester.progress * 100 : 0}%` }}
+              initial={reducedMotion ? false : { scaleX: 0 }}
+              animate={{ scaleX: semester?.progress ?? 0 }}
+              transition={{ duration: reducedMotion ? 0 : motionTiming.progress, ease: motionEase }}
             />
           </div>
 
           {paused && semester && (
             <div className={styles.semesterControls}>
               <span className={styles.semesterHint}>Break active — progress is paused.</span>
-              <button className={`${styles.semesterActionBtn} ${styles.semesterActionBtnSmall}`} onClick={handleEndBreak} disabled={saving}>
+              <motion.button {...pressFeedback(reducedMotion)} className={`${styles.semesterActionBtn} ${styles.semesterActionBtnSmall}`} onClick={handleEndBreak} disabled={saving}>
                 End mid-sem break
-              </button>
+              </motion.button>
             </div>
           )}
 
           {!paused && semester && !pickerOpen && (
             <div className={styles.semesterControls}>
-              <button className={styles.semesterActionBtn} onClick={openUpdate}>Update week</button>
-              <button className={styles.semesterActionBtnSecondary} onClick={handleStartBreak} disabled={saving}>
+              <motion.button {...pressFeedback(reducedMotion)} className={styles.semesterActionBtn} onClick={openUpdate}>Update week</motion.button>
+              <motion.button {...pressFeedback(reducedMotion)} className={styles.semesterActionBtnSecondary} onClick={handleStartBreak} disabled={saving}>
                 Start mid-sem break
-              </button>
+              </motion.button>
             </div>
           )}
 
           {!semester && !pickerOpen && (
-            <button className={styles.semesterActionBtn} onClick={openUpdate}>
+            <motion.button {...pressFeedback(reducedMotion)} className={styles.semesterActionBtn} onClick={openUpdate}>
               Set your week
-            </button>
+            </motion.button>
           )}
 
-          {pickerOpen && (
-            <AnimatePresence initial={false}>
+          <AnimatePresence initial={false}>
+            {pickerOpen && (
               <motion.div key="picker" {...pickerSpring}>
                 <div className={styles.pickerWrap}>
                   {pickerStep === 'week' ? (
@@ -439,14 +501,14 @@ export default function DashboardScreen() {
                         {Array.from({ length: 12 }, (_, i) => {
                           const week = i + 1;
                           return (
-                            <button
+                            <motion.button {...pressFeedback(reducedMotion)}
                               key={week}
                               type="button"
                               className={styles.semesterWeekDot}
                               onClick={() => handlePickWeek(week)}
                             >
                               {week}
-                            </button>
+                            </motion.button>
                           );
                         })}
                       </div>
@@ -458,7 +520,7 @@ export default function DashboardScreen() {
                         {Array.from({ length: 7 }, (_, i) => {
                           const day = i + 1;
                           return (
-                            <button
+                            <motion.button {...pressFeedback(reducedMotion)}
                               key={day}
                               type="button"
                               className={styles.semesterWeekDot}
@@ -466,27 +528,39 @@ export default function DashboardScreen() {
                               disabled={saving}
                             >
                               {day}
-                            </button>
+                            </motion.button>
                           );
                         })}
                       </div>
-                      <button
+                      <motion.button {...pressFeedback(reducedMotion)}
                         className={styles.semesterActionBtnSecondary}
                         onClick={() => { setPickerStep('week'); setPendingWeek(null); }}
                       >
                         Back
-                      </button>
+                      </motion.button>
                     </>
                   )}
                 </div>
               </motion.div>
-            </AnimatePresence>
-          )}
-        </div>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
-        <div className={styles.statsRow}>
+        <motion.div className={styles.statsRow} variants={sectionReveal}>
           {actionCards.map((item, i) => {
             const Icon = item.icon;
+            if (item.orb && reducedMotion) {
+              return (
+                <motion.button
+                  key={i}
+                  className={styles.statCard}
+                  onClick={() => navigate(item.path)}
+                >
+                  <span className={styles.orbIcon}><Brain size={32} color="var(--color-primary)" /></span>
+                  <span className={styles.statLabel}>{item.label}</span>
+                </motion.button>
+              );
+            }
             if (item.orb) {
               return (
                 <BorderBeam
@@ -501,7 +575,7 @@ export default function DashboardScreen() {
                   strength={1}
                   className={styles.orbCardBeam}
                 >
-                  <button
+                  <motion.button {...pressFeedback(reducedMotion)}
                     className={styles.statCard}
                     onClick={() => navigate(item.path)}
                   >
@@ -509,24 +583,24 @@ export default function DashboardScreen() {
                       <ThinkingOrb state="composing" size={64} />
                     </span>
                     <span className={styles.statLabel}>{item.label}</span>
-                  </button>
+                  </motion.button>
                 </BorderBeam>
               );
             }
             return (
-              <button
+              <motion.button {...pressFeedback(reducedMotion)}
                 key={i}
                 className={styles.statCard}
                 onClick={() => navigate(item.path)}
               >
                 <Icon size={28} color="var(--color-primary)" />
                 <span className={styles.statLabel}>{item.label}</span>
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
-        <div className={styles.countdownCompact}>
+        <motion.div className={styles.countdownCompact} variants={sectionReveal}>
           {countdown ? (
             <>
               <img src={examImage} className={styles.countdownBg} alt="" />
@@ -550,7 +624,7 @@ export default function DashboardScreen() {
                         })}
                       </span>
                     </div>
-                    <button className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</button>
+                    <motion.button {...pressFeedback(reducedMotion)} className={styles.countdownEditBtn} onClick={() => navigate('/set-exam', { state: { countdown } })}>Edit</motion.button>
                   </div>
                 </div>
               </div>
@@ -559,13 +633,13 @@ export default function DashboardScreen() {
             <div className={styles.countdownEmpty}>
               <Calendar size={28} color="var(--color-text-secondary)" />
               <p className={styles.countdownEmptyText}>Set your final exam</p>
-              <button className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</button>
+              <motion.button {...pressFeedback(reducedMotion)} className={styles.countdownSetBtn} onClick={() => navigate('/set-exam')}>Set Date &amp; Time</motion.button>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {modules.length > 0 && (
-          <button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
+          <motion.button {...pressFeedback(reducedMotion)} variants={sectionReveal} className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
             <img src={zepImage} className={styles.zepBg} alt="" />
             <div className={styles.zepOverlay} />
             <div className={styles.zepContent}>
@@ -579,45 +653,47 @@ export default function DashboardScreen() {
               </div>
               <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
             </div>
-          </button>
+          </motion.button>
         )}
 
-        <div className={styles.sectionRow}>
-          <h2 className={styles.sectionTitle}>Continue Learning..</h2>
-          <button className={styles.showAllLink} onClick={() => navigate('/modules')}>Show All &rarr;</button>
-        </div>
-
-        {modules.length > 0 ? (
-          <>
-            <div className={styles.moduleGrid}>
-              <ModuleCards />
-            </div>
-            <div className={styles.mobileCarousel}>
-              <div className={styles.carousel} ref={carouselRef} onScroll={handleCarouselScroll}>
-                <ModuleCards />
-              </div>
-              <div className={styles.dotsRow}>
-                {modules.map((_, i) => (
-                  <div key={i} className={`${styles.dot} ${i === carouselIndex ? styles.dotActive : ''}`} />
-                ))}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className={styles.emptyCard}>
-            <p className={styles.emptyText}>
-              {role === 'student'
-                ? 'No modules yet. Select your lecturers to see your subjects.'
-                : 'No modules available'}
-            </p>
-            {role === 'student' && (
-              <button className={styles.emptyCta} onClick={() => navigate('/select-lecturers')}>
-                Choose Lecturers
-              </button>
-            )}
+        <motion.section variants={sectionReveal} aria-labelledby="dashboard-learning-title">
+          <div className={styles.sectionRow}>
+            <h2 id="dashboard-learning-title" className={styles.sectionTitle}>Continue Learning..</h2>
+            <motion.button {...pressFeedback(reducedMotion)} className={styles.showAllLink} onClick={() => navigate('/modules')}>Show All &rarr;</motion.button>
           </div>
-        )}
-      </div>
+
+          {modules.length > 0 ? (
+            <>
+              <div className={styles.moduleGrid}>
+                <ModuleCards modules={modules} moduleProgress={moduleProgress} navigate={navigate} reducedMotion={reducedMotion} />
+              </div>
+              <div className={styles.mobileCarousel}>
+                <div className={styles.carousel} ref={carouselRef} onScroll={handleCarouselScroll}>
+                  <ModuleCards modules={modules} moduleProgress={moduleProgress} navigate={navigate} reducedMotion={reducedMotion} />
+                </div>
+                <div className={styles.dotsRow}>
+                  {modules.map((_, i) => (
+                    <div key={i} className={`${styles.dot} ${i === carouselIndex ? styles.dotActive : ''}`} />
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className={styles.emptyCard}>
+              <p className={styles.emptyText}>
+                {role === 'student'
+                  ? 'No modules yet. Select your lecturers to see your subjects.'
+                  : 'No modules available'}
+              </p>
+              {role === 'student' && (
+                <motion.button {...pressFeedback(reducedMotion)} className={styles.emptyCta} onClick={() => navigate('/select-lecturers')}>
+                  Choose Lecturers
+                </motion.button>
+              )}
+            </div>
+          )}
+        </motion.section>
+      </motion.div>
     </div>
   );
 }

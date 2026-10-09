@@ -1,6 +1,8 @@
-import { useCallback, useEffect } from 'react';
-import { animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
+import { useCallback, useEffect, useId } from 'react';
+import { useLocation } from 'react-router-dom';
+import { animate, LayoutGroup, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
 import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, Bug } from 'lucide-react';
+import { layoutSpring, motionEase, motionTiming, pressFeedback } from '../utils/motion';
 import styles from './Sidebar.module.css';
 
 // Opens the global bug-report popup (handled in AppLayout).
@@ -17,7 +19,7 @@ function CountUp({ value }) {
       mv.set(value);
       return;
     }
-    const controls = animate(mv, value, { duration: 0.8, ease: 'easeOut' });
+    const controls = animate(mv, value, { duration: motionTiming.progress, ease: motionEase });
     return () => controls.stop();
   }, [value, reduced, mv]);
 
@@ -50,21 +52,37 @@ const LECTURER_MENU = [
   { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
 ];
 
+// Keep the section selected while visiting one of its detail screens.
+// PDF viewer is deliberately omitted: it also opens notes and submissions.
+function selectedSection(pathname, isLecturer) {
+  if (/^\/friend(?:s|\/)/.test(pathname)) return '/friends';
+  if (/^\/(?:messages|chat\/)/.test(pathname)) return '/messages';
+  if (/^\/submission\//.test(pathname)) return isLecturer ? '/inbox' : '/my-submissions';
+  if (pathname === '/submit-work') return '/my-submissions';
+  if (/^\/manage-topics\//.test(pathname)) return '/manage-modules';
+  if (['/about', '/admin'].includes(pathname)) return '/settings';
+  if (/^\/(?:module(?:s|\/)|question\/|student(?:s|\/))/.test(pathname)
+    || ['/profile', '/set-exam', '/scan-solve', '/ai-chat'].includes(pathname)) return '/dashboard';
+  return pathname;
+}
+
 // Admin access lives in Settings, not the sidebar.
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const reducedMotion = useReducedMotion();
+  const { pathname } = useLocation();
+  const navigationId = useId();
   const openReportBug = useCallback(() => {
     document.dispatchEvent(new CustomEvent('open-report-bug'));
   }, []);
   const handleNav = useCallback((route) => {
+    // Dismiss and navigate together; never queue stale navigation behind a timer.
+    onClose();
     if (route === REPORT_BUG_ACTION) {
-      onClose();
-      setTimeout(() => openReportBug(), 200);
+      openReportBug();
       return;
     }
-    onClose();
-    setTimeout(() => onNavigate(route), 200);
+    onNavigate(route);
   }, [onClose, onNavigate, openReportBug]);
 
   // Profile still loading — render nothing role-specific so the lecturer
@@ -79,6 +97,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
   const streak = userData?.days_streak ?? 0;
 
   const isLecturer = userData?.role === 'lecturer';
+  const selectedRoute = selectedSection(pathname, isLecturer);
 
   const roleTag = userData?.role ? (
     <span className={styles.roleTag}>
@@ -111,9 +130,9 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
             <div className={styles.xpBar}>
               <motion.div
                 className={styles.xpFill}
-                initial={reducedMotion ? false : { width: 0 }}
-                animate={{ width: `${xp.into}%` }}
-                transition={reducedMotion ? { duration: 0 } : { duration: 0.8, ease: 'easeOut', delay: 0.15 }}
+                initial={reducedMotion ? false : { scaleX: 0 }}
+                animate={{ scaleX: xp.into / 100 }}
+                transition={reducedMotion ? { duration: 0 } : { duration: motionTiming.progress, ease: motionEase }}
               />
             </div>
             <span className={styles.xpCount}><CountUp value={xp.total} /> XP</span>
@@ -123,83 +142,123 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
     </div>
   );
 
-  if (persistent) {
-    return (
-      <aside className={styles.persistent}>
-        <div className={styles.persistentInner}>
-          <div className={`${styles.header} bg-graph-purple`}>
-            {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
-            <div className={styles.headerOverlay} />
-            {roleTag}
-            {profileBlock}
-          </div>
-          <div className={styles.menu}>
-            {MENU.map((item) => {
-              const Icon = item.icon;
-              const isReport = item.route === REPORT_BUG_ACTION;
-              return (
-                <button key={item.route} className={styles.menuItem} onClick={() => isReport ? (onClose(), openReportBug()) : onNavigate(item.route)}>
-                  <Icon size={20} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className={styles.footer}>
-            <button className={styles.footerBtn} onClick={() => onNavigate('/settings')}>
-              <Settings size={20} color="var(--color-text-primary)" />
-              <span>Settings</span>
-            </button>
-            <button className={styles.logoutBtn} onClick={() => onNavigate('logout')}>
-              <LogOut size={20} color="var(--color-error)" />
-              <span style={{ color: 'var(--color-error)' }}>Log Out</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-    );
-  }
+  const selection = (route) => selectedRoute === route ? (
+    <motion.span
+      aria-hidden="true"
+      className={styles.activeIndicator}
+      layoutId="selected-section"
+      initial={false}
+      transition={reducedMotion ? { duration: 0 } : layoutSpring}
+      style={{ borderRadius: 16 }}
+    />
+  ) : null;
+
+  const currentPage = (route) => selectedRoute === route
+    ? (pathname === route ? 'page' : 'location')
+    : undefined;
+
+  const menuBlock = (
+    <motion.nav className={styles.menu} aria-label="Primary" layoutScroll>
+      {MENU.map((item) => {
+        const Icon = item.icon;
+        return (
+          <motion.button
+            key={item.route}
+            type="button"
+            className={styles.menuItem}
+            aria-current={currentPage(item.route)}
+            onClick={() => handleNav(item.route)}
+            {...pressFeedback(reducedMotion)}
+          >
+            {selection(item.route)}
+            <Icon size={20} aria-hidden="true" />
+            <span className={styles.menuLabel}>{item.label}</span>
+          </motion.button>
+        );
+      })}
+    </motion.nav>
+  );
+
+  const footerBlock = (
+    <div className={styles.footer}>
+      <motion.button
+        type="button"
+        className={styles.footerBtn}
+        aria-current={currentPage('/settings')}
+        onClick={() => handleNav('/settings')}
+        {...pressFeedback(reducedMotion)}
+      >
+        {selection('/settings')}
+        <Settings size={20} aria-hidden="true" />
+        <span className={styles.menuLabel}>Settings</span>
+      </motion.button>
+      <motion.button
+        type="button"
+        className={styles.logoutBtn}
+        onClick={() => handleNav('logout')}
+        {...pressFeedback(reducedMotion)}
+      >
+        <LogOut size={20} color="var(--color-error)" aria-hidden="true" />
+        <span style={{ color: 'var(--color-error)' }}>Log Out</span>
+      </motion.button>
+    </div>
+  );
+
+  const headerBlock = (
+    <div className={`${styles.header} bg-graph-purple`}>
+      {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
+      <div className={styles.headerOverlay} />
+      {!persistent && (
+        <motion.button
+          type="button"
+          className={styles.closeBtn}
+          onClick={onClose}
+          aria-label="Close navigation"
+          {...pressFeedback(reducedMotion)}
+        >
+          <X size={22} color="#FFFFFF" aria-hidden="true" />
+        </motion.button>
+      )}
+      {roleTag}
+      {profileBlock}
+    </div>
+  );
 
   return (
-    <div className={styles.wrapper} style={{ pointerEvents: visible ? 'auto' : 'none' }}>
-      <div
-        className={`${styles.backdrop} ${visible ? styles.backdropVisible : ''}`}
-        onClick={onClose}
-      />
-      <div className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ''}`}>
-          <div className={`${styles.header} bg-graph-purple`}>
-            {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
-            <div className={styles.headerOverlay} />
-            <button className={styles.closeBtn} onClick={onClose}>
-              <X size={22} color="#FFFFFF" />
-            </button>
-            {roleTag}
-            {profileBlock}
+    <LayoutGroup id={navigationId}>
+      {persistent ? (
+        <aside className={styles.persistent} aria-label="App navigation">
+          <div className={styles.persistentInner}>
+            {headerBlock}
+            {menuBlock}
+            {footerBlock}
           </div>
-
-        <div className={styles.menu}>
-          {MENU.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button key={item.route} className={styles.menuItem} onClick={() => handleNav(item.route)}>
-                <Icon size={20} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+        </aside>
+      ) : (
+        <div
+          className={styles.wrapper}
+          style={{ pointerEvents: visible ? 'auto' : 'none' }}
+          inert={!visible}
+          aria-hidden={!visible}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') onClose();
+          }}
+        >
+          <div
+            className={`${styles.backdrop} ${visible ? styles.backdropVisible : ''}`}
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <aside
+            className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ''}`}
+            aria-label="App navigation"
+          >
+            {headerBlock}
+            {menuBlock}
+            {footerBlock}
+          </aside>
         </div>
-
-        <div className={styles.footer}>
-          <button className={styles.footerBtn} onClick={() => handleNav('/settings')}>
-            <Settings size={20} color="var(--color-text-primary)" />
-            <span>Settings</span>
-          </button>
-          <button className={styles.logoutBtn} onClick={() => handleNav('logout')}>
-            <LogOut size={20} color="var(--color-error)" />
-            <span style={{ color: 'var(--color-error)' }}>Log Out</span>
-          </button>
-        </div>
-      </div>
-    </div>
+      )}
+    </LayoutGroup>
   );
 }

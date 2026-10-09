@@ -9,7 +9,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
   opacity: 0;
-  transition: opacity 250ms ease;
+  transition: opacity 160ms ease-out;
   pointer-events: none;
 }
 
@@ -27,7 +27,7 @@
   background: var(--color-background);
   border-radius: 0 24px 24px 0;
   transform: translateX(-100%);
-  transition: transform 250ms ease;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
   display: flex;
   flex-direction: column;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
@@ -82,6 +82,11 @@
   border: none;
   cursor: pointer;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   padding: 4px;
 }
 
@@ -190,10 +195,11 @@
 }
 
 .xpFill {
+  width: 100%;
   height: 100%;
+  transform-origin: left center;
   border-radius: var(--radius-full);
   background: #FFFFFF;
-  transition: width 0.4s ease;
 }
 
 .xpCount {
@@ -229,8 +235,57 @@
   text-align: left;
 }
 
-.menuItem:hover {
-  background: var(--color-border);
+.menuItem,
+.footerBtn {
+  position: relative;
+  isolation: isolate;
+}
+
+.menuItem,
+.footerBtn,
+.logoutBtn {
+  transition: background-color 120ms ease-out;
+}
+
+.activeIndicator {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-primary) 15%, var(--color-surface));
+}
+
+.menuItem > svg,
+.footerBtn > svg,
+.menuLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.menuItem > svg,
+.footerBtn > svg,
+.logoutBtn > svg {
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .menuItem:not([aria-current]):hover,
+  .footerBtn:not([aria-current]):hover,
+  .logoutBtn:hover {
+    background-color: color-mix(in srgb, var(--color-border) 65%, transparent);
+  }
+}
+
+.menuItem:focus-visible,
+.footerBtn:focus-visible,
+.logoutBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.closeBtn:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
 }
 
 .footer {
@@ -309,4 +364,12 @@
   flex-shrink: 0;
 }
 
-
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .backdrop,
+  .menuItem,
+  .footerBtn,
+  .logoutBtn {
+    transition: none;
+  }
+}

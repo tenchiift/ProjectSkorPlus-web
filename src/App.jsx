@@ -56,7 +56,7 @@ const AboutScreen = lazy(() => import('./screens/AboutScreen'));
 export default function App() {
   const location = useLocation();
   return (
-    <ErrorBoundary key={location.pathname}>
+    <ErrorBoundary resetKey={location.pathname}>
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path="/" element={<HomeScreen />} />

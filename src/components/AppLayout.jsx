@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { supabase } from '../config/supabase';
@@ -9,6 +9,7 @@ import Sidebar from './Sidebar';
 import LoadingScreen from './LoadingScreen';
 import ReportBugModal from './ReportBugModal';
 import styles from './AppLayout.module.css';
+import { motionEase, motionTiming } from '../utils/motion';
 
 export default function AppLayout({ children }) {
   const navigate = useNavigate();
@@ -19,17 +20,28 @@ export default function AppLayout({ children }) {
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const contentRef = useRef(null);
+  const profileRequest = useRef(0);
 
   // Entrance animation on every route change (Outlet remounts per path).
   const pageMotion = {
-    initial: reducedMotion ? false : { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.22, ease: 'easeOut' },
+    // Keep fixed sheets anchored to the viewport: a transformed route
+    // wrapper would become their containing block, even at translateY(0).
+    initial: reducedMotion ? false : { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: motionTiming.enter, ease: motionEase },
   };
 
   // Pre-app routes (profile setup, intro pages) render chrome-free — the
   // sidebar only exists once the introduction flow is finished.
   const isPreAppRoute = ['/setup-profile', '/onboarding'].includes(location.pathname);
+
+  useLayoutEffect(() => {
+    // The shell survives navigation; new screens still start at the top.
+    setSidebarVisible(false);
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, [location.pathname, isDesktop]);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
@@ -53,20 +65,26 @@ export default function AppLayout({ children }) {
 
   const fetchProfile = useCallback(() => {
     if (!user) return;
+    const request = ++profileRequest.current;
     supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
-      .then(({ data }) => { if (data) setUserData(data); })
+      .then(({ data }) => {
+        if (data && request === profileRequest.current) setUserData(data);
+      })
       .catch(() => {});
   }, [user]);
 
   useEffect(() => {
     fetchProfile();
     window.addEventListener('skorplus-profile-refresh', fetchProfile);
-    return () => window.removeEventListener('skorplus-profile-refresh', fetchProfile);
-  }, [fetchProfile]);
+    return () => {
+      profileRequest.current += 1;
+      window.removeEventListener('skorplus-profile-refresh', fetchProfile);
+    };
+  }, [fetchProfile, location.pathname]);
 
   // App-wide submission notifications: lecturers hear about new work,
   // students hear when their work is reviewed. Lives here (not in the
@@ -135,7 +153,7 @@ export default function AppLayout({ children }) {
           onNavigate={handleSidebarNavigate}
           userData={userData}
         />
-        <main className={styles.desktopContent}>
+        <main ref={contentRef} className={styles.desktopContent}>
           <Suspense fallback={<LoadingScreen />}>
             <motion.div key={location.pathname} {...pageMotion} style={{ height: '100%' }}>
               {children}
