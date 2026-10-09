@@ -226,7 +226,7 @@ export const setStudentLecturers = async (studentId, lecturerIds) => {
 export const getStudentsForLecturer = async (lecturerId) => {
   const { data, error } = await supabase
     .from('student_lecturers')
-    .select('student:profiles!student_lecturers_student_id_fkey(id, name, username, photo_url)')
+    .select('student:profiles!student_lecturers_student_id_fkey(id, name, username, photo_url, class_code)')
     .eq('lecturer_id', lecturerId);
   if (error) throw error;
   return (data ?? []).map((row) => row.student).filter(Boolean);

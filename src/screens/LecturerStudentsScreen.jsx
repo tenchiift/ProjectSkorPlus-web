@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { getAllStudents } from '../services/userService';
 import { getStudentsForLecturer } from '../services/moduleService';
 import { getSubmissionCounts } from '../services/submissionService';
+import ClassTabs from '../components/ClassTabs';
 import listStyles from './SubmissionListScreen.module.css';
 import styles from './LecturerStudentsScreen.module.css';
 
@@ -15,6 +16,7 @@ export default function LecturerStudentsScreen() {
   const [mine, setMine] = useState([]);
   const [counts, setCounts] = useState({ total: 0, pending: 0 });
   const [loading, setLoading] = useState(true);
+  const [classFilter, setClassFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
@@ -29,6 +31,18 @@ export default function LecturerStudentsScreen() {
   }, [user]);
 
   const reviewedCount = counts.total - counts.pending;
+
+  // Auto-detected classes from My Students (no hardcoding — a new class
+  // appears here on its own once a student of that class selects you).
+  const classCounts = {};
+  mine.forEach((s) => {
+    if (s.class_code) classCounts[s.class_code] = (classCounts[s.class_code] || 0) + 1;
+  });
+  const classTabs = [
+    { value: 'all', label: 'All', count: mine.length },
+    ...Object.keys(classCounts).sort().map((c) => ({ value: c, label: c, count: classCounts[c] })),
+  ];
+  const visibleMine = classFilter === 'all' ? mine : mine.filter((s) => s.class_code === classFilter);
 
   return (
     <div className={listStyles.container}>
@@ -65,11 +79,16 @@ export default function LecturerStudentsScreen() {
           <h2 className={styles.sectionTitle}>My Students</h2>
           <span className={styles.sectionCount}>{mine.length}</span>
         </div>
+        {!loading && mine.length > 0 && (
+          <ClassTabs tabs={classTabs} value={classFilter} onChange={setClassFilter} />
+        )}
         {loading ? null : mine.length === 0 ? (
           <p className={listStyles.emptyText} style={{ padding: '16px 0' }}>No students have selected you yet.</p>
+        ) : visibleMine.length === 0 ? (
+          <p className={listStyles.emptyText} style={{ padding: '16px 0' }}>No students in this class yet.</p>
         ) : (
           <div className={listStyles.studentList} style={{ marginBottom: '24px' }}>
-            {mine.map((student) => (
+            {visibleMine.map((student) => (
               <div key={student.id} className={styles.studentRow}>
                 {student.photo_url ? (
                   <img src={student.photo_url} alt="" className={listStyles.rowAvatar} />
@@ -84,6 +103,9 @@ export default function LecturerStudentsScreen() {
                     <span className={listStyles.rowSub}>@{student.username}</span>
                   )}
                 </div>
+                {student.class_code && (
+                  <span className={styles.sectionCount}>{student.class_code}</span>
+                )}
               </div>
             ))}
           </div>

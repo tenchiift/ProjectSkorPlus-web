@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Plus, Send, Sparkles, X, Menu, Zap, ChevronDown, Pencil, Trash2, Check } from 'lucide-react';
 import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
-import { MetalFx } from 'metal-fx';
 import { useAuth } from '../context/AuthContext';
 import { stripMarkdown } from '../utils/plainText';
 import {
@@ -50,7 +49,6 @@ function Sheet({ onClose, children }) {
 export default function AiChatScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const prefersReduced = useReducedMotion();
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -299,11 +297,9 @@ export default function AiChatScreen() {
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Ask your study buddy..."
         />
-        <MetalFx preset="chromatic" strength={1} variant="circle" theme="dark" paused={prefersReduced}>
-          <button className={styles.sendBtn} onClick={handleSend} disabled={waiting || !input.trim()}>
-            <Send size={20} color="#FFFFFF" />
-          </button>
-        </MetalFx>
+        <button className={styles.sendBtn} onClick={handleSend} disabled={waiting || !input.trim()}>
+          <Send size={20} color="#FFFFFF" />
+        </button>
       </div>
       </BorderBeam>
       </div>
