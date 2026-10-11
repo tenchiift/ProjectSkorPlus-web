@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Search, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Search, RefreshCw, AlertTriangle } from 'lucide-react';
+import PaperFolder from '../components/PaperFolder';
 import { supabase } from '../config/supabase';
 import styles from './FinalExamScreen.module.css';
 
@@ -50,6 +51,13 @@ export default function FinalExamScreen() {
     );
   }
 
+  const subjects = new Map();
+  for (const exam of exams) {
+    const subject = exam.subject?.trim() || 'Other';
+    if (!subjects.has(subject)) subjects.set(subject, []);
+    subjects.get(subject).push(exam);
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -82,28 +90,16 @@ export default function FinalExamScreen() {
             </p>
           </div>
         ) : (
-          exams.map((exam) => (
-            <button
-              key={exam.id}
-              className={styles.examCard}
-              onClick={() => navigate('/pdf-viewer', { state: { exam } })}
-            >
-              <div className={styles.examIcon}>
-                <FileText size={28} color="#FFFFFF" />
-              </div>
-              <div className={styles.examInfo}>
-                <p className={styles.examTitle}>{exam.title}</p>
-                {exam.subject ? (
-                  <p className={styles.examMeta}>
-                    {exam.subject}{exam.semester ? ` \u2014 ${exam.semester}` : ''}
-                  </p>
-                ) : null}
-                {exam.year ? (
-                  <p className={styles.examYear}>Year {exam.year}</p>
-                ) : null}
-              </div>
-            </button>
-          ))
+          <div className={styles.folderGrid}>
+            {[...subjects].map(([subject, papers]) => (
+              <PaperFolder
+                key={subject}
+                title={subject}
+                papers={papers}
+                onSelect={(exam) => navigate('/pdf-viewer', { state: { exam } })}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
