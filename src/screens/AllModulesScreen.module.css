@@ -148,6 +148,9 @@
      Reason: no visible seam between photo and card body on any
      image, in every theme. */
   transform: scale(1);
+  /* Tighter crop like the reference, then a long seamless fade.
+     Reason: no visible seam between photo and card body on any
+     image, in every theme. */
   mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
 }
@@ -232,4 +235,12 @@
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--color-text-secondary);
+}
+
+/* Mobile only: no card shadow. Reason: any shadow pools grey at the
+   rounded bottom corners on small screens. */
+@media (max-width: 767px) {
+  .moduleCard {
+    box-shadow: none;
+  }
 }
