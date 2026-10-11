@@ -26,8 +26,15 @@
   width: min(65vw, 320px);
   background: var(--color-background);
   border-radius: 0 24px 24px 0;
+  /* Clips the scaled blur backdrop to the rounded edge so no sliver
+     of photo bleeds past the drawer. Inner menu keeps its own scroll. */
+  overflow: hidden;
   transform: translateX(-100%);
-  transition: transform 250ms ease;
+  /* Hidden drawer paints nothing (no shadow/blur sliver at the screen
+     edge) and leaves the keyboard tab order. Delay hides it only after
+     the slide-out animation finishes. */
+  visibility: hidden;
+  transition: transform 250ms ease, visibility 0s 250ms;
   display: flex;
   flex-direction: column;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
@@ -35,179 +42,16 @@
 
 .sidebarVisible {
   transform: translateX(0);
+  visibility: visible;
+  transition: transform 250ms ease;
 }
 
-/* Locked banner: fixed height + no shrinking, so the profile block always
-   renders full-size at any text zoom. The menu below scrolls instead. */
-.header {
-  position: relative;
-  padding: 60px 24px 32px;
-  border-radius: 0 24px 0 0;
-  overflow: hidden;
-  flex-shrink: 0;
-  height: 300px;
-}
-
-/* Avatar sebagai background penuh — blur sikit supaya text jelas. */
-.headerBg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: blur(3px) saturate(1.15);
-  transform: scale(1.06);
-  z-index: 0;
-}
-
-/* Gradient tint overlay ikut tema — avatar nampak kat atas, warna dalam
-   kat bawah supaya nama & XP bar jelas. */
-.headerOverlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-gradient-vector-start) 50%, transparent),
-    color-mix(in srgb, var(--color-gradient-vector-end) 85%, transparent)
-  );
-}
-
-.closeBtn {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 2;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  padding: 4px;
-}
-
-.streakPill {
-  font-family: var(--font-body-bold);
-  font-size: 12px;
-  color: #FFFFFF;
-  background: #F59E0B;
-  border-radius: var(--radius-full);
-  padding: 5px 14px;
-  margin-top: 4px;
-}
-
-.profileCenter {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.avatarBig {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  object-fit: cover;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  margin-bottom: 4px;
-}
-
-.avatarBigPlaceholder {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  margin-bottom: 4px;
-}
-
-.profileName {
-  font-family: var(--font-heading-bold);
-  font-size: 18px;
-  color: #FFFFFF;
-  text-align: center;
-  /* Long names at large text sizes clip with an ellipsis instead of
-     pushing the locked banner apart. */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.roleTag {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 3;
-  font-family: var(--font-body-bold);
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #FFFFFF;
-  background: var(--color-primary);
-  border-radius: var(--radius-full);
-  padding: 4px 12px;
-}
-
-.profileSem {
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-}
-
-.xpRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin-top: 8px;
-}
-
-.xpLevel {
-  font-family: var(--font-body-bold);
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: var(--radius-full);
-  padding: 3px 8px;
-  flex-shrink: 0;
-}
-
-.xpBar {
-  flex: 1;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.25);
-  overflow: hidden;
-}
-
-.xpFill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: #FFFFFF;
-  transition: width 0.4s ease;
-}
-
-.xpCount {
-  font-family: var(--font-body-bold);
-  font-size: 11px;
-  color: #FFFFFF;
-  flex-shrink: 0;
-}
-
+/* Middle: stacked nav. Reason: 16px radius matches app cards. */
 .menu {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -216,10 +60,12 @@
 .menuItem {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 12px 14px;
+  min-height: 44px;
   border-radius: 16px;
   border: none;
+  border-left: 3px solid transparent;
   background: none;
   cursor: pointer;
   font-family: var(--font-body);
@@ -233,40 +79,222 @@
   background: var(--color-border);
 }
 
-.footer {
-  padding: 0 24px 40px;
+.menuItemActive {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-left-color: var(--color-primary);
+  font-family: var(--font-body-bold);
+}
+
+/* Rail-wide blurred photo backdrop, no gradient. The flat veil below
+   keeps dark text legible over any photo across profile and nav. */
+.sideBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(8px) saturate(1.15);
+  transform: scale(1.1);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.persistentInner::after,
+.sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-background) 82%, transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.persistentInner > *:not(.sideBg),
+.sidebar > *:not(.sideBg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Profile directly under the brand. Reason: identity first, nav second. */
+.profileTop {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Bottom: pinned Settings + Log Out. Reason: destructive action stays last. */
+.account {
+  padding: 12px 12px 20px;
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Compact centered banner (old-style arrangement, tightened). Reason:
+   at-a-glance identity like the old header, minus the 300px cost. */
+.profileCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.avatarBig {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  object-fit: cover;
+  margin-bottom: 4px;
+}
+
+.avatarBigPlaceholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.profileName {
+  font-family: var(--font-heading-bold);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.profileSem {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.roleTag {
+  font-family: var(--font-body-bold);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.gamify {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.xpRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.xpLevel {
+  font-family: var(--font-body-bold);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--color-text-primary);
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 3px 8px;
+  flex-shrink: 0;
+}
+
+.xpBar {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.xpFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  transition: width 0.4s ease;
+}
+
+.xpCount {
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .footerBtn {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 12px 14px;
+  min-height: 44px;
   border-radius: 16px;
   border: none;
+  border-left: 3px solid transparent;
   background: none;
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 15px;
   width: 100%;
   color: var(--color-text-primary);
+  text-align: left;
+}
+
+.footerBtn:hover {
+  background: var(--color-border);
 }
 
 .logoutBtn {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 12px 14px;
+  min-height: 44px;
   border-radius: 16px;
   border: none;
   background: none;
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 15px;
-  margin-top: 8px;
   width: 100%;
+  color: var(--color-error);
+  text-align: left;
+}
+
+.logoutBtn:hover {
+  background: var(--color-border);
+}
+
+.menuItem:focus-visible,
+.footerBtn:focus-visible,
+.logoutBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Persistent desktop sidebar */
@@ -288,25 +316,21 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-}
-
-.persistent .header {
-  padding: 56px 20px 44px;
-  border-radius: 0;
-  flex-shrink: 0;
-  height: 300px;
+  position: relative;
 }
 
 .persistent .menu {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
   padding: 16px 12px;
 }
 
-.persistent .footer {
-  padding: 0 12px 24px;
-  flex-shrink: 0;
+.persistent .account {
+  padding: 12px 12px 24px;
 }
 
-
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .backdrop,
+  .xpFill {
+    transition: none;
+  }
+}

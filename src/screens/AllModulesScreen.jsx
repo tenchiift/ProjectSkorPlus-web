@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../config/supabase';
 import { getModules, getModulesForStudent, getUserModuleProgress } from '../services/moduleService';
+import { getModuleCover } from '../utils/moduleImage';
 import styles from './AllModulesScreen.module.css';
 
 export default function AllModulesScreen() {
@@ -89,11 +90,18 @@ export default function AllModulesScreen() {
           modules.map((mod) => {
             const progress = moduleProgress[mod.id]?.progress ?? 0;
             const percent = Math.round(progress * 100);
+            const cover = getModuleCover(mod);
             return (
               <div
                 key={mod.id}
                 className={styles.moduleCard}
               >
+                <div className={styles.modulePhoto}>
+                  {cover && (
+                    <img src={cover} alt="" aria-hidden="true" className={styles.modulePhotoImg} />
+                  )}
+                </div>
+                <div className={styles.moduleBody}>
                 <h2 className={styles.moduleTitle}>{mod.title}</h2>
                 <p className={styles.moduleDesc}>{mod.description}</p>
                 <div className={styles.moduleProgressBarBg}>
@@ -111,6 +119,7 @@ export default function AllModulesScreen() {
                   >
                     <ArrowRight size={20} color="#FFFFFF" />
                   </button>
+                </div>
                 </div>
               </div>
             );

@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
-import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, X, User, LogOut, Settings, Layers, Bug } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, User, LogOut, Settings, Layers, Bug } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 // Opens the global bug-report popup (handled in AppLayout).
@@ -54,6 +55,7 @@ const LECTURER_MENU = [
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const reducedMotion = useReducedMotion();
+  const location = useLocation();
   const openReportBug = useCallback(() => {
     document.dispatchEvent(new CustomEvent('open-report-bug'));
   }, []);
@@ -67,8 +69,8 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
     setTimeout(() => onNavigate(route), 200);
   }, [onClose, onNavigate, openReportBug]);
 
-  // Profile still loading — render nothing role-specific so the lecturer
-  // never sees the student menu / streak flash before the fetch lands.
+  // Profile still loading: render nothing role-specific so the lecturer
+  // never sees the student menu before the fetch lands.
   const profileLoaded = !!userData?.role;
 
   const MENU =
@@ -76,39 +78,71 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
     : userData?.role ? STUDENT_MENU
     : [];
   const xp = xpInfo(userData?.total_exp);
-  const streak = userData?.days_streak ?? 0;
 
   const isLecturer = userData?.role === 'lecturer';
+  const isActive = (route) => route !== REPORT_BUG_ACTION && location.pathname === route;
 
-  const roleTag = userData?.role ? (
-    <span className={styles.roleTag}>
-      {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
-    </span>
+  // Blurred photo backdrop shared by the whole rail (profile + nav).
+  const sideBg = userData?.photo_url ? (
+    <img src={userData.photo_url} className={styles.sideBg} alt="" aria-hidden="true" />
   ) : null;
 
+  // X button removed: drawer closes via backdrop tap, navigation, or Escape.
+  useEffect(() => {
+    if (persistent || !visible) return;
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [persistent, visible, onClose]);
+
+  const navList = (click) => (
+    <nav className={styles.menu} aria-label="Primary">
+      {MENU.map((item) => {
+        const Icon = item.icon;
+        const active = isActive(item.route);
+        return (
+          <button
+            key={item.label}
+            type="button"
+            className={`${styles.menuItem} ${active ? styles.menuItemActive : ''}`}
+            onClick={() => click(item.route)}
+            aria-current={active ? 'page' : undefined}
+          >
+            <Icon size={20} aria-hidden="true" />
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+
   const profileBlock = (
-    <div className={styles.profileCenter}>
-      {userData?.photo_url ? (
-        <img src={userData.photo_url} className={styles.avatarBig} alt="" />
-      ) : (
-        <div className={styles.avatarBigPlaceholder}>
-          <User size={32} color="#FFFFFF" />
-        </div>
-      )}
-      <p className={styles.profileName}>{userData?.name ?? ''}</p>
-      <p className={styles.profileSem}>{profileLoaded ? (userData?.semester ?? 'Semester') : ''}</p>
-      {profileLoaded && !isLecturer && (
-        <>
-          <span className={styles.streakPill}>
-            {streak > 0 ? (
-              <>🔥 <CountUp value={streak} /> Day Streak</>
-            ) : (
-              '🔥 Start Streak!'
-            )}
+    <div className={styles.profileTop}>
+      <div className={styles.profileCenter}>
+        {userData?.photo_url ? (
+          <img src={userData.photo_url} className={styles.avatarBig} alt="" />
+        ) : (
+          <div className={styles.avatarBigPlaceholder} aria-hidden="true">
+            <User size={26} color="var(--color-text-secondary)" />
+          </div>
+        )}
+        <p className={styles.profileName}>{userData?.name ?? ''}</p>
+        <p className={styles.profileSem}>
+          {profileLoaded
+            ? (isLecturer ? 'Lecturer' : (userData?.semester ?? 'Semester'))
+            : ''}
+        </p>
+        {profileLoaded && (
+          <span className={styles.roleTag}>
+            {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
           </span>
+        )}
+      </div>
+      {profileLoaded && !isLecturer && (
+        <div className={styles.gamify}>
           <div className={styles.xpRow}>
             <span className={styles.xpLevel}>LVL {xp.level}</span>
-            <div className={styles.xpBar}>
+            <div className={styles.xpBar} role="progressbar" aria-valuenow={xp.into} aria-valuemin={0} aria-valuemax={100} aria-label="Experience progress">
               <motion.div
                 className={styles.xpFill}
                 initial={reducedMotion ? false : { width: 0 }}
@@ -118,43 +152,39 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
             </div>
             <span className={styles.xpCount}><CountUp value={xp.total} /> XP</span>
           </div>
-        </>
+        </div>
       )}
+    </div>
+  );
+
+  const footerBlock = (click) => (
+    <div className={styles.account}>
+      <div className={styles.footer}>
+        <button
+          type="button"
+          className={`${styles.footerBtn} ${isActive('/settings') ? styles.menuItemActive : ''}`}
+          onClick={() => click('/settings')}
+          aria-current={isActive('/settings') ? 'page' : undefined}
+        >
+          <Settings size={20} aria-hidden="true" />
+          <span>Settings</span>
+        </button>
+        <button type="button" className={styles.logoutBtn} onClick={() => click('logout')}>
+          <LogOut size={20} aria-hidden="true" />
+          <span>Log Out</span>
+        </button>
+      </div>
     </div>
   );
 
   if (persistent) {
     return (
-      <aside className={styles.persistent}>
+      <aside className={styles.persistent} aria-label="Sidebar">
         <div className={styles.persistentInner}>
-          <div className={`${styles.header} bg-graph-purple`}>
-            {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
-            <div className={styles.headerOverlay} />
-            {roleTag}
-            {profileBlock}
-          </div>
-          <div className={styles.menu}>
-            {MENU.map((item) => {
-              const Icon = item.icon;
-              const isReport = item.route === REPORT_BUG_ACTION;
-              return (
-                <button key={item.route} className={styles.menuItem} onClick={() => isReport ? (onClose(), openReportBug()) : onNavigate(item.route)}>
-                  <Icon size={20} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className={styles.footer}>
-            <button className={styles.footerBtn} onClick={() => onNavigate('/settings')}>
-              <Settings size={20} color="var(--color-text-primary)" />
-              <span>Settings</span>
-            </button>
-            <button className={styles.logoutBtn} onClick={() => onNavigate('logout')}>
-              <LogOut size={20} color="var(--color-error)" />
-              <span style={{ color: 'var(--color-error)' }}>Log Out</span>
-            </button>
-          </div>
+          {sideBg}
+          {profileBlock}
+          {navList(onNavigate)}
+          {footerBlock(onNavigate)}
         </div>
       </aside>
     );
@@ -166,39 +196,11 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         className={`${styles.backdrop} ${visible ? styles.backdropVisible : ''}`}
         onClick={onClose}
       />
-      <div className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ''}`}>
-          <div className={`${styles.header} bg-graph-purple`}>
-            {userData?.photo_url && <img src={userData.photo_url} className={styles.headerBg} alt="" />}
-            <div className={styles.headerOverlay} />
-            <button className={styles.closeBtn} onClick={onClose}>
-              <X size={22} color="#FFFFFF" />
-            </button>
-            {roleTag}
-            {profileBlock}
-          </div>
-
-        <div className={styles.menu}>
-          {MENU.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button key={item.route} className={styles.menuItem} onClick={() => handleNav(item.route)}>
-                <Icon size={20} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className={styles.footer}>
-          <button className={styles.footerBtn} onClick={() => handleNav('/settings')}>
-            <Settings size={20} color="var(--color-text-primary)" />
-            <span>Settings</span>
-          </button>
-          <button className={styles.logoutBtn} onClick={() => handleNav('logout')}>
-            <LogOut size={20} color="var(--color-error)" />
-            <span style={{ color: 'var(--color-error)' }}>Log Out</span>
-          </button>
-        </div>
+      <div className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ''}`} role="dialog" aria-modal="true" aria-label="Menu">
+        {sideBg}
+        {profileBlock}
+        {navList(handleNav)}
+        {footerBlock(handleNav)}
       </div>
     </div>
   );

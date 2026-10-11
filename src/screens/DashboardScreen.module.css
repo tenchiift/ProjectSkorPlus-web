@@ -123,7 +123,7 @@
 
 .logoImage {
   width: 140px;
-  height: 75px;
+  height: 45px;
   object-fit: contain;
 }
 
@@ -351,7 +351,7 @@
   transform: scale(0.97);
 }
 
-/* Beam wrapper around the AI Study Buddy card — flexes like a statCard. */
+/* Beam wrapper around the AI Study Buddy card, flexes like a statCard. */
 .orbCardBeam {
   --beam-strength: 1;
   --beam-stroke-opacity: 1;
@@ -367,7 +367,7 @@
   width: 100%;
 }
 
-/* ThinkingOrb only ships tuned sizes 64/20 — scale 64 down to ~40px
+/* ThinkingOrb only ships tuned sizes 64/20, so scale 64 down to ~40px
    so it sits balanced with the 28px lucide icons. */
 .orbIcon {
   width: 40px;
@@ -698,9 +698,12 @@
 
   .moduleGrid .moduleCardWrapper {
     min-height: 220px;
-    padding: var(--spacing-lg);
     flex: none;
     scroll-snap-align: none;
+  }
+
+  .moduleGrid .modulePhoto {
+    height: 180px;
   }
 }
 
@@ -731,24 +734,55 @@
 .moduleCardWrapper {
   flex: 0 0 100%;
   scroll-snap-align: start;
-  padding-right: var(--spacing-md);
   cursor: pointer;
   text-align: left;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
+  padding: 0;
   min-height: 200px;
   display: flex;
   flex-direction: column;
   border: none;
-  background: var(--color-primary);
-  color: #ffffff;
+  background: var(--color-card);
+  color: var(--color-text-primary);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* Photo band. Reason: topic recognition at a glance, like the reference. */
+.modulePhoto {
+  height: 190px;
+  width: 550px;
+  flex-shrink: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.modulePhotoImg {
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  /* Tighter crop like the reference, then a long seamless fade.
+     Reason: no visible seam between photo and card body on any
+     image, in every theme. */
+  transform: scale(1);
+  mask-image: linear-gradient(to bottom, black 0%, transparent 55%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 55%);
+}
+
+.moduleBody {
+  position: relative;
+  margin-top: -100px;
+  padding: 4px var(--spacing-lg) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .moduleTitle {
   font-family: var(--font-heading-bold);
   font-size: 24px;
-  color: #ffffff;
+  color: var(--color-text-primary);
   margin-bottom: var(--spacing-sm);
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -759,7 +793,7 @@
 .moduleDesc {
   font-family: var(--font-body);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-text-secondary);
   margin-bottom: var(--spacing-md);
   flex: 1;
   display: -webkit-box;
@@ -771,7 +805,7 @@
 .moduleProgressBarBg {
   height: 8px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--color-border);
   overflow: hidden;
   margin-bottom: var(--spacing-sm);
 }
@@ -779,7 +813,7 @@
 .moduleProgressBarFill {
   height: 100%;
   border-radius: var(--radius-full);
-  background: #ffffff;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
@@ -792,14 +826,14 @@
 .modulePercent {
   font-family: var(--font-body);
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-text-secondary);
 }
 
 .continueBtn {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;

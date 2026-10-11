@@ -10,6 +10,7 @@ import { setWeekAnchor, setSemesterPaused, claimDailyStreak, localDateStr } from
 import { ensureDailyNotifications, subscribeToNotifications, getUnreadCount } from '../services/notificationService';
 import LecturerDashboardScreen from './LecturerDashboardScreen';
 import ClassPrompt from '../components/ClassPrompt';
+import { getModuleCover } from '../utils/moduleImage';
 import { parseClassCode } from '../utils/parseClass';
 import examImage from '../assets/images/exam.jpeg';
 import zepImage from '../assets/images/zep.avif';
@@ -87,7 +88,7 @@ export default function DashboardScreen() {
       }
 
       // Daily login streak (+EXP). Needs streak_migration.sql; degrades quietly.
-      // The sidebar header shows the streak — nudge AppLayout to refresh it.
+      // The sidebar profile shows the streak, so nudge AppLayout to refresh it.
       try {
         const result = await claimDailyStreak(user.id);
         if (result?.claimed) window.dispatchEvent(new CustomEvent('skorplus-profile-refresh'));
@@ -306,21 +307,29 @@ export default function DashboardScreen() {
     <>
       {modules.map((mod) => {
         const progress = moduleProgress[mod.id]?.progress ?? 0;
+        const cover = getModuleCover(mod);
         return (
           <button
             key={mod.id}
             className={styles.moduleCardWrapper}
             onClick={() => navigate('/module/' + mod.id, { state: { module: mod } })}
           >
-            <h3 className={styles.moduleTitle}>{mod.title}</h3>
-            <p className={styles.moduleDesc}>{mod.description}</p>
-            <div className={styles.moduleProgressBarBg}>
-              <div className={styles.moduleProgressBarFill} style={{ width: `${progress * 100}%` }} />
+            <div className={styles.modulePhoto}>
+              {cover && (
+                <img src={cover} alt="" aria-hidden="true" className={styles.modulePhotoImg} />
+              )}
             </div>
-            <div className={styles.moduleFooter}>
-              <span className={styles.modulePercent}>{Math.round(progress * 100)}%</span>
-              <div className={styles.continueBtn}>
-                <ArrowRight size={20} color="#FFFFFF" />
+            <div className={styles.moduleBody}>
+              <h3 className={styles.moduleTitle}>{mod.title}</h3>
+              <p className={styles.moduleDesc}>{mod.description}</p>
+              <div className={styles.moduleProgressBarBg}>
+                <div className={styles.moduleProgressBarFill} style={{ width: `${progress * 100}%` }} />
+              </div>
+              <div className={styles.moduleFooter}>
+                <span className={styles.modulePercent}>{Math.round(progress * 100)}%</span>
+                <div className={styles.continueBtn}>
+                  <ArrowRight size={20} color="#FFFFFF" />
+                </div>
               </div>
             </div>
           </button>
@@ -406,7 +415,7 @@ export default function DashboardScreen() {
 
           {paused && semester && (
             <div className={styles.semesterControls}>
-              <span className={styles.semesterHint}>Break active — progress is paused.</span>
+              <span className={styles.semesterHint}>Break active, progress is paused.</span>
               <button className={`${styles.semesterActionBtn} ${styles.semesterActionBtnSmall}`} onClick={handleEndBreak} disabled={saving}>
                 End mid-sem break
               </button>
