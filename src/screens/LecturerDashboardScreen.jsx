@@ -36,7 +36,11 @@ export default function LecturerDashboardScreen({ unreadNotif = 0 }) {
           modules: modules.length,
           exams,
         });
-        setRecent(submissions.slice(0, 5));
+        // Pending reviews first so they are never buried under reviewed items.
+        const byUrgency = [...submissions].sort(
+          (a, b) => Number(a.status === 'reviewed') - Number(b.status === 'reviewed'),
+        );
+        setRecent(byUrgency.slice(0, 5));
       } catch (err) {
         console.error('Lecturer dashboard error:', err);
       } finally {
@@ -96,18 +100,22 @@ export default function LecturerDashboardScreen({ unreadNotif = 0 }) {
                   {recent.map((sub) => {
                     const fileNames = (sub.files ?? []).map((f) => f.file_name).filter(Boolean);
                     const title = fileNames[0] ?? sub.message ?? 'Submission';
+                    const reviewed = sub.status === 'reviewed';
                     return (
                       <button
                         key={sub.id}
-                        className={styles.inboxRow}
+                        className={`${styles.inboxRow} ${reviewed ? '' : styles.inboxRowUnread}`}
                         onClick={() => navigate(`/submission/${sub.id}`)}
                       >
-                        <span className={styles.inboxRowTitle}>
+                        <span className={`${styles.inboxRowTitle} ${reviewed ? '' : styles.inboxRowTitleUnread}`}>
                           <FileText size={14} color="var(--color-text-secondary)" />
                           {title}
                         </span>
                         <span className={styles.inboxRowMeta}>
-                          {sub.student?.name ?? 'Student'} · {sub.status === 'reviewed' ? 'Reviewed' : 'New'}
+                          {sub.student?.name ?? 'Student'} ·{' '}
+                          <span className={`${styles.rowBadge} ${reviewed ? styles.rowBadgeReviewed : styles.rowBadgePending}`}>
+                            {reviewed ? 'Reviewed' : 'Needs review'}
+                          </span>
                         </span>
                       </button>
                     );

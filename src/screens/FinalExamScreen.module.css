@@ -212,3 +212,10 @@
   gap: 64px 24px;
   padding: 24px 8px 40px;
 }
+
+@media (max-width: 479px) {
+  .folderGrid {
+    gap: 16px 8px;
+    padding: 8px 4px 16px;
+  }
+}

@@ -1,11 +1,14 @@
 import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
-import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, User, LogOut, Settings, Layers, Bug } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, User, LogOut, Settings, Layers, Bug, Lightbulb } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 // Opens the global bug-report popup (handled in AppLayout).
 export const REPORT_BUG_ACTION = 'report-bug';
+
+// Opens the suggestion-box popup in idea mode (handled in AppLayout).
+export const SUGGEST_IDEA_ACTION = 'suggest-idea';
 
 // Animated number: counts up from 0 when `value` lands (profile fetch).
 function CountUp({ value }) {
@@ -38,6 +41,7 @@ const STUDENT_MENU = [
   { icon: Users, label: 'Friends', route: '/friends' },
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
   { icon: FolderOpen, label: 'My Submissions', route: '/my-submissions' },
+  { icon: Lightbulb, label: 'Suggest Feature', route: SUGGEST_IDEA_ACTION },
   { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
 ];
 
@@ -48,6 +52,7 @@ const LECTURER_MENU = [
   { icon: Layers, label: 'Modules', route: '/manage-modules' },
   { icon: Users, label: 'Friends', route: '/friends' },
   { icon: MessageCircle, label: 'Messages', route: '/messages' },
+  { icon: Lightbulb, label: 'Suggest Feature', route: SUGGEST_IDEA_ACTION },
   { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
 ];
 
@@ -56,18 +61,23 @@ const LECTURER_MENU = [
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
   const reducedMotion = useReducedMotion();
   const location = useLocation();
-  const openReportBug = useCallback(() => {
-    document.dispatchEvent(new CustomEvent('open-report-bug'));
+  const openPopup = useCallback((event) => {
+    document.dispatchEvent(new CustomEvent(event));
   }, []);
   const handleNav = useCallback((route) => {
     if (route === REPORT_BUG_ACTION) {
       onClose();
-      setTimeout(() => openReportBug(), 200);
+      setTimeout(() => openPopup('open-report-bug'), 200);
+      return;
+    }
+    if (route === SUGGEST_IDEA_ACTION) {
+      onClose();
+      setTimeout(() => openPopup('open-suggest-idea'), 200);
       return;
     }
     onClose();
     setTimeout(() => onNavigate(route), 200);
-  }, [onClose, onNavigate, openReportBug]);
+  }, [onClose, onNavigate, openPopup]);
 
   // Profile still loading: render nothing role-specific so the lecturer
   // never sees the student menu before the fetch lands.
@@ -80,7 +90,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
   const xp = xpInfo(userData?.total_exp);
 
   const isLecturer = userData?.role === 'lecturer';
-  const isActive = (route) => route !== REPORT_BUG_ACTION && location.pathname === route;
+  const isActive = (route) => ![REPORT_BUG_ACTION, SUGGEST_IDEA_ACTION].includes(route) && location.pathname === route;
 
   // Blurred photo backdrop shared by the whole rail (profile + nav).
   const sideBg = userData?.photo_url ? (
@@ -183,7 +193,7 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
         <div className={styles.persistentInner}>
           {sideBg}
           {profileBlock}
-          {navList(onNavigate)}
+          {navList(handleNav)}
           {footerBlock(onNavigate)}
         </div>
       </aside>

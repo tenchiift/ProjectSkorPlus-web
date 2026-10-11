@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -95,6 +95,7 @@ export default function App() {
             <Route path="/ai-chat" element={<AiChatScreen />} />
             <Route path="/messages" element={<MessagesScreen />} />
             <Route path="/chat/:friendId" element={<FriendChatScreen />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
       </Suspense>

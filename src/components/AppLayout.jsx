@@ -19,6 +19,7 @@ export default function AppLayout({ children }) {
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
 
   // Entrance animation on every route change (Outlet remounts per path).
   const pageMotion = {
@@ -49,6 +50,12 @@ export default function AppLayout({ children }) {
     const openReport = () => setReportOpen(true);
     document.addEventListener('open-report-bug', openReport);
     return () => document.removeEventListener('open-report-bug', openReport);
+  }, []);
+
+  useEffect(() => {
+    const openSuggest = () => setSuggestOpen(true);
+    document.addEventListener('open-suggest-idea', openSuggest);
+    return () => document.removeEventListener('open-suggest-idea', openSuggest);
   }, []);
 
   const fetchProfile = useCallback(() => {
@@ -143,6 +150,7 @@ export default function AppLayout({ children }) {
           </Suspense>
         </main>
         <ReportBugModal open={reportOpen} onClose={() => setReportOpen(false)} />
+        <ReportBugModal mode="idea" open={suggestOpen} onClose={() => setSuggestOpen(false)} />
       </div>
     );
   }
@@ -162,6 +170,7 @@ export default function AppLayout({ children }) {
         userData={userData}
       />
       <ReportBugModal open={reportOpen} onClose={() => setReportOpen(false)} />
+      <ReportBugModal mode="idea" open={suggestOpen} onClose={() => setSuggestOpen(false)} />
     </>
   );
 }

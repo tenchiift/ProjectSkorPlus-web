@@ -73,8 +73,8 @@
 .folderToolbar { display: flex; gap: 12px; justify-content: center; margin-top: 4px; }
 
 @media (max-width: 479px) {
-  .folderGrid { gap: 12px; padding: 12px 4px 24px; }
-  .folderToolbar { gap: 16px; margin-top: 8px; margin-bottom: 12px; }
+  .folderGrid { gap: 4px; padding: 8px 4px 16px; }
+  .folderToolbar { gap: 16px; margin-top: 4px; margin-bottom: 8px; }
 }
 
 .toolbarBtn {

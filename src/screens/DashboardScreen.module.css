@@ -121,6 +121,12 @@
   align-items: center;
 }
 
+@media (max-width: 767px) {
+  .logoWrap {
+    padding-bottom: 12px;
+  }
+}
+
 .logoImage {
   width: 140px;
   height: 45px;

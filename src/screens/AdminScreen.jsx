@@ -83,6 +83,7 @@ export default function AdminScreen() {
   const [reportsError, setReportsError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [kindFilter, setKindFilter] = useState('all');
   const [expandedReport, setExpandedReport] = useState(null);
   const [statusBusy, setStatusBusy] = useState({});
 
@@ -191,11 +192,14 @@ export default function AdminScreen() {
     return () => window.removeEventListener('keydown', onKey);
   }, [deleteOpen]);
 
-  const loadReports = async (status, category) => {
+  const loadReports = async (status, category, kind) => {
     setReportsLoading(true);
     setReportsError('');
     try {
-      setReports(await listBugReports({ status, category }));
+      const rows = await listBugReports({ status, category, kind });
+      // Most-voted ideas first so the popular requests surface.
+      rows.sort((a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0));
+      setReports(rows);
     } catch (err) {
       console.error(err);
       setReportsError(err.message || 'Failed to load reports.');
@@ -206,13 +210,13 @@ export default function AdminScreen() {
 
   useEffect(() => {
     if (checking || tab !== 'reports') return;
-    loadReports(statusFilter, categoryFilter);
+    loadReports(statusFilter, categoryFilter, kindFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, checking]);
 
   const applyReportFilter = () => {
     setExpandedReport(null);
-    loadReports(statusFilter, categoryFilter);
+    loadReports(statusFilter, categoryFilter, kindFilter);
   };
 
   const reportStatusBadge = (status) => {
@@ -225,7 +229,7 @@ export default function AdminScreen() {
     BUG_STATUSES.find((s) => s.value === status)?.label ?? status;
 
   const reportCategoryLabel = (value) =>
-    BUG_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+    value === 'idea' ? 'Feature Idea' : BUG_CATEGORIES.find((c) => c.value === value)?.label ?? value;
 
   const reportSeverityLabel = (value) =>
     BUG_SEVERITIES.find((s) => s.value === value)?.label ?? value;
@@ -515,9 +519,9 @@ export default function AdminScreen() {
 
       {tab === 'reports' && (
       <div className={styles.scroll}>
-        <h2 className={styles.pageTitle}>Bug Reports</h2>
+        <h2 className={styles.pageTitle}>Reports & Ideas</h2>
         <p className={styles.pageSub}>
-          Reports filed from the sidebar popup. Tap one to see details, then triage it.
+          Bug reports and feature ideas filed from the sidebar. Tap one to see details, then triage it.
         </p>
 
         <div className={styles.searchRow}>
@@ -531,6 +535,16 @@ export default function AdminScreen() {
             {BUG_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
+          </select>
+          <select
+            className={styles.roleSelect}
+            value={kindFilter}
+            onChange={(e) => setKindFilter(e.target.value)}
+            aria-label="Filter by type"
+          >
+            <option value="all">Bugs + Ideas</option>
+            <option value="bug">Bugs only</option>
+            <option value="idea">Ideas only</option>
           </select>
           <select
             className={styles.roleSelect}
@@ -555,7 +569,7 @@ export default function AdminScreen() {
         ) : reports.length === 0 ? (
           <div className={styles.empty}>
             <Bug size={32} color="var(--color-text-secondary)" />
-            <span className={styles.emptyText}>No bug reports match this filter.</span>
+            <span className={styles.emptyText}>No reports match this filter.</span>
           </div>
         ) : (
           reports.map((r) => {
@@ -572,7 +586,8 @@ export default function AdminScreen() {
                     <span className={styles.codeText}>{r.title}</span>
                     <span className={styles.codeLabel}>
                       {r.reporter?.name || r.reporter?.username ? `${r.reporter?.name || r.reporter?.username} · ` : ''}
-                      {reportCategoryLabel(r.category)} · {new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {r.kind === 'idea' ? 'Feature Idea' : reportCategoryLabel(r.category)} · {new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {r.kind === 'idea' ? ` · ${r.voteCount ?? 0} ${(r.voteCount ?? 0) === 1 ? 'vote' : 'votes'}` : ''}
                     </span>
                     <span className={`${styles.badge} ${reportStatusBadge(r.status)}`}>
                       {reportStatusLabel(r.status)}
@@ -588,7 +603,7 @@ export default function AdminScreen() {
                       </span>
                       {r.reporter?.email && <span className={styles.codeLabel}>{r.reporter.email}</span>}
                       <span className={styles.codeLabel}>
-                        {reportCategoryLabel(r.category)} · Severity: {reportSeverityLabel(r.severity)} ·{' '}
+                        {r.kind === 'idea' ? 'Feature Idea' : reportCategoryLabel(r.category)}{r.kind === 'idea' ? '' : ` · Severity: ${reportSeverityLabel(r.severity)}`} ·{' '}
                         {new Date(r.created_at).toLocaleDateString('en-GB', {
                           day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
                         })}

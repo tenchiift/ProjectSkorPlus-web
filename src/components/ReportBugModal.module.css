@@ -31,6 +31,73 @@
   }
 }
 
+/* Suggestion box: one panel, New Idea / My Ideas toggle. */
+.segWrap {
+  display: flex;
+  gap: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  background: var(--color-input-bg);
+}
+
+.segBtn {
+  position: relative;
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-family: var(--font-body-bold);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.segPill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+
+.segLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.segActive {
+  color: #FFFFFF;
+}
+
+.segBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.ideaForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-width: 0;
+}
+
+/* Fixed stage so the panel never resizes between the two views. */
+.ideaViews {
+  min-height: 340px;
+}
+
+.ideasBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
 .header {
   display: flex;
   align-items: flex-start;
@@ -206,4 +273,71 @@
   font-size: 14px;
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+
+
+.ideasEmpty {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.ideaRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.ideaTitle {
+  font-family: var(--font-body-bold);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.ideaMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusPill {
+  font-family: var(--font-body-bold);
+  font-size: 11px;
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.status_open {
+  color: var(--color-priority-medium);
+  background: var(--color-soft-cream-badge);
+}
+
+.status_in_progress {
+  color: var(--color-primary);
+  background: var(--color-soft-blue-badge);
+}
+
+.status_resolved {
+  color: var(--color-success);
+  background: var(--color-soft-green-badge);
+}
+
+.voteBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body-bold);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.voteLabel {
+  font-family: var(--font-body);
 }
