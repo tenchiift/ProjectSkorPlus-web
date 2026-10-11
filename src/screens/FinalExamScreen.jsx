@@ -119,6 +119,7 @@ export default function FinalExamScreen() {
 
       <div className={styles.scrollContent}>
         <h1 className={styles.pageTitle}>Past Papers</h1>
+        <p className={styles.pageSub}>Choose a subtopic folder to practice with previous questions.</p>
 
         {error ? (
           <div className={styles.errorState}>
