@@ -6,9 +6,11 @@ import {
   BUG_CATEGORIES,
   BUG_STATUSES,
   MAX_SCREENSHOT_BYTES,
+  listIdeas,
   listMyIdeas,
   submitBugReport,
   submitIdea,
+  toggleIdeaVote,
 } from '../services/bugReportService';
 import styles from './ReportBugModal.module.css';
 
@@ -33,6 +35,9 @@ export default function ReportBugModal({ open, onClose, mode = 'bug' }) {
   const [ideas, setIdeas] = useState([]);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const [ideaView, setIdeaView] = useState('form');
+  const [browse, setBrowse] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const [voteBusy, setVoteBusy] = useState(null);
   const fileRef = useRef(null);
   const rm = useReducedMotion();
 
@@ -77,6 +82,34 @@ export default function ReportBugModal({ open, onClose, mode = 'bug' }) {
       .catch(() => setIdeas([]))
       .finally(() => setIdeasLoading(false));
   }, [open, isIdea]);
+
+  // Browse tab: every idea, most-voted first. My Ideas refreshes too so
+  // counts stay correct after voting elsewhere.
+  useEffect(() => {
+    if (!open || !isIdea || ideaView === 'form') return;
+    if (ideaView === 'browse') {
+      setBrowseLoading(true);
+      listIdeas()
+        .then(setBrowse)
+        .catch(() => setBrowse([]))
+        .finally(() => setBrowseLoading(false));
+    } else {
+      listMyIdeas().then(setIdeas).catch(() => {});
+    }
+  }, [open, isIdea, ideaView]);
+
+  const handleVote = async (id) => {
+    if (voteBusy) return;
+    setVoteBusy(id);
+    try {
+      await toggleIdeaVote(id);
+      setBrowse(await listIdeas());
+    } catch (err) {
+      console.error('Vote error:', err);
+    } finally {
+      setVoteBusy(null);
+    }
+  };
 
   const pickFile = (picked) => {
     setError('');
@@ -261,6 +294,7 @@ export default function ReportBugModal({ open, onClose, mode = 'bug' }) {
                   {[
                     { value: 'form', label: 'New Idea' },
                     { value: 'ideas', label: `My Ideas${ideas.length > 0 ? ` (${ideas.length})` : ''}` },
+                    { value: 'browse', label: 'Browse' },
                   ].map((tab) => {
                     const active = ideaView === tab.value;
                     return (
@@ -299,7 +333,38 @@ export default function ReportBugModal({ open, onClose, mode = 'bug' }) {
                           {detailsField}
                           {sendControl}
                         </div>
-                      ) : ideasPanel}
+                      ) : ideaView === 'ideas' ? ideasPanel : (
+                        <div className={styles.ideasBlock}>
+                          {browseLoading ? (
+                            <p className={styles.ideasEmpty}>Loading ideas...</p>
+                          ) : browse.length === 0 ? (
+                            <p className={styles.ideasEmpty}>No ideas yet. Be the first to suggest one.</p>
+                          ) : (
+                            browse.map((idea) => (
+                              <div key={idea.id} className={styles.ideaRow}>
+                                <span className={styles.ideaTitle}>{idea.title}</span>
+                                <span className={styles.ideaMeta}>
+                                  <span className={`${styles.statusPill} ${styles[`status_${idea.status}`] || ''}`}>
+                                    {ideaStatusLabel(idea.status)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className={`${styles.voteBtn} ${idea.voted ? styles.voteBtnActive : ''}`}
+                                    onClick={() => handleVote(idea.id)}
+                                    disabled={voteBusy === idea.id}
+                                    aria-pressed={idea.voted}
+                                    aria-label={`${idea.voted ? 'Remove vote from' : 'Vote for'} ${idea.title}`}
+                                  >
+                                    <ThumbsUp size={12} />
+                                    <span className={styles.voteLabel}>Votes</span>
+                                    {idea.voteCount ?? 0}
+                                  </button>
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </div>

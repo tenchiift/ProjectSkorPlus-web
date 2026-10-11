@@ -138,6 +138,26 @@ export const listMyIdeas = async () => {
   }));
 };
 
+// Every idea, most-voted first, with counts and whether I voted.
+export const listIdeas = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('You must be signed in.');
+  const { data, error } = await supabase
+    .from('bug_reports')
+    .select('id, title, status, created_at, user_id, votes:idea_votes(user_id)')
+    .eq('kind', 'idea')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return (data || [])
+    .map((row) => ({
+      ...row,
+      voteCount: row.votes?.length ?? 0,
+      voted: (row.votes ?? []).some((v) => v.user_id === user.id),
+    }))
+    .sort((a, b) => b.voteCount - a.voteCount);
+};
+
 // Toggle the current student's vote on an idea. Returns true if voted.
 export const toggleIdeaVote = async (reportId) => {
   const { data: { user } } = await supabase.auth.getUser();

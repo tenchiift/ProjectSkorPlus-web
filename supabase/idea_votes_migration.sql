@@ -41,3 +41,11 @@ create policy "users remove own idea vote"
   on public.idea_votes for delete
   to authenticated
   using (auth.uid() = user_id);
+
+-- 3. Browsing: everyone signed in can read ideas (bugs stay private —
+-- users still only read their own bug rows, admins read everything).
+drop policy if exists "anyone can read ideas" on public.bug_reports;
+create policy "anyone can read ideas"
+  on public.bug_reports for select
+  to authenticated
+  using (kind = 'idea');
