@@ -51,6 +51,61 @@ export const uploadExamPdf = async (file) => {
   return supabase.storage.from('exams').getPublicUrl(path).data.publicUrl;
 };
 
+// Folders (subtopics) exist independently so empty folders still show.
+// Lecturers/admins write; students read (RLS enforces this server-side).
+export const getFolders = async () => {
+  const { data, error } = await supabase
+    .from('exam_folders')
+    .select('name')
+    .order('name', { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((row) => row.name);
+};
+
+export const createFolder = async (name) => {
+  const clean = (name ?? '').trim();
+  if (!clean) throw new Error('Folder name is required.');
+  const { data, error } = await supabase
+    .from('exam_folders')
+    .insert({ name: clean })
+    .select('name')
+    .single();
+  if (error) throw error;
+  return data.name;
+};
+
+export const renameFolder = async (oldName, newName) => {
+  const from = (oldName ?? '').trim();
+  const to = (newName ?? '').trim();
+  if (!from || !to) throw new Error('Folder name is required.');
+  if (from === to) return to;
+  const { error: insertError } = await supabase
+    .from('exam_folders')
+    .insert({ name: to });
+  if (insertError) throw insertError;
+  const { error: moveError } = await supabase
+    .from('exams')
+    .update({ folder: to })
+    .eq('folder', from);
+  if (moveError) throw moveError;
+  const { error: deleteError } = await supabase
+    .from('exam_folders')
+    .delete()
+    .eq('name', from);
+  if (deleteError) throw deleteError;
+  return to;
+};
+
+export const deleteFolder = async (name) => {
+  const clean = (name ?? '').trim();
+  if (!clean) throw new Error('Folder name is required.');
+  const { error } = await supabase
+    .from('exam_folders')
+    .delete()
+    .eq('name', clean);
+  if (error) throw error;
+};
+
 // Counts for the lecturer dashboard.
 export const getExamCount = async () => {
   const { count, error } = await supabase

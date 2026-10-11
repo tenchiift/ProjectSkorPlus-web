@@ -24,14 +24,16 @@ function PaperFace({ paper, className }) {
   );
 }
 
-export default function PaperFolder({ title, papers, onSelect }) {
+export default function PaperFolder({ title, papers, onSelect, renderActions, onAdd, addLabel }) {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const trigger = useRef(null);
   const dialog = useRef(null);
   const closeButton = useRef(null);
   const restoring = useRef(false);
+  const leaveTimer = useRef(null);
   const id = useId();
   const reduced = useReducedMotion();
   const transition = reduced ? { duration: 0 } : SPRING;
@@ -55,10 +57,24 @@ export default function PaperFolder({ title, papers, onSelect }) {
     };
   }, [expanded]);
 
+  useEffect(() => () => clearTimeout(leaveTimer.current), []);
+
+  // Fade the panel out before unmounting so closing never snaps.
   const close = () => {
-    setExpanded(false);
-    setHovered(false);
-    setFocused(false);
+    if (leaving) return;
+    if (reduced) {
+      setExpanded(false);
+      setHovered(false);
+      setFocused(false);
+      return;
+    }
+    setLeaving(true);
+    leaveTimer.current = setTimeout(() => {
+      setLeaving(false);
+      setExpanded(false);
+      setHovered(false);
+      setFocused(false);
+    }, 180);
   };
 
   return (
@@ -122,28 +138,57 @@ export default function PaperFolder({ title, papers, onSelect }) {
           onCancel={(event) => { event.preventDefault(); close(); }}
           onClick={(event) => { if (event.target === event.currentTarget) close(); }}
         >
-          <div className={styles.panel}>
+          <motion.div
+            className={styles.panel}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={leaving ? { opacity: 0, y: 8, scale: 0.98 } : { opacity: 1, y: 0, scale: 1 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' }}
+          >
             <header className={styles.header}>
               <div><h2 id={`${id}-title`}>{title}</h2><p>{count}</p></div>
               <button ref={closeButton} type="button" className={styles.close} onClick={close} aria-label={`Close ${title}`}><X size={22} /></button>
             </header>
             <div className={styles.papers}>
-              {papers.map((paper, index) => (
-                <motion.button
-                  key={paper.id}
-                  layoutId={index < 5 ? `paper-${paper.id}` : undefined}
-                  transition={transition}
-                  className={styles.paper}
-                  type="button"
-                  onClick={() => { close(); onSelect(paper); }}
-                >
-                  <PaperFace paper={paper} className={styles.page} />
-                  <span className={styles.paperTitle}>{paper.title}</span>
-                  <span className={styles.meta}>{[paper.semester, paper.year].filter(Boolean).join(' · ')}</span>
-                </motion.button>
-              ))}
+              {papers.length === 0 ? (
+                <div className={styles.emptyPapers}>
+                  <p>No papers in this folder yet.</p>
+                  {onAdd && (
+                    <button type="button" className={styles.addBtn} onClick={() => { close(); onAdd(); }}>
+                      {addLabel || 'Add paper to this folder'}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                papers.map((paper, index) => (
+                  <div key={paper.id} className={styles.paperWrap}>
+                    <motion.button
+                      layoutId={index < 5 ? `paper-${paper.id}` : undefined}
+                      transition={transition}
+                      className={styles.paper}
+                      type="button"
+                      onClick={() => { close(); onSelect(paper); }}
+                    >
+                      <PaperFace paper={paper} className={styles.page} />
+                      <span className={styles.paperTitle}>{paper.title}</span>
+                      <span className={styles.meta}>{[paper.semester, paper.year].filter(Boolean).join(' · ')}</span>
+                    </motion.button>
+                    {renderActions && (
+                      <div className={styles.paperActions}>
+                        {renderActions(paper, close)}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
-          </div>
+            {papers.length > 0 && onAdd && (
+              <div className={styles.dialogFooter}>
+                <button type="button" className={styles.addBtn} onClick={() => { close(); onAdd(); }}>
+                  {addLabel || 'Add paper to this folder'}
+                </button>
+              </div>
+            )}
+          </motion.div>
         </dialog>, document.body,
       )}
     </LayoutGroup>

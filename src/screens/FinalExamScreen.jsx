@@ -5,10 +5,26 @@ import PaperFolder from '../components/PaperFolder';
 import { supabase } from '../config/supabase';
 import styles from './FinalExamScreen.module.css';
 
+// Lecturer-created subtopics. Differentiation and Integration are
+// placeholders until papers are added. Used as fallback when the
+// exam_folders migration has not been applied yet. Vector is not a
+// placeholder: it comes from actual papers (renamed from Mathematics).
+const FALLBACK_FOLDERS = ['Differentiation', 'Integration'];
+
+// Legacy subject names all mean the Vector subtopic.
+const canonicalFolder = (value) => {
+  const name = (value ?? '').trim();
+  if (!name) return '';
+  const lower = name.toLowerCase();
+  if (lower === 'mathematics' || lower === 'discrete mathematics') return 'Vector';
+  return name;
+};
+
 export default function FinalExamScreen() {
   const navigate = useNavigate();
 
   const [exams, setExams] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -19,18 +35,36 @@ export default function FinalExamScreen() {
     setError(null);
 
     try {
-      const { data, error: supabaseError } = await supabase
+      const { data: examRows, error: supabaseError } = await supabase
         .from('exams')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (supabaseError) throw supabaseError;
 
-      setExams(data || []);
+      // Folders live in their own table so empty subtopics still show.
+      // If the migration is not applied yet, fall back to folders seen
+      // in exams plus the three known subtopics.
+      let folderNames = [];
+      try {
+        const { data: folderRows, error: folderError } = await supabase
+          .from('exam_folders')
+          .select('name')
+          .order('name', { ascending: true });
+        if (folderError) throw folderError;
+        folderNames = (folderRows ?? []).map((row) => canonicalFolder(row.name)).filter(Boolean);
+      } catch (folderErr) {
+        console.warn('Fetch folders fallback:', folderErr);
+        folderNames = [];
+      }
+
+      setExams(examRows || []);
+      setFolders(folderNames);
     } catch (err) {
       console.error('Fetch exams error:', err);
       setError(err?.message || 'Failed to load exam papers');
       setExams([]);
+      setFolders([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -51,12 +85,26 @@ export default function FinalExamScreen() {
     );
   }
 
-  const subjects = new Map();
+  const folderMap = new Map();
+  const ensureFolder = (name) => {
+    const clean = canonicalFolder(name);
+    if (!clean) return '';
+    if (!folderMap.has(clean)) folderMap.set(clean, []);
+    return clean;
+  };
+  for (const name of [...folders, ...FALLBACK_FOLDERS]) ensureFolder(name);
   for (const exam of exams) {
-    const subject = exam.subject?.trim() || 'Other';
-    if (!subjects.has(subject)) subjects.set(subject, []);
-    subjects.get(subject).push(exam);
+    const clean = ensureFolder(exam.folder ?? exam.subject ?? '') || 'Vector';
+    if (!folderMap.has(clean)) folderMap.set(clean, []);
+    folderMap.get(clean).push(exam);
   }
+  // Folders with papers first (most papers first), empty placeholders last.
+  const sortedFolders = [...folderMap].sort(
+    ([nameA, papersA], [nameB, papersB]) =>
+      Number(papersB.length > 0) - Number(papersA.length > 0)
+      || papersB.length - papersA.length
+      || nameA.localeCompare(nameB),
+  );
 
   return (
     <div className={styles.container}>
@@ -81,7 +129,7 @@ export default function FinalExamScreen() {
               Retry
             </button>
           </div>
-        ) : exams.length === 0 ? (
+        ) : folderMap.size === 0 ? (
           <div className={styles.emptyState}>
             <Search size={48} color="var(--color-text-secondary)" />
             <p className={styles.emptyTitle}>No exam papers yet</p>
@@ -91,10 +139,10 @@ export default function FinalExamScreen() {
           </div>
         ) : (
           <div className={styles.folderGrid}>
-            {[...subjects].map(([subject, papers]) => (
+            {sortedFolders.map(([folder, papers]) => (
               <PaperFolder
-                key={subject}
-                title={subject}
+                key={folder}
+                title={folder}
                 papers={papers}
                 onSelect={(exam) => navigate('/pdf-viewer', { state: { exam } })}
               />
