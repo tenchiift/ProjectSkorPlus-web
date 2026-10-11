@@ -70,7 +70,12 @@
 
 .folderCell { display: flex; flex-direction: column; align-items: stretch; width: 100%; max-width: 288px; }
 
-.folderToolbar { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+.folderToolbar { display: flex; gap: 12px; justify-content: center; margin-top: 4px; }
+
+@media (max-width: 479px) {
+  .folderGrid { gap: 12px; padding: 12px 4px 24px; }
+  .folderToolbar { gap: 16px; margin-top: 8px; margin-bottom: 12px; }
+}
 
 .toolbarBtn {
   display: inline-flex;
