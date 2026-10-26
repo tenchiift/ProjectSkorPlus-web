@@ -21,23 +21,31 @@ export default function AppLayout({ children }) {
   const [reportOpen, setReportOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
 
-  // Entrance animation on every route change (Outlet remounts per path).
   const pageMotion = {
     initial: reducedMotion ? false : { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.22, ease: 'easeOut' },
   };
 
-  // Pre-app routes (profile setup, intro pages) render chrome-free — the
-  // sidebar only exists once the introduction flow is finished.
-  const isPreAppRoute = ['/setup-profile', '/onboarding'].includes(location.pathname);
+  const isPreAppRoute =
+    ['/setup-profile', '/onboarding'].includes(location.pathname) ||
+    location.pathname.startsWith('/calcquest');
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    setIsDesktop(mq.matches);
-    const handler = (e) => setIsDesktop(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    const checkViewport = () => {
+      const wideEnough = window.matchMedia('(min-width: 768px)').matches;
+      const mobileLandscape = window.matchMedia(
+        '(max-height: 560px) and (orientation: landscape)'
+      ).matches;
+      setIsDesktop(wideEnough && !mobileLandscape);
+    };
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    window.addEventListener('orientationchange', checkViewport);
+    return () => {
+      window.removeEventListener('resize', checkViewport);
+      window.removeEventListener('orientationchange', checkViewport);
+    };
   }, []);
 
   useEffect(() => {
@@ -65,7 +73,9 @@ export default function AppLayout({ children }) {
       .select('*')
       .eq('id', user.id)
       .single()
-      .then(({ data }) => { if (data) setUserData(data); })
+      .then(({ data }) => {
+        if (data) setUserData(data);
+      })
       .catch(() => {});
   }, [user]);
 
@@ -75,9 +85,6 @@ export default function AppLayout({ children }) {
     return () => window.removeEventListener('skorplus-profile-refresh', fetchProfile);
   }, [fetchProfile]);
 
-  // App-wide submission notifications: lecturers hear about new work,
-  // students hear when their work is reviewed. Lives here (not in the
-  // inbox screen) so it works on every screen.
   useEffect(() => {
     if (!user) return;
     const isLecturer = userData?.role === 'lecturer';
@@ -104,15 +111,17 @@ export default function AppLayout({ children }) {
     }
 
     channel.subscribe();
-    return () => { channel.unsubscribe(); };
+    return () => {
+      channel.unsubscribe();
+    };
   }, [user, userData?.role]);
 
   useEffect(() => {
     if (!user) return;
-    // Single shared presence channel (owned by friendChatService) — screens
-    // like Messages/FriendChat subscribe to the same channel's sync events.
     startPresenceTracking(user.id);
-    return () => { stopPresenceTracking(); };
+    return () => {
+      stopPresenceTracking();
+    };
   }, [user]);
 
   const handleLogout = useCallback(async () => {
@@ -121,17 +130,18 @@ export default function AppLayout({ children }) {
     navigate('/', { replace: true });
   }, [navigate]);
 
-  const handleSidebarNavigate = useCallback((route) => {
-    if (route === 'logout') {
-      handleLogout();
-    } else {
-      setSidebarVisible(false);
-      navigate(route);
-    }
-  }, [navigate, handleLogout]);
+  const handleSidebarNavigate = useCallback(
+    (route) => {
+      if (route === 'logout') {
+        handleLogout();
+      } else {
+        setSidebarVisible(false);
+        navigate(route);
+      }
+    },
+    [navigate, handleLogout]
+  );
 
-  // Inner Suspense boundary: lazy screen chunks load inside the content area
-  // only, so the sidebar/chrome never flashes a full-page loading screen.
   if (isDesktop && !isPreAppRoute) {
     return (
       <div className={styles.desktopLayout}>
@@ -158,7 +168,6 @@ export default function AppLayout({ children }) {
   return (
     <>
       <Suspense fallback={<LoadingScreen />}>
-        {/* definite height so pages' min-height:100% backgrounds resolve */}
         <motion.div key={location.pathname} {...pageMotion} style={{ height: '100%' }}>
           {children}
         </motion.div>

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, NotebookPen } from 'lucide-react';
+import { ArrowRight, MoreHorizontal, Calendar, Brain, ScanLine, Send, Bell, NotebookPen, MessageSquarePlus, Gamepad2 } from 'lucide-react';
 import { ThinkingOrb } from 'thinking-orbs';
 import { BorderBeam } from 'border-beam';
 import { supabase } from '../config/supabase';
@@ -14,14 +14,18 @@ import { getModuleCover } from '../utils/moduleImage';
 import { parseClassCode } from '../utils/parseClass';
 import examImage from '../assets/images/exam.jpeg';
 import zepImage from '../assets/images/zep.avif';
+import calcquestBg from '../assets/images/calcquest-bg.svg';
 import styles from './DashboardScreen.module.css';
+
+const GAME_SLIDE_INTERVAL_MS = 6000;
 
 export default function DashboardScreen() {
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+  const gamesCarouselRef = useRef(null);
+  const gamesPausedRef = useRef(false);
   const reducedMotion = useReducedMotion();
 
-  // Spring expand/collapse for the week picker.
   const pickerSpring = {
     initial: { height: 0, opacity: 0 },
     animate: { height: 'auto', opacity: 1 },
@@ -35,18 +39,18 @@ export default function DashboardScreen() {
   const [moduleProgress, setModuleProgress] = useState({});
   const [loading, setLoading] = useState(true);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [gameSlideIndex, setGameSlideIndex] = useState(0);
   const [countdown, setCountdown] = useState(null);
   const [daysLeft, setDaysLeft] = useState(null);
-  const [anchor, setAnchor] = useState(null); // { date, week, day }
+  const [anchor, setAnchor] = useState(null);
   const [paused, setPaused] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerStep, setPickerStep] = useState('week'); // 'week' | 'day'
+  const [pickerStep, setPickerStep] = useState('week');
   const [pendingWeek, setPendingWeek] = useState(null);
   const [saving, setSaving] = useState(false);
   const [unreadNotif, setUnreadNotif] = useState(0);
   const [role, setRole] = useState(null);
 
-  // One-time class prompt for students whose profile predates class codes.
   const [classPrompt, setClassPrompt] = useState(false);
   const [promptClass, setPromptClass] = useState('');
   const [promptConfirming, setPromptConfirming] = useState(null);
@@ -87,8 +91,6 @@ export default function DashboardScreen() {
         }
       }
 
-      // Daily login streak (+EXP). Needs streak_migration.sql; degrades quietly.
-      // The sidebar profile shows the streak, so nudge AppLayout to refresh it.
       try {
         const result = await claimDailyStreak(user.id);
         if (result?.claimed) window.dispatchEvent(new CustomEvent('skorplus-profile-refresh'));
@@ -117,7 +119,6 @@ export default function DashboardScreen() {
         setDaysLeft(null);
       }
 
-      // Seed daily quote/reminder notifications (idempotent) and load unread count.
       try {
         await ensureDailyNotifications(user.id, profile, countdownData.data?.[0] ?? null);
       } catch (e) {
@@ -152,6 +153,49 @@ export default function DashboardScreen() {
     };
   }, []);
 
+  const scrollToGameSlide = useCallback((idx) => {
+    const el = gamesCarouselRef.current;
+    if (!el) return;
+    const child = el.children[idx];
+    if (child) {
+      el.scrollTo({
+        left: child.offsetLeft,
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
+    }
+    setGameSlideIndex(idx);
+  }, [reducedMotion]);
+
+  // Auto-slide between Zep Quiz and CalcQuest every 6 seconds (within the 5-10s window)
+  useEffect(() => {
+    if (loading || role === 'lecturer') return undefined;
+    const timer = setInterval(() => {
+      if (gamesPausedRef.current) return;
+      setGameSlideIndex((prev) => {
+        const next = (prev + 1) % 2;
+        const el = gamesCarouselRef.current;
+        if (el && el.children[next]) {
+          el.scrollTo({
+            left: el.children[next].offsetLeft,
+            behavior: reducedMotion ? 'auto' : 'smooth',
+          });
+        }
+        return next;
+      });
+    }, GAME_SLIDE_INTERVAL_MS);
+
+    return () => clearInterval(timer);
+  }, [loading, role, reducedMotion]);
+
+  const handleGamesCarouselScroll = () => {
+    const el = gamesCarouselRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== gameSlideIndex) {
+      setGameSlideIndex(Math.max(0, Math.min(1, idx)));
+    }
+  };
+
   const handleCarouselScroll = () => {
     if (!carouselRef.current) return;
     setCarouselIndex(Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth));
@@ -167,13 +211,21 @@ export default function DashboardScreen() {
     if (paused) elapsedDays = 0;
 
     const totalDays = (anchor.week - 1) * 7 + (anchor.day - 1) + elapsedDays;
-    const week = Math.floor(totalDays / 7) + 1;
-    const day = (totalDays % 7) + 1;
 
-    let phase = 'teaching';
-    if (week > 14) phase = week === 15 ? 'study' : 'exam';
+    const TEACHING_DAYS = 12 * 7;
+    const STUDY_DAYS = 7;
 
-    return { phase, week: Math.min(week, 14), day, progress: Math.min(week, 14) / 14 };
+    if (totalDays < TEACHING_DAYS) {
+      const week = Math.floor(totalDays / 7) + 1;
+      const day = (totalDays % 7) + 1;
+      return { phase: 'teaching', week, day, progress: (totalDays + 1) / TEACHING_DAYS };
+    }
+
+    if (totalDays < TEACHING_DAYS + STUDY_DAYS) {
+      return { phase: 'study', week: 12, day: 7, progress: 1 };
+    }
+
+    return { phase: 'exam', week: 12, day: 7, progress: 1 };
   };
 
   const getUserId = async () => {
@@ -216,7 +268,6 @@ export default function DashboardScreen() {
       dismissClassPrompt();
     } catch (err) {
       console.error('Save class error:', err);
-      // Dismiss for this session so a missing migration never nag-loops.
       dismissClassPrompt();
     } finally {
       setPromptSaving(false);
@@ -292,7 +343,6 @@ export default function DashboardScreen() {
     );
   }
 
-  // Lecturers get their own dashboard (stats, content management, submissions).
   if (role === 'lecturer') {
     return <LecturerDashboardScreen unreadNotif={unreadNotif} />;
   }
@@ -573,23 +623,74 @@ export default function DashboardScreen() {
           )}
         </div>
 
-        {modules.length > 0 && (
-          <button className={styles.zepCard} onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}>
-            <img src={zepImage} className={styles.zepBg} alt="" />
-            <div className={styles.zepOverlay} />
-            <div className={styles.zepContent}>
-              <div className={styles.zepCardContent}>
-                <div className={styles.zepIconWrap}><Brain size={26} color="#FFFFFF" /></div>
-                <div className={styles.zepTextWrap}>
-                  <span className={styles.zepKicker}>QUICK PRACTICE</span>
-                  <span className={styles.zepTitle}>Zep Quiz</span>
-                  <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
+        {/* Swipeable + Auto-Sliding Game Banner Group (Zep Quiz + CalcQuest) */}
+        <div
+          className={styles.gamesCarouselWrap}
+          onMouseEnter={() => { gamesPausedRef.current = true; }}
+          onMouseLeave={() => { gamesPausedRef.current = false; }}
+          onTouchStart={() => { gamesPausedRef.current = true; }}
+          onTouchEnd={() => {
+            setTimeout(() => { gamesPausedRef.current = false; }, 2000);
+          }}
+        >
+          <div
+            className={styles.gamesCarousel}
+            ref={gamesCarouselRef}
+            onScroll={handleGamesCarouselScroll}
+          >
+            <button
+              type="button"
+              className={`${styles.zepCard} ${styles.gameSlideCard}`}
+              onClick={() => window.open('https://quiz.zep.us/en/public', '_blank')}
+            >
+              <img src={zepImage} className={styles.zepBg} alt="" />
+              <div className={styles.zepOverlay} />
+              <div className={styles.zepContent}>
+                <div className={styles.zepCardContent}>
+                  <div className={styles.zepIconWrap}><Brain size={26} color="#FFFFFF" /></div>
+                  <div className={styles.zepTextWrap}>
+                    <span className={styles.zepKicker}>QUICK PRACTICE</span>
+                    <span className={styles.zepTitle}>Zep Quiz</span>
+                    <span className={styles.zepDesc}>Test your knowledge with quick questions</span>
+                  </div>
                 </div>
+                <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
               </div>
-              <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
-            </div>
-          </button>
-        )}
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.zepCard} ${styles.gameSlideCard} ${styles.calcQuestCard}`}
+              onClick={() => navigate('/calcquest')}
+            >
+              <img src={calcquestBg} className={styles.calcQuestBg} alt="" />
+              <div className={styles.calcQuestOverlay} />
+              <div className={styles.zepContent}>
+                <div className={styles.zepCardContent}>
+                  <div className={styles.zepIconWrap}><Gamepad2 size={26} color="#FFFFFF" /></div>
+                  <div className={styles.zepTextWrap}>
+                    <span className={styles.zepKicker}>CALCULUS RPG</span>
+                    <span className={styles.zepTitle}>CalcQuest</span>
+                    <span className={styles.zepDesc}>Explore 5 pixel worlds &amp; master calculus quests</span>
+                  </div>
+                </div>
+                <div className={styles.zepArrow}><ArrowRight size={20} color="#FFFFFF" /></div>
+              </div>
+            </button>
+          </div>
+
+          <div className={styles.gameDotsRow}>
+            {[0, 1].map((idx) => (
+              <button
+                key={idx}
+                type="button"
+                aria-label={idx === 0 ? 'Show Zep Quiz' : 'Show CalcQuest'}
+                onClick={() => scrollToGameSlide(idx)}
+                className={`${styles.dot} ${styles.gameDotBtn} ${idx === gameSlideIndex ? styles.dotActive : ''}`}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className={styles.sectionRow}>
           <h2 className={styles.sectionTitle}>Continue Learning..</h2>
@@ -627,6 +728,16 @@ export default function DashboardScreen() {
           </div>
         )}
       </div>
+
+      <button
+        type="button"
+        className={styles.reviewFab}
+        onClick={() => navigate('/feedback')}
+        aria-label="Write a review"
+        title="Write a review"
+      >
+        <MessageSquarePlus size={24} color="#FFFFFF" />
+      </button>
     </div>
   );
 }

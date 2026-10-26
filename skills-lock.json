@@ -7,6 +7,30 @@
       "skillPath": ".agents/skills/gluestack-ui-v5/SKILL.md",
       "computedHash": "2d7e2ed985d31d2d058d62d3e14c56e3e159c4417d12afc0b22f0ce9702fa0a1"
     },
+    "rea-changelog-update": {
+      "source": "morluto/rea",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/rea-changelog-update/SKILL.md",
+      "computedHash": "1dc814390b0007f898af9861a00f213390229185dd2aa6ddb8c6e8016b0d1374"
+    },
+    "rea-ci-tests-audit": {
+      "source": "morluto/rea",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/rea-ci-tests-audit/SKILL.md",
+      "computedHash": "66bacc26230b7157e69add008656302b16b90df5c776130ce20fd6f5ef6ef8b6"
+    },
+    "rea-tool-design": {
+      "source": "morluto/rea",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/rea-tool-design/SKILL.md",
+      "computedHash": "b1dd54035bbd31a55196dba0ce78a55c9a548e7ac395ad3771f9fe8784a6fc6a"
+    },
+    "reverse-engineer-anything": {
+      "source": "morluto/rea",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/reverse-engineer-anything/SKILL.md",
+      "computedHash": "c28f07492df09491280f4169c540e02f8ab7891c64f6b60b76776289eec55ca2"
+    },
     "ui-ux-pro-max": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "sourceType": "github",

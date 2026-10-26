@@ -17,11 +17,11 @@ export const getUserProfile = async (userId) => {
   return data;
 };
 
-// All registered students, for the lecturer's Students page.
+// All registered students, for the lecturer's Students page and student reviews.
 export const getAllStudents = async () => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, username, photo_url')
+    .select('id, name, username, photo_url, class_code, semester')
     .eq('role', 'student')
     .order('name', { ascending: true });
   if (error) throw error;

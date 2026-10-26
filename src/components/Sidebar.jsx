@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { animate, motion, useMotionValue, useTransform, useReducedMotion } from 'motion/react';
-import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, User, LogOut, Settings, Layers, Bug, Lightbulb } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Users, Inbox, FolderOpen, MessageCircle, User, LogOut, Settings, Layers, Bug, Lightbulb, ClipboardList } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 // Opens the global bug-report popup (handled in AppLayout).
@@ -56,6 +56,18 @@ const LECTURER_MENU = [
   { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
 ];
 
+const ADMIN_MENU = [
+  { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
+  { icon: FileText, label: 'Past Papers', route: '/final-exam' },
+  { icon: CheckSquare, label: 'Tasks', route: '/tasks' },
+  { icon: Users, label: 'Friends', route: '/friends' },
+  { icon: MessageCircle, label: 'Messages', route: '/messages' },
+  { icon: FolderOpen, label: 'My Submissions', route: '/my-submissions' },
+  { icon: ClipboardList, label: 'Student Reviews', route: '/reviews' },
+  { icon: Lightbulb, label: 'Suggest Feature', route: SUGGEST_IDEA_ACTION },
+  { icon: Bug, label: 'Report Bug', route: REPORT_BUG_ACTION },
+];
+
 // Admin access lives in Settings, not the sidebar.
 
 export default function Sidebar({ visible, onClose, onNavigate, userData, persistent }) {
@@ -84,7 +96,8 @@ export default function Sidebar({ visible, onClose, onNavigate, userData, persis
   const profileLoaded = !!userData?.role;
 
   const MENU =
-    userData?.role === 'lecturer' ? LECTURER_MENU
+    userData?.role === 'admin' ? ADMIN_MENU
+    : userData?.role === 'lecturer' ? LECTURER_MENU
     : userData?.role ? STUDENT_MENU
     : [];
   const xp = xpInfo(userData?.total_exp);

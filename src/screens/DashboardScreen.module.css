@@ -373,8 +373,6 @@
   width: 100%;
 }
 
-/* ThinkingOrb only ships tuned sizes 64/20, so scale 64 down to ~40px
-   so it sits balanced with the 28px lucide icons. */
 .orbIcon {
   width: 40px;
   height: 40px;
@@ -588,7 +586,27 @@
   margin-top: var(--spacing-xs);
 }
 
-/* Zep Quiz card */
+/* Swipeable & Auto-Sliding Game Banner Group (Zep Quiz + CalcQuest) */
+.gamesCarouselWrap {
+  margin-bottom: var(--spacing-lg);
+}
+
+.gamesCarousel {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gamesCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* Zep Quiz & CalcQuest slide cards */
 .zepCard {
   position: relative;
   overflow: hidden;
@@ -597,7 +615,7 @@
   justify-content: space-between;
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 0;
   border: none;
   cursor: pointer;
   width: 100%;
@@ -605,8 +623,13 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
+.gameSlideCard {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
 .zepCard:hover {
-  opacity: 0.92;
+  opacity: 0.94;
 }
 
 .zepBg {
@@ -622,6 +645,39 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0) 60%), linear-gradient(160deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));
+}
+
+.calcQuestCard {
+  background: #1A103C;
+}
+
+.calcQuestBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  opacity: 0.88;
+}
+
+.calcQuestOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(16, 12, 36, 0.82) 0%, rgba(25, 74, 42, 0.38) 60%, rgba(16, 12, 36, 0.55) 100%);
+}
+
+.gameDotsRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.gameDotBtn {
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .zepContent {
@@ -754,7 +810,6 @@
   overflow: hidden;
 }
 
-/* Photo band. Reason: topic recognition at a glance, like the reference. */
 .modulePhoto {
   height: 190px;
   width: 100%;
@@ -769,13 +824,7 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  /* Tighter crop like the reference, then a long seamless fade.
-     Reason: no visible seam between photo and card body on any
-     image, in every theme. */
   transform: scale(1);
-  /* Tighter crop like the reference, then a long seamless fade.
-     Reason: no visible seam between photo and card body on any
-     image, in every theme. */
   mask-image: linear-gradient(to bottom, black 0%, transparent 55%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 55%);
 }
@@ -903,11 +952,42 @@
   opacity: 0.92;
 }
 
-/* Mobile only: no card shadow. Reason: any shadow pools grey at the
-   rounded bottom corners on small screens. */
 @media (max-width: 767px) {
   .moduleCardWrapper {
     box-shadow: none;
   }
 }
 
+.reviewFab {
+  position: fixed;
+  right: max(var(--spacing-lg), calc((100vw - var(--phone-width)) / 2 + var(--spacing-lg)));
+  bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom, 0px));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  z-index: 20;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.reviewFab:hover {
+  opacity: 0.92;
+}
+
+.reviewFab:active {
+  transform: scale(0.95);
+}
+
+@media (min-width: 768px) {
+  .reviewFab {
+    right: var(--spacing-xxl);
+    bottom: var(--spacing-xxl);
+  }
+}

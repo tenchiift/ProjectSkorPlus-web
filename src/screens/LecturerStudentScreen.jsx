@@ -15,8 +15,16 @@ export default function LecturerStudentScreen() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // A literal 'undefined' id can never match a row — fail openly
+  // instead of showing a misleading empty state.
+  const validId = !!studentId && studentId !== 'undefined';
+
   useEffect(() => {
-    if (!user || !studentId) return;
+    if (!user) return;
+    if (!validId) {
+      setLoading(false);
+      return;
+    }
     getStudentSubmissionsForLecturer(user.id, studentId)
       .then((list) => {
         setSubmissions(list);
@@ -24,6 +32,7 @@ export default function LecturerStudentScreen() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, studentId]);
 
   return (
@@ -58,7 +67,11 @@ export default function LecturerStudentScreen() {
         {loading ? (
           <div className={styles.center}><div className={styles.spinner} /></div>
         ) : submissions.length === 0 ? (
-          <div className={styles.center}><p className={styles.emptyText}>No submissions from this student.</p></div>
+          <div className={styles.center}>
+            <p className={styles.emptyText}>
+              {validId ? 'No submissions from this student.' : 'Student not found.'}
+            </p>
+          </div>
         ) : (
           submissions.map((sub) => {
             const fileNames = (sub.files ?? []).map((f) => f.file_name).filter(Boolean);

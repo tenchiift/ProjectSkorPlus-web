@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, User, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, MessageCircle, User, Trash2, Check, Archive, ArchiveRestore } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   getConversations,
@@ -8,6 +8,9 @@ import {
   getLastMessages,
   deleteConversation,
   subscribeToPresence,
+  getLocalArchivedChatIds,
+  isConversationArchived,
+  setConversationsArchived,
 } from '../services/friendChatService';
 import styles from './MessagesScreen.module.css';
 
@@ -35,10 +38,15 @@ export default function MessagesScreen() {
   const [editMode, setEditMode] = useState(false);
   const [selected, setSelected] = useState([]);
   const [deleting, setDeleting] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const [viewTab, setViewTab] = useState('active'); // 'active' | 'archived'
+  const [archivedIds, setArchivedIds] = useState([]);
 
   const load = async () => {
     if (!user) return;
     try {
+      const localIds = getLocalArchivedChatIds(user.id);
+      setArchivedIds(localIds);
       const list = await getConversations(user.id);
       setConversations(list);
       const [counts, lastMsgs] = await Promise.all([
@@ -76,6 +84,65 @@ export default function MessagesScreen() {
     setSelected([]);
   };
 
+  const switchTab = (nextTab) => {
+    setViewTab(nextTab);
+    setSelected([]);
+    setEditMode(false);
+  };
+
+  const handleArchiveSelected = async (archiveFlag) => {
+    if (!user || selected.length === 0 || archiving) return;
+    setArchiving(true);
+    try {
+      const updatedLocal = await setConversationsArchived(
+        user.id,
+        conversations,
+        selected,
+        archiveFlag
+      );
+      setArchivedIds(updatedLocal);
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (!selected.includes(c.id)) return c;
+          const col = c.user1_id === user.id ? 'archived_by_user1' : 'archived_by_user2';
+          return { ...c, [col]: archiveFlag };
+        })
+      );
+      setSelected([]);
+      setEditMode(false);
+    } catch (err) {
+      console.error('Archive conversation error:', err);
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const handleSingleArchiveToggle = async (event, conversation, archiveFlag) => {
+    event.stopPropagation();
+    if (!user || archiving) return;
+    setArchiving(true);
+    try {
+      const updatedLocal = await setConversationsArchived(
+        user.id,
+        conversations,
+        [conversation.id],
+        archiveFlag
+      );
+      setArchivedIds(updatedLocal);
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (c.id !== conversation.id) return c;
+          const col = c.user1_id === user.id ? 'archived_by_user1' : 'archived_by_user2';
+          return { ...c, [col]: archiveFlag };
+        })
+      );
+    } catch (err) {
+      console.error('Archive conversation error:', err);
+    } finally {
+      setArchiving(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (selected.length === 0 || deleting) return;
     setDeleting(true);
@@ -98,6 +165,20 @@ export default function MessagesScreen() {
     return m.sender_id === user?.id ? `You: ${content}` : content;
   };
 
+  const activeConversations = conversations.filter(
+    (c) => !isConversationArchived(c, user?.id, archivedIds)
+  );
+  const archivedConversations = conversations.filter((c) =>
+    isConversationArchived(c, user?.id, archivedIds)
+  );
+  const visibleConversations =
+    viewTab === 'archived' ? archivedConversations : activeConversations;
+
+  const archivedUnreadTotal = archivedConversations.reduce(
+    (sum, c) => sum + (unread[c.id] ?? 0),
+    0
+  );
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -109,69 +190,154 @@ export default function MessagesScreen() {
       <div className={styles.scroll}>
         <div className={styles.titleRow}>
           <h1 className={styles.pageTitle}>Messages</h1>
+          {visibleConversations.length > 0 && (
+            <button
+              className={`${styles.editBtn} ${editMode ? styles.editBtnActive : ''}`}
+              onClick={() => (editMode ? exitEditMode() : setEditMode(true))}
+            >
+              {editMode ? 'Done' : 'Edit'}
+            </button>
+          )}
+        </div>
+
+        <div className={styles.tabs} role="tablist" aria-label="Chat folders">
           <button
-            className={`${styles.editBtn} ${editMode ? styles.editBtnActive : ''}`}
-            onClick={() => (editMode ? exitEditMode() : setEditMode(true))}
+            type="button"
+            role="tab"
+            aria-selected={viewTab === 'active'}
+            className={`${styles.tab} ${viewTab === 'active' ? styles.tabActive : ''}`}
+            onClick={() => switchTab('active')}
           >
-            {editMode ? 'Done' : 'Edit'}
+            <MessageCircle size={16} aria-hidden="true" />
+            <span>Chats ({activeConversations.length})</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewTab === 'archived'}
+            className={`${styles.tab} ${viewTab === 'archived' ? styles.tabActive : ''}`}
+            onClick={() => switchTab('archived')}
+          >
+            <Archive size={16} aria-hidden="true" />
+            <span>Archived ({archivedConversations.length})</span>
+            {archivedUnreadTotal > 0 && (
+              <span className={styles.tabBadge}>{archivedUnreadTotal}</span>
+            )}
           </button>
         </div>
 
         {editMode && selected.length > 0 && (
-          <button className={styles.deleteBar} onClick={handleDelete} disabled={deleting}>
-            <Trash2 size={16} color="#FFFFFF" />
-            <span>{deleting ? 'Deleting...' : `Delete ${selected.length} chat${selected.length > 1 ? 's' : ''}`}</span>
-          </button>
+          <div className={styles.actionBar}>
+            <button
+              type="button"
+              className={styles.archiveBar}
+              onClick={() => handleArchiveSelected(viewTab !== 'archived')}
+              disabled={archiving || deleting}
+            >
+              {viewTab === 'archived' ? (
+                <ArchiveRestore size={16} color="#FFFFFF" />
+              ) : (
+                <Archive size={16} color="#FFFFFF" />
+              )}
+              <span>
+                {archiving
+                  ? viewTab === 'archived'
+                    ? 'Unarchiving...'
+                    : 'Archiving...'
+                  : `${viewTab === 'archived' ? 'Unarchive' : 'Archive'} ${selected.length} chat${selected.length > 1 ? 's' : ''}`}
+              </span>
+            </button>
+            <button
+              type="button"
+              className={styles.deleteBar}
+              onClick={handleDelete}
+              disabled={deleting || archiving}
+            >
+              <Trash2 size={16} color="#FFFFFF" />
+              <span>{deleting ? 'Deleting...' : `Delete ${selected.length}`}</span>
+            </button>
+          </div>
         )}
 
         {loading ? (
           <div className={styles.center}><div className={styles.spinner} /></div>
-        ) : conversations.length === 0 ? (
+        ) : visibleConversations.length === 0 ? (
           <div className={styles.center}>
-            <MessageCircle size={40} color="var(--color-text-secondary)" />
-            <p className={styles.emptyText}>No chats yet — open a chat from your Friends list.</p>
+            {viewTab === 'archived' ? (
+              <>
+                <Archive size={40} color="var(--color-text-secondary)" />
+                <p className={styles.emptyText}>No archived chats yet.</p>
+              </>
+            ) : (
+              <>
+                <MessageCircle size={40} color="var(--color-text-secondary)" />
+                <p className={styles.emptyText}>No chats yet — open a chat from your Friends list.</p>
+              </>
+            )}
           </div>
         ) : (
           <div className={styles.listGroup}>
-            {conversations.map((c) => {
+            {visibleConversations.map((c) => {
               const other = otherProfile(c);
               const online = onlineIds.includes(other?.id);
               const unreadCount = unread[c.id] ?? 0;
               const isSelected = selected.includes(c.id);
+              const isArchived = viewTab === 'archived';
               return (
-                <button
+                <div
                   key={c.id}
-                  className={`${styles.convoCard} ${isSelected ? styles.convoCardSelected : ''}`}
-                  onClick={() =>
-                    editMode
-                      ? toggleSelect(c.id)
-                      : other && navigate(`/chat/${other.id}`, { state: { friend: other, conversationId: c.id } })
-                  }
+                  className={`${styles.convoRow} ${isSelected ? styles.convoCardSelected : ''}`}
                 >
-                  {editMode && (
-                    <span className={`${styles.checkCircle} ${isSelected ? styles.checkCircleOn : ''}`}>
-                      {isSelected && <Check size={12} color="#FFFFFF" />}
-                    </span>
-                  )}
-                  <div className={styles.avatarWrap}>
-                    {other?.photo_url ? (
-                      <img src={other.photo_url} alt="" className={styles.avatar} />
-                    ) : (
-                      <div className={styles.avatarPlaceholder}><User size={22} color="#FFFFFF" /></div>
+                  <button
+                    type="button"
+                    className={styles.convoCard}
+                    onClick={() =>
+                      editMode
+                        ? toggleSelect(c.id)
+                        : other && navigate(`/chat/${other.id}`, { state: { friend: other, conversationId: c.id } })
+                    }
+                  >
+                    {editMode && (
+                      <span className={`${styles.checkCircle} ${isSelected ? styles.checkCircleOn : ''}`}>
+                        {isSelected && <Check size={12} color="#FFFFFF" />}
+                      </span>
                     )}
-                    {online && !editMode && <span className={styles.onlineDot} />}
-                  </div>
-                  <div className={styles.convoInfo}>
-                    <span className={styles.convoName}>{other?.name ?? 'Unknown'}</span>
-                    <span className={`${styles.convoPreview} ${unreadCount > 0 ? styles.convoPreviewUnread : ''}`}>
-                      {previewText(c)}
-                    </span>
-                  </div>
-                  <div className={styles.rightCol}>
-                    <span className={styles.time}>{c.last_message_at ? timeAgo(c.last_message_at) : ''}</span>
-                    {unreadCount > 0 && !editMode && <span className={styles.unreadBadge}>{unreadCount}</span>}
-                  </div>
-                </button>
+                    <div className={styles.avatarWrap}>
+                      {other?.photo_url ? (
+                        <img src={other.photo_url} alt="" className={styles.avatar} />
+                      ) : (
+                        <div className={styles.avatarPlaceholder}><User size={22} color="#FFFFFF" /></div>
+                      )}
+                      {online && !editMode && <span className={styles.onlineDot} />}
+                    </div>
+                    <div className={styles.convoInfo}>
+                      <span className={styles.convoName}>{other?.name ?? 'Unknown'}</span>
+                      <span className={`${styles.convoPreview} ${unreadCount > 0 ? styles.convoPreviewUnread : ''}`}>
+                        {previewText(c)}
+                      </span>
+                    </div>
+                    <div className={styles.rightCol}>
+                      <span className={styles.time}>{c.last_message_at ? timeAgo(c.last_message_at) : ''}</span>
+                      {unreadCount > 0 && !editMode && <span className={styles.unreadBadge}>{unreadCount}</span>}
+                    </div>
+                  </button>
+                  {!editMode && (
+                    <button
+                      type="button"
+                      className={styles.quickArchiveBtn}
+                      onClick={(e) => handleSingleArchiveToggle(e, c, !isArchived)}
+                      disabled={archiving}
+                      aria-label={isArchived ? `Unarchive chat with ${other?.name ?? 'friend'}` : `Archive chat with ${other?.name ?? 'friend'}`}
+                      title={isArchived ? 'Unarchive chat' : 'Archive chat'}
+                    >
+                      {isArchived ? (
+                        <ArchiveRestore size={18} color="var(--color-text-secondary)" />
+                      ) : (
+                        <Archive size={18} color="var(--color-text-secondary)" />
+                      )}
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>

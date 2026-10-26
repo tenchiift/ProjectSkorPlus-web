@@ -44,12 +44,14 @@ export default function LecturerInboxScreen() {
   }, [user]);
 
   // Group by student — the inbox lists each student once with their counts.
+  // Keyed by the raw student_id FK (always present) so rows never collapse
+  // into one group when the profile join is null.
   const students = [];
   const byStudent = {};
   submissions.forEach((sub) => {
-    const key = sub.student?.id ?? 'unknown';
+    const key = sub.student_id ?? sub.student?.id ?? 'unknown';
     if (!byStudent[key]) {
-      byStudent[key] = { student: sub.student, items: [] };
+      byStudent[key] = { studentId: key, student: sub.student, items: [] };
       students.push(byStudent[key]);
     }
     byStudent[key].items.push(sub);
@@ -101,9 +103,9 @@ export default function LecturerInboxScreen() {
         ) : (
           visibleStudents.map((group) => (
             <button
-              key={group.student?.id ?? 'unknown'}
+              key={group.studentId}
               className={styles.card}
-              onClick={() => group.student && navigate(`/student/${group.student.id}`, { state: { student: group.student } })}
+              onClick={() => group.studentId !== 'unknown' && navigate(`/student/${group.studentId}`, { state: { student: group.student } })}
             >
               <div className={styles.cardHeader}>
                 <div className={styles.studentRowLeft}>

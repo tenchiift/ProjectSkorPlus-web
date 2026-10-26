@@ -1,0 +1,168 @@
+.sheet {
+  background: #f7f1e3;
+  color: #231a12;
+  padding: 8px;
+  border: 1.5px solid #6e4726;
+  border-radius: 6px;
+  line-height: 1.35;
+  min-width: 0;
+  font-size: 0.78rem;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.sheet h2 {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.badge {
+  background: #ede3ce;
+  border: 1px solid #6e4726;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #5c4938;
+}
+
+.promptBox {
+  background: #fffdf8;
+  border: 1.5px solid #6e4726;
+  border-radius: 6px;
+  padding: 7px 8px;
+  margin-bottom: 6px;
+}
+
+.subtopicLabel {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #5c4938;
+  margin-bottom: 2px;
+}
+
+.feedbackBox {
+  background: #ede3ce;
+  border: 1px solid #6e4726;
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+}
+
+.doneBanner {
+  background: #e3f2e7;
+  border: 1.5px solid #266b3e;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #194a2a;
+  font-weight: 800;
+  font-size: 0.74rem;
+  margin: 4px 0 0;
+}
+
+.errorText {
+  color: #8c2518;
+  font-weight: 700;
+  font-size: 0.72rem;
+  margin: 0 0 6px;
+}
+
+.form {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.compactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
+}
+
+.form label {
+  display: grid;
+  gap: 3px;
+  font-weight: 800;
+  font-size: 0.68rem;
+  color: #5c4938;
+}
+
+.form select,
+.form textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: #fffdf8;
+  color: #231a12;
+  border: 1.5px solid #6e4726;
+  border-radius: 4px;
+  padding: 5px 7px;
+  font: inherit;
+  font-size: 0.74rem;
+}
+
+.form textarea {
+  resize: vertical;
+}
+
+.sheet button {
+  min-height: 30px;
+  border: 1.5px solid #194a2a;
+  border-radius: 4px;
+  background: #266b3e;
+  color: white;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sheet button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.sheet summary {
+  cursor: pointer;
+  padding-block: 4px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  color: #5c4938;
+}
+
+.reviews {
+  padding-left: 16px;
+  margin: 4px 0 0;
+}
+
+.reviews li {
+  padding: 6px 0;
+  border-bottom: 1px solid #d8c8ae;
+  overflow-wrap: anywhere;
+  font-size: 0.72rem;
+}
+
+.reviews p {
+  margin: 2px 0 0;
+}
+
+.options {
+  display: grid;
+  gap: 5px;
+}
+
+.options button {
+  text-align: left;
+  background: #fffdf8;
+  color: #231a12;
+  border-color: #6e4726;
+}

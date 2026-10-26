@@ -76,7 +76,7 @@ export const getStudentSubmissions = async (studentId) => {
 export const getLecturerSubmissions = async (lecturerId) => {
   const { data, error } = await supabase
     .from('submissions')
-    .select('*, student:profiles!submissions_student_id_fkey(name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
+    .select('*, student:profiles!submissions_student_id_fkey(id, name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
     .eq('lecturer_id', lecturerId)
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -88,7 +88,7 @@ export const getLecturerSubmissions = async (lecturerId) => {
 export const getStudentSubmissionsForLecturer = async (lecturerId, studentId) => {
   const { data, error } = await supabase
     .from('submissions')
-    .select('*, student:profiles!submissions_student_id_fkey(name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
+    .select('*, student:profiles!submissions_student_id_fkey(id, name, username, photo_url), files:submission_files(id, file_name, file_url, file_type)')
     .eq('lecturer_id', lecturerId)
     .eq('student_id', studentId)
     .order('created_at', { ascending: false });

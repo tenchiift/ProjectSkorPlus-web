@@ -4,6 +4,70 @@ function canonicalPair(a, b) {
   return a < b ? { user1_id: a, user2_id: b } : { user1_id: b, user2_id: a };
 }
 
+const ARCHIVE_STORAGE_PREFIX = 'skorplus-archived-chats-';
+
+export const getLocalArchivedChatIds = (userId) => {
+  if (!userId) return [];
+  try {
+    const raw = localStorage.getItem(`${ARCHIVE_STORAGE_PREFIX}${userId}`);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const setLocalArchivedChatIds = (userId, ids) => {
+  if (!userId) return;
+  try {
+    localStorage.setItem(`${ARCHIVE_STORAGE_PREFIX}${userId}`, JSON.stringify([...new Set(ids)]));
+  } catch {
+    /* ignore storage quota errors */
+  }
+};
+
+export const isConversationArchived = (conversation, userId, localArchivedIds = []) => {
+  if (!conversation || !userId) return false;
+  if (localArchivedIds.includes(conversation.id)) return true;
+  if (conversation.user1_id === userId && typeof conversation.archived_by_user1 === 'boolean') {
+    return conversation.archived_by_user1;
+  }
+  if (conversation.user2_id === userId && typeof conversation.archived_by_user2 === 'boolean') {
+    return conversation.archived_by_user2;
+  }
+  return false;
+};
+
+export const setConversationsArchived = async (userId, conversations, targetIds, archived) => {
+  if (!userId || !Array.isArray(targetIds) || targetIds.length === 0) return [];
+  const currentLocal = new Set(getLocalArchivedChatIds(userId));
+  for (const id of targetIds) {
+    if (archived) currentLocal.add(id);
+    else currentLocal.delete(id);
+  }
+  const updatedLocal = [...currentLocal];
+  setLocalArchivedChatIds(userId, updatedLocal);
+
+  // Best-effort sync to Supabase if the archive columns exist on friend_conversations
+  await Promise.all(
+    targetIds.map(async (id) => {
+      const conv = (conversations || []).find((c) => c.id === id);
+      if (!conv) return;
+      const column = conv.user1_id === userId ? 'archived_by_user1' : 'archived_by_user2';
+      try {
+        await supabase
+          .from('friend_conversations')
+          .update({ [column]: archived })
+          .eq('id', id);
+      } catch {
+        /* ignore if migration not yet applied */
+      }
+    })
+  );
+
+  return updatedLocal;
+};
+
 export const getOrCreateConversation = async (userIdA, userIdB) => {
   const pair = canonicalPair(userIdA, userIdB);
 
@@ -20,12 +84,7 @@ export const getConversations = async (userId) => {
   const { data, error } = await supabase
     .from('friend_conversations')
     .select(`
-      id,
-      user1_id,
-      user2_id,
-      last_read_at_user1,
-      last_read_at_user2,
-      last_message_at,
+      *,
       user1:profiles!friend_conversations_user1_id_fkey(id, name, username, photo_url),
       user2:profiles!friend_conversations_user2_id_fkey(id, name, username, photo_url)
     `)

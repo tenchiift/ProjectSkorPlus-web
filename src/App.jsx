@@ -52,6 +52,8 @@ const ManageModulesScreen = lazy(() => import('./screens/ManageModulesScreen'));
 const ManageTopicsScreen = lazy(() => import('./screens/ManageTopicsScreen'));
 const AdminScreen = lazy(() => import('./screens/AdminScreen'));
 const AboutScreen = lazy(() => import('./screens/AboutScreen'));
+const StudentFeedbackScreen = lazy(() => import('./screens/StudentFeedbackScreen'));
+const CalcQuestScreen = lazy(() => import('./screens/CalcQuestScreen'));
 
 export default function App() {
   const location = useLocation();
@@ -68,6 +70,9 @@ export default function App() {
             <Route path="/select-lecturers" element={<SelectLecturersScreen />} />
             <Route path="/onboarding" element={<OnboardingScreen />} />
             <Route path="/dashboard" element={<DashboardScreen />} />
+            <Route path="/calcquest/*" element={<CalcQuestScreen />} />
+            <Route path="/feedback" element={<StudentFeedbackScreen />} />
+            <Route path="/reviews" element={<StudentFeedbackScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
             <Route path="/modules" element={<AllModulesScreen />} />

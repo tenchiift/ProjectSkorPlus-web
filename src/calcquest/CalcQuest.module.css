@@ -1,0 +1,1010 @@
+/* ============================================================================
+   SKOR+ CalcQuest: Handheld Emulator Skins + In-Screen Retro RPG UI
+   Clean, compact, visual-first game UI with zero overlapping elements.
+   ============================================================================ */
+
+.pageShellFullscreen {
+  width: 100%;
+  height: 100dvh;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #141619;
+  color: #231A12;
+  font-family: var(--font-body, system-ui, sans-serif);
+  user-select: none;
+  -webkit-user-select: none;
+  box-sizing: border-box;
+}
+
+.pageShellFullscreen *,
+.pageShellFullscreen *::before,
+.pageShellFullscreen *::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   1. PORTRAIT HANDHELD EMULATOR SKIN
+   ============================================================================ */
+.emulatorRoot {
+  width: 100%;
+  height: 100dvh;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #DCE0E6;
+  overflow: hidden;
+}
+
+.portraitScreenBezel {
+  height: 58dvh;
+  min-height: 270px;
+  width: 100%;
+  padding: max(6px, env(safe-area-inset-top)) 8px 4px;
+  background: #DCE0E6;
+  display: flex;
+  flex-direction: column;
+}
+
+.portraitScreenInner {
+  flex: 1;
+  min-height: 0;
+  background: #0E1013;
+  border: 3px solid #141619;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.portraitUpperCanvasWrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  background: #1E1610;
+  overflow: hidden;
+}
+
+.portraitLowerDeck {
+  min-height: 40px;
+  background: #3B2818;
+  border-top: 2px solid #8C5A2B;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 8px;
+  gap: 6px;
+  color: #F7F1E3;
+  flex-shrink: 0;
+}
+
+.deckQuestInfo {
+  flex: 1;
+  min-width: 0;
+  background: #F7F1E3;
+  border: 1.5px solid #8C5A2B;
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: #231A12;
+  overflow: hidden;
+}
+
+.deckQuickTabs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.deckTabBtn {
+  min-height: 28px;
+  padding: 2px 8px;
+  background: #C89B54;
+  border: 1.5px solid #5C3A18;
+  border-radius: 4px;
+  color: #231A12;
+  font-family: var(--font-body-bold, sans-serif);
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Portrait Controller Deck (~42% height) */
+.portraitControlsDeck {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px 12px max(8px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #E2E5EB 0%, #D2D7DF 100%);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.emuWordmark {
+  text-align: center;
+  font-family: var(--font-heading-bold, sans-serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  color: #7E8794;
+  margin: 0 0 2px;
+}
+
+.shoulderRowPortrait {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.emuPillBtn {
+  min-height: 30px;
+  min-width: 38px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1.5px solid #2B303A;
+  background: linear-gradient(180deg, #F8FAFC 0%, #DFE3EA 100%);
+  color: #2B303A;
+  font-weight: 800;
+  font-size: 0.7rem;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 #FFFFFF;
+}
+
+.emuPillBtn:active,
+.emuCircleSmallBtn:active,
+.abxyBtnPortrait:active,
+.startSelectPill:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.emuCircleSmallBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid #2B303A;
+  background: linear-gradient(180deg, #F8FAFC 0%, #DFE3EA 100%);
+  color: #2B303A;
+  font-weight: 800;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 #FFFFFF;
+}
+
+.portraitMainControls {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+}
+
+.portraitLeftColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 100%;
+  min-height: 0;
+}
+
+.analogOuter {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #5A606B, #2F343D);
+  border: 2px solid #1E2229;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.analogCap {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #D0D5DD, #8D94A0);
+  border: 1.5px solid #3E4450;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 60ms ease-out;
+  pointer-events: none;
+}
+
+.crossDpad {
+  position: relative;
+  width: 98px;
+  height: 98px;
+  flex-shrink: 0;
+}
+
+.dpadArmUp,
+.dpadArmDown,
+.dpadArmLeft,
+.dpadArmRight {
+  position: absolute;
+  background: linear-gradient(180deg, #F8FAFC 0%, #E1E5EC 100%);
+  border: 1.5px solid #2B303A;
+  color: #68707E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+  touch-action: none;
+}
+
+.dpadArmUp {
+  top: 0;
+  left: 33px;
+  width: 32px;
+  height: 35px;
+  border-radius: 6px 6px 0 0;
+}
+
+.dpadArmDown {
+  bottom: 0;
+  left: 33px;
+  width: 32px;
+  height: 35px;
+  border-radius: 0 0 6px 6px;
+}
+
+.dpadArmLeft {
+  left: 0;
+  top: 33px;
+  width: 35px;
+  height: 32px;
+  border-radius: 6px 0 0 6px;
+}
+
+.dpadArmRight {
+  right: 0;
+  top: 33px;
+  width: 35px;
+  height: 32px;
+  border-radius: 0 6px 6px 0;
+}
+
+.dpadCenterPatch {
+  position: absolute;
+  top: 33px;
+  left: 33px;
+  width: 32px;
+  height: 32px;
+  background: #EAEEF4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dpadCenterCircle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #B8C0CC;
+}
+
+.portraitRightColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 100%;
+  min-height: 0;
+}
+
+.abxyDiamond {
+  position: relative;
+  width: 114px;
+  height: 114px;
+  flex-shrink: 0;
+}
+
+.abxyBtnPortrait {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid #2B303A;
+  background: linear-gradient(180deg, #F8FAFC 0%, #DFE3EA 100%);
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 0.9rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 #FFFFFF;
+}
+
+.btnXPos {
+  top: 0;
+  left: 37px;
+  color: #1D63D8;
+}
+
+.btnYPos {
+  top: 37px;
+  left: 0;
+  color: #1E8E3E;
+}
+
+.btnAPos {
+  top: 37px;
+  right: 0;
+  color: #D93025;
+}
+
+.btnBPos {
+  bottom: 0;
+  left: 37px;
+  color: #D99B00;
+}
+
+.startSelectRow {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.startSelectItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.startSelectPill {
+  width: 42px;
+  height: 13px;
+  border-radius: 999px;
+  border: 1.5px solid #2B303A;
+  background: linear-gradient(180deg, #F8FAFC 0%, #D8DDE6 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.startSelectLabel {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #68707E;
+}
+
+/* ============================================================================
+   2. LANDSCAPE CONSOLE SKIN
+   ============================================================================ */
+.landscapeConsoleRoot {
+  width: 100%;
+  height: 100dvh;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: minmax(120px, 16vw) minmax(0, 1fr) minmax(120px, 16vw);
+  background: #2C324B;
+  overflow: hidden;
+}
+
+.consoleWingLeft,
+.consoleWingRight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(8px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #323954 0%, #252A3F 100%);
+  border-right: 3px solid #171A26;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.consoleWingRight {
+  border-right: none;
+  border-left: 3px solid #171A26;
+}
+
+.wingShoulderL,
+.wingShoulderR {
+  width: 100%;
+  height: 34px;
+  background: linear-gradient(180deg, #252A3E 0%, #1B1F2E 100%);
+  border: 2px solid #121520;
+  border-radius: 6px 6px 22px 6px;
+  color: #7E88A8;
+  font-weight: 900;
+  font-size: 0.82rem;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #121520;
+}
+
+.wingShoulderR {
+  border-radius: 6px 6px 6px 22px;
+}
+
+.embossedBadge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1.5px solid #1E2233;
+  background: #282E45;
+  color: #5E6887;
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.crossDpadDark .dpadArmUp,
+.crossDpadDark .dpadArmDown,
+.crossDpadDark .dpadArmLeft,
+.crossDpadDark .dpadArmRight {
+  background: linear-gradient(180deg, #2A2E3D 0%, #1D202B 100%);
+  border-color: #10121A;
+  color: #4A5268;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.45);
+}
+
+.crossDpadDark .dpadCenterPatch {
+  background: #232734;
+}
+
+.crossDpadDark .dpadCenterCircle {
+  border-color: #161922;
+  background: #1B1E29;
+}
+
+.angledPillsRow {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.angledPillBtn {
+  width: 32px;
+  height: 13px;
+  border-radius: 999px;
+  background: #1F2330;
+  border: 1.5px solid #10121A;
+  transform: rotate(-32deg);
+  cursor: pointer;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
+}
+
+.abxyBtnLandscape {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #121520;
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.45), inset 0 2px 2px rgba(255, 255, 255, 0.25);
+}
+
+.btnXSolid {
+  top: 0;
+  left: 37px;
+  background: #1D4ED8;
+}
+
+.btnYSolid {
+  top: 37px;
+  left: 0;
+  background: #15803D;
+}
+
+.btnASolid {
+  top: 37px;
+  right: 0;
+  background: #B91C1C;
+}
+
+.btnBSolid {
+  bottom: 0;
+  left: 37px;
+  background: #CA8A04;
+}
+
+.cornerDeltaBtn {
+  align-self: flex-start;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #1F2330;
+  border: 1.5px solid #10121A;
+  color: #94A3B8;
+  font-weight: 800;
+  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.landscapeCenterScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0B0D12;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.landscapeCanvasBezel {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  border: 3px solid #141722;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #1E1610;
+}
+
+.gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.inScreenStatusStrip {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.statusBadge {
+  pointer-events: auto;
+  background: rgba(247, 241, 227, 0.94);
+  border: 1.5px solid #6E4726;
+  box-shadow: 0 1px 0 #3D2612;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #231A12;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 100%;
+}
+
+.inScreenPrompt {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  max-width: 92%;
+}
+
+/* ============================================================================
+   3. IN-SCREEN RETRO RPG PAUSE MENU & IN-SCREEN PANELS
+   ============================================================================ */
+.inScreenOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 14, 10, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  z-index: 40;
+}
+
+.retroPauseWindow {
+  width: 100%;
+  max-width: 300px;
+  max-height: 100%;
+  overflow-y: auto;
+  background: #231A12;
+  border: 2.5px solid #F7F1E3;
+  box-shadow: 0 0 0 2px #231A12, 0 6px 16px rgba(0, 0, 0, 0.65);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #F7F1E3;
+}
+
+.retroPauseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1.5px solid #6E4726;
+  padding-bottom: 5px;
+  margin-bottom: 6px;
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #F5B82E;
+}
+
+.retroPauseList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.retroMenuItem {
+  min-height: 32px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  border: 1.5px solid #6E4726;
+  background: #33261B;
+  color: #F7F1E3;
+  font-family: var(--font-body-bold, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.retroMenuItemSelected {
+  background: #266B3E;
+  border-color: #F5B82E;
+  color: #FFFFFF;
+}
+
+.retroCursor {
+  color: #F5B82E;
+  font-size: 0.66rem;
+  width: 8px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Full In-Screen Panel Viewport */
+.inScreenPanelContainer {
+  position: absolute;
+  inset: 0;
+  background: #F7F1E3;
+  display: flex;
+  flex-direction: column;
+  z-index: 35;
+  overflow: hidden;
+}
+
+.inScreenPanelTopBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: #231A12;
+  border-bottom: 2px solid #6E4726;
+  color: #F7F1E3;
+  flex-shrink: 0;
+}
+
+.inScreenPanelTitle {
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #F5B82E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.inScreenBackBtn {
+  min-height: 26px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1.5px solid #F5B82E;
+  background: #266B3E;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.inScreenPanelBody {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================================
+   4. COMPACT GAME CARDS & WORKBENCHES (No walls of text, no clipping)
+   ============================================================================ */
+.journalSheet {
+  background: #F7F1E3;
+  color: #231A12;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading-bold, sans-serif);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #231A12;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.sectionLead {
+  font-size: 0.72rem;
+  color: #5C4938;
+  line-height: 1.3;
+  margin: 2px 0 8px;
+}
+
+/* Compact Horizontal Region Card (Never wraps REGION 1 on two lines!) */
+.routeStopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  background: #FFFDF8;
+  border: 1.5px solid #6E4726;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  min-width: 0;
+}
+
+.routeStopLocked {
+  background: #EDE3CE;
+  border-color: #9C8870;
+  opacity: 0.82;
+}
+
+.routeNumberBox {
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid #6E4726;
+  border-radius: 6px;
+  background: #EDE3CE;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-weight: 900;
+  font-size: 0.62rem;
+  line-height: 1;
+  color: #231A12;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Pinned Avatar Header + Tabbed Wardrobe */
+.avatarStickyBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #FFFDF8;
+  border: 2px solid #6E4726;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(35, 26, 18, 0.12);
+}
+
+.avatarTabRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.avatarTabBtn {
+  min-height: 28px;
+  padding: 3px 4px;
+  border-radius: 4px;
+  border: 1.5px solid #6E4726;
+  background: #EDE3CE;
+  color: #231A12;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.avatarTabBtnActive {
+  background: #231A12;
+  color: #F5B82E;
+  border-color: #231A12;
+}
+
+.actionBtn {
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1.5px solid #194A2A;
+  background: #266B3E;
+  color: #FFFFFF;
+  font-family: var(--font-body-bold, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1.5px 0 #12351E;
+}
+
+.actionBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.secondaryBtn {
+  min-height: 30px;
+  padding: 4px 9px;
+  border-radius: 4px;
+  border: 1.5px solid #6E4726;
+  background: #EDE3CE;
+  color: #231A12;
+  font-family: var(--font-body-bold, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1.5px 0 #3D2612;
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* In-Screen Dialogue & Quiz Box */
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 14, 10, 0.85);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 5px;
+  z-index: 45;
+  overflow: hidden;
+}
+
+.rpgDialogBox {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #F7F1E3;
+  border: 2px solid #6E4726;
+  border-radius: 6px;
+  padding: 8px 10px 10px;
+  color: #231A12;
+  -webkit-overflow-scrolling: touch;
+}
+
+.npcSpeechPlate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFDF8;
+  border: 1.5px solid #6E4726;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+
+.npcPortraitCanvas {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  background: #EDE3CE;
+  border: 1.5px solid #6E4726;
+  border-radius: 4px;
+  image-rendering: pixelated;
+  display: block;
+}
+
+.npcSpeechBody {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.optionBtn {
+  width: 100%;
+  min-height: 32px;
+  text-align: left;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1.5px solid #8C6D4E;
+  background: #FFFDF8;
+  color: #231A12;
+  font-size: 0.76rem;
+  cursor: pointer;
+  overflow-wrap: break-word;
+}
+
+.optionBtnSelected {
+  border-color: #266B3E;
+  background: #E3F2E7;
+  font-weight: 700;
+}
+
+.mathInput {
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1.5px solid #6E4726;
+  background: #FFFDF8;
+  color: #231A12;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
