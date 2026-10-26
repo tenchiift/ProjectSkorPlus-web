@@ -9,7 +9,12 @@
     "url": "https://github.com/tenchiift/ProjectSkorPlus-web.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": "24.x"
+  },
+  "allowScripts": {
+    "@astryxdesign/cli": false,
+    "@astryxdesign/core": false,
+    "esbuild@0.25.12": true
   },
   "scripts": {
     "dev": "vite",

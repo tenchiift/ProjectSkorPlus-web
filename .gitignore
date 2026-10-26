@@ -53,7 +53,7 @@ VECTOR MODULES/
 
 # --- SkorPlus: keep public repo lean (local-only, never commit) ---
 video-assets/
-assets/
+/assets/
 assets.zip
 login dekstop/
 module page/

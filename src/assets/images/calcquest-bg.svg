@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" width="800" height="320" shape-rendering="crispEdges">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1A103C" />
+      <stop offset="55%" stop-color="#2E236C" />
+      <stop offset="100%" stop-color="#433D8B" />
+    </linearGradient>
+    <linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1E56A0" />
+      <stop offset="50%" stop-color="#3696BF" />
+      <stop offset="100%" stop-color="#1E56A0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Night/Twilight Pixel RPG Sky -->
+  <rect width="800" height="320" fill="url(#sky)" />
+
+  <!-- Pixel Stars & Math Runes -->
+  <rect x="60" y="28" width="8" height="8" fill="#F5B82E" />
+  <rect x="140" y="52" width="6" height="6" fill="#FFFDF8" />
+  <rect x="230" y="22" width="8" height="8" fill="#7CF3A0" />
+  <rect x="340" y="44" width="6" height="6" fill="#F5B82E" />
+  <rect x="480" y="24" width="8" height="8" fill="#FFFDF8" />
+  <rect x="590" y="48" width="8" height="8" fill="#F5B82E" />
+  <rect x="710" y="26" width="6" height="6" fill="#7CF3A0" />
+  <rect x="750" y="64" width="8" height="8" fill="#FFFDF8" />
+
+  <!-- Glowing Pixel Moon / Knowledge Core -->
+  <rect x="636" y="36" width="64" height="64" fill="#F5B82E" opacity="0.25" />
+  <rect x="644" y="44" width="48" height="48" fill="#FFD966" />
+  <rect x="652" y="52" width="32" height="32" fill="#FFFDF8" />
+
+  <!-- Distant Pixel Mountains (Mastery Peaks) -->
+  <polygon points="0,210 90,110 180,210" fill="#2B2254" />
+  <polygon points="130,210 240,86 350,210" fill="#372C6A" />
+  <polygon points="220,104 240,86 260,104" fill="#E3F2E7" />
+  <polygon points="310,210 430,96 550,210" fill="#2B2254" />
+  <polygon points="480,210 610,78 740,210" fill="#372C6A" />
+  <polygon points="588,98 610,78 632,98" fill="#F5B82E" />
+  <polygon points="660,210 760,115 840,210" fill="#2B2254" />
+
+  <!-- Pixel Clouds -->
+  <g fill="#5E548E" opacity="0.75">
+    <rect x="88" y="82" width="64" height="16" />
+    <rect x="104" y="70" width="32" height="12" />
+    <rect x="410" y="66" width="80" height="16" />
+    <rect x="426" y="54" width="48" height="12" />
+  </g>
+
+  <!-- Citadel Tower on Right Hill -->
+  <rect x="520" y="124" width="48" height="76" fill="#4A3B32" />
+  <rect x="514" y="114" width="60" height="14" fill="#6E4726" />
+  <polygon points="510,114 544,82 578,114" fill="#B83B2A" />
+  <rect x="536" y="140" width="16" height="24" fill="#F5B82E" />
+
+  <!-- Rolling Emerald RPG Hills -->
+  <rect x="0" y="188" width="800" height="132" fill="#1E5E3A" />
+  <rect x="0" y="212" width="800" height="108" fill="#266B3E" />
+  <rect x="0" y="246" width="800" height="74" fill="#194A2A" />
+
+  <!-- Limit River & Golden Bridge -->
+  <polygon points="310,188 370,188 450,320 250,320" fill="url(#river)" />
+  <rect x="284" y="218" width="144" height="28" fill="#8C5A2B" />
+  <rect x="284" y="212" width="144" height="8" fill="#C89B54" />
+  <rect x="296" y="202" width="10" height="16" fill="#6E4726" />
+  <rect x="350" y="202" width="10" height="16" fill="#6E4726" />
+  <rect x="406" y="202" width="10" height="16" fill="#6E4726" />
+
+  <!-- Dirt Expedition Path -->
+  <rect x="0" y="224" width="290" height="20" fill="#C89B54" />
+  <rect x="424" y="224" width="376" height="20" fill="#C89B54" />
+
+  <!-- Pixel Pine & Oak Trees -->
+  <g>
+    <rect x="116" y="176" width="12" height="24" fill="#5C3A18" />
+    <rect x="98" y="152" width="48" height="28" fill="#2E8B57" />
+    <rect x="106" y="136" width="32" height="20" fill="#3CB371" />
+
+    <rect x="212" y="182" width="12" height="22" fill="#5C3A18" />
+    <rect x="196" y="160" width="44" height="24" fill="#2E8B57" />
+    <rect x="204" y="144" width="28" height="18" fill="#3CB371" />
+
+    <rect x="648" y="174" width="14" height="26" fill="#5C3A18" />
+    <rect x="628" y="148" width="54" height="28" fill="#2E8B57" />
+    <rect x="638" y="130" width="34" height="20" fill="#3CB371" />
+
+    <rect x="732" y="184" width="12" height="22" fill="#5C3A18" />
+    <rect x="716" y="162" width="44" height="24" fill="#2E8B57" />
+  </g>
+
+  <!-- Glowing Knowledge Crystal Shrine -->
+  <polygon points="484,172 500,144 516,172 500,200" fill="#4EF2D2" />
+  <polygon points="490,172 500,152 510,172 500,192" fill="#E0FFFF" />
+
+  <!-- Pixel Explorer Hero & Quest Marker on the Bridge -->
+  <rect x="342" y="172" width="20" height="18" fill="#F5B82E" />
+  <rect x="350" y="175" width="4" height="8" fill="#231A12" />
+  <rect x="350" y="185" width="4" height="3" fill="#231A12" />
+  <rect x="344" y="196" width="16" height="14" fill="#F5C6A5" />
+  <rect x="342" y="192" width="20" height="8" fill="#B83B2A" />
+  <rect x="342" y="210" width="20" height="14" fill="#1D63D8" />
+</svg>
