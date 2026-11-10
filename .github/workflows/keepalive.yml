@@ -1,0 +1,29 @@
+name: Supabase keep-alive
+
+# Supabase pauses Free-plan projects after 7 days without database activity.
+# Two real table reads a day keeps the project active.
+on:
+  schedule:
+    - cron: "17 3,15 * * *" # 03:17 and 15:17 UTC = 11:17 and 23:17 MYT
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the database
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o /tmp/body -w '%{http_code}' \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/modules?select=id&limit=1")
+          echo "HTTP $status"
+          head -c 300 /tmp/body; echo
+          if [ "$status" -ge 400 ]; then
+            echo "Keep-alive failed: database did not answer successfully." >&2
+            exit 1
+          fi
